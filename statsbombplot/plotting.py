@@ -143,7 +143,9 @@ def draw_pitch(min_x=0, max_x=1):
     plt.axis('off')
     return ax
 
-def draw_actions(ax, actions, description=""):
+def draw_actions(actions, description=""):
+
+        ax = draw_pitch()
     
         # actions = actions.reset_index(drop=True)
         actions['alpha'] = np.linspace(0.25, 1, len(actions))
