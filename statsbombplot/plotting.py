@@ -143,88 +143,113 @@ def draw_pitch(min_x=0, max_x=1):
     plt.axis('off')
     return ax
 
-def draw_actions(ax, actions, title="", legend=""):
-
-    shots_color = "#AA4A44"
-    passes_color = "#96DB8F"
-    throws_color = passes_color
-    dribbles_color = "#C18FDB"
-    tackles_color = "#DB9B2A"
-    fouls_color = "#FA8416"
-
-    passes_cmap = LinearSegmentedColormap.from_list('custom_cmap', [(0, (0, 0, 0, 0)), (1, passes_color)])
-
-    shots = actions[actions['type_name'] == 'shot']
-    passes = actions[(actions['type_name'] == 'pass')]
-    throws = actions[actions['type_name'] == 'throw_in']
-    dribbles = actions[actions['type_name'] == 'dribble']
-    tackles = actions[actions['type_name'] == 'tackle']
-    fouls = actions[actions['type_name'] == 'foul']
-    shortfks = actions[actions['type_name'] == 'freekick_short']
-
-    # Plot shots
-    ax.plot(shots['start_x'], shots['start_y'], 
-            '.',  
-            color=shots_color,
-            markersize=20, 
-            zorder=4)
-
-    # Plot passes
-    ax.plot(passes['start_x'], passes['start_y'], 
-            '.',  
-            color=passes_color,
-            markersize=20, 
-            zorder=4)
-    ax.plot([passes['start_x'], passes['end_x']],
-            [passes['start_y'], passes['end_y']],
-            linestyle="-",
-            color = passes_color,
-            linewidth=2,
-            zorder=3,
-            )
+def draw_actions(ax, actions, description=""):
     
-    # Plot throw ins
-    ax.plot(throws['start_x'], throws['start_y'], 
-            's',  
-            color=throws_color,
-            markersize=10, 
-            zorder=4)
-    ax.plot([throws['start_x'], throws['end_x']],
-            [throws['start_y'], throws['end_y']],
-            linestyle="-",
-            color=throws_color,
-            linewidth=2,
-            zorder=3
-            )
+        # actions = actions.reset_index(drop=True)
+        actions['alpha'] = np.linspace(0.25, 1, len(actions))
+        shots_color = "#AA4A44"
+        passes_color = "#96DB8F"
+        dribbles_color = "#C18FDB"
+        tackles_color = "#DB9B2A"
+        fouls_color = "#FA8416"
+        crosses_color = "#456990"
+    
+        for i, action in actions.iterrows():
 
-    # Plot dribbles
-    ax.plot([dribbles['start_x'], dribbles['end_x']],
-            [dribbles['start_y'], dribbles['end_y']],
-            linestyle=":",
-            color=dribbles_color,
-            linewidth=2,
-            zorder=3
-            )
-    
-    # Plot tackles
-    ax.plot(tackles['start_x'], tackles['start_y'], 
-            '^',  
-            color=tackles_color,
-            markersize=10, 
-            zorder=4)
-    
-    # Plot fouls
-    ax.plot(fouls['start_x'], fouls['start_y'], 
-            '+',  
-            color=fouls_color,
-            markersize=10, 
-            zorder=4)
-    
-    # Plot short freekicks
-    ax.plot([shortfks['start_x'], shortfks['end_x']],
-            [shortfks['start_y'], shortfks['end_y']],
-            linestyle="-",
-            color=passes_color,
-            linewidth=2,
-            zorder=3
-            )
+                x = action['start_x']
+                x_end = action['end_x']
+                y = action['start_y']
+                y_end = action['end_y']
+
+                alpha = action['alpha']
+
+                markersize = 20
+                linewidth = 2
+
+                if i == 0:
+                        annotation_text = "Start"
+                        arrowprops = dict(arrowstyle="->", connectionstyle=f"arc3,rad=0.3", color="#404040")
+                        plt.annotate(annotation_text, xy=(x, y), xytext=(x, y-8), arrowprops=arrowprops, ha="center", zorder=7, fontsize=10, color='#404040')
+
+
+                if (action['type_name'] == 'tackle') | (action['type_name'] == 'take_on') :
+
+                        if (action['type_name'] == 'tackle'):
+                                marker = '^'
+                                color = tackles_color
+                                markersize = 10
+                        elif (action['type_name'] == 'take_on'):
+                                marker = '*'
+                                color = fouls_color
+                                markersize = 11
+                        
+                        # Symbol
+                        ax.plot(x, 
+                                y, 
+                                marker,  
+                                color=color,
+                                markersize=markersize, 
+                                zorder=4,
+                                alpha = alpha
+                        )
+
+                elif (action['type_name'] == 'pass') | (action['type_name'] == 'throw_in') | (action['type_name'] == 'freekick_short') | (action['type_name'] == 'cross') | (action['type_name'] == 'corner_crossed') | (action['type_name'] == 'freekick_crossed') | (action['type_name'] == 'shot'):
+
+                        color = passes_color
+
+                        if (action['type_name'] == 'pass'):
+                                marker = '.'
+                        elif (action['type_name'] == 'throw_in'):
+                                marker = 'p'
+                                markersize = 10
+                        elif (action['type_name'] == 'freekick_short'):
+                                marker = 'v'
+                                color = passes_color
+                        elif (action['type_name'] == 'cross'):
+                                marker = 's'
+                                markersize = 10
+                                color = crosses_color
+                        elif (action['type_name'] == 'corner_crossed'):
+                                marker = 's'
+                                markersize = 10
+                                color = crosses_color
+                        elif (action['type_name'] == 'freekick_crossed'):
+                                marker = 'v'
+                                markersize = 10
+                                color = crosses_color
+                        elif (action['type_name'] == 'shot'):
+                                marker = '.'
+                                color = shots_color
+
+                        # Symbol + Line
+                        ax.plot(x, y, 
+                                marker,  
+                                color=color,
+                                markersize=markersize, 
+                                zorder=4,
+                                alpha = alpha
+                        )
+                        ax.plot([x, x_end],
+                                [y, y_end],
+                                linestyle="-",
+                                color = color,
+                                linewidth=linewidth,
+                                zorder=3,
+                                alpha = alpha
+                        )
+                
+                elif (action['type_name'] == 'dribble'):
+
+                        # Line
+                        ax.plot([x, x_end],
+                                [y, y_end],
+                                linestyle=":",
+                                color = dribbles_color,
+                                linewidth=2,
+                                zorder=3,
+                                alpha = alpha
+                        )
+
+
+
+                ax.annotate(description, xy=(0.01*width, 0.02*height), ha="left", va="bottom", zorder=7, fontsize=10, color='#404040')
