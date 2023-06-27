@@ -23,7 +23,7 @@ config = {
   "font_color": "black",
 
   "plot_edges": True,
-  "fig_size": 12,
+  "fig_size": 6,
   "font_size": 9,
   "width": 105,
   "height": 68,
@@ -145,10 +145,11 @@ def draw_pitch(min_x=0, max_x=1):
 
 def draw_actions(actions, description=""):
 
+        figsize_ratio = config['fig_size']/12
         ax = draw_pitch()
     
         # actions = actions.reset_index(drop=True)
-        actions['alpha'] = np.linspace(0.25, 1, len(actions))
+        actions['alpha'] = np.linspace(0.5, 1, len(actions))
         shots_color = "#AA4A44"
         passes_color = "#96DB8F"
         dribbles_color = "#C18FDB"
@@ -165,25 +166,25 @@ def draw_actions(actions, description=""):
 
                 alpha = action['alpha']
 
-                markersize = 20
-                linewidth = 2
+                markersize = 20 * figsize_ratio
+                linewidth = 2 * figsize_ratio
 
                 if i == 0:
                         annotation_text = "Start"
                         arrowprops = dict(arrowstyle="->", connectionstyle=f"arc3,rad=0.3", color="#404040")
-                        plt.annotate(annotation_text, xy=(x, y), xytext=(x, y-8), arrowprops=arrowprops, ha="center", zorder=7, fontsize=10, color='#404040')
+                        plt.annotate(annotation_text, xy=(x, y), xytext=(x, y-8), arrowprops=arrowprops, ha="center", zorder=7, fontsize=10 * figsize_ratio, color='#404040')
 
 
                 if (action['type_name'] == 'tackle') | (action['type_name'] == 'take_on') :
 
                         if (action['type_name'] == 'tackle'):
-                                marker = '^'
+                                marker = 'P'
                                 color = tackles_color
-                                markersize = 10
+                                markersize = 10 * figsize_ratio
                         elif (action['type_name'] == 'take_on'):
                                 marker = '*'
                                 color = fouls_color
-                                markersize = 11
+                                markersize = 11 * figsize_ratio
                         
                         # Symbol
                         ax.plot(x, 
@@ -195,33 +196,43 @@ def draw_actions(actions, description=""):
                                 alpha = alpha
                         )
 
-                elif (action['type_name'] == 'pass') | (action['type_name'] == 'throw_in') | (action['type_name'] == 'freekick_short') | (action['type_name'] == 'cross') | (action['type_name'] == 'corner_crossed') | (action['type_name'] == 'freekick_crossed') | (action['type_name'] == 'shot'):
+                elif (action['type_name'] == 'pass') | (action['type_name'] == 'clearance') | (action['type_name'] == 'throw_in') | (action['type_name'] == 'freekick_short') | (action['type_name'] == 'cross') | (action['type_name'] == 'corner_crossed') | (action['type_name'] == 'freekick_crossed') | (action['type_name'] == 'shot'):
 
                         color = passes_color
+                        linestyle = '-'
 
                         if (action['type_name'] == 'pass'):
                                 marker = '.'
+                        elif (action['type_name'] == 'clearance'):
+                                marker = 'h'
                         elif (action['type_name'] == 'throw_in'):
                                 marker = 'p'
-                                markersize = 10
+                                markersize = 10 * figsize_ratio
                         elif (action['type_name'] == 'freekick_short'):
                                 marker = 'v'
                                 color = passes_color
                         elif (action['type_name'] == 'cross'):
                                 marker = 's'
-                                markersize = 10
+                                markersize = 10 * figsize_ratio
                                 color = crosses_color
                         elif (action['type_name'] == 'corner_crossed'):
                                 marker = 's'
-                                markersize = 10
+                                markersize = 10 * figsize_ratio
                                 color = crosses_color
                         elif (action['type_name'] == 'freekick_crossed'):
                                 marker = 'v'
-                                markersize = 10
+                                markersize = 10 * figsize_ratio
                                 color = crosses_color
                         elif (action['type_name'] == 'shot'):
                                 marker = '.'
+                                linestyle = '--'
                                 color = shots_color
+                                try:
+                                        x = actions.iloc[i-1]['end_x']
+                                        y = actions.iloc[i-1]['end_y']
+                                except:
+                                        pass
+                                markersize = 20 * figsize_ratio
 
                         # Symbol + Line
                         ax.plot(x, y, 
@@ -233,7 +244,7 @@ def draw_actions(actions, description=""):
                         )
                         ax.plot([x, x_end],
                                 [y, y_end],
-                                linestyle="-",
+                                linestyle=linestyle,
                                 color = color,
                                 linewidth=linewidth,
                                 zorder=3,
@@ -247,11 +258,11 @@ def draw_actions(actions, description=""):
                                 [y, y_end],
                                 linestyle=":",
                                 color = dribbles_color,
-                                linewidth=2,
+                                linewidth=2 * figsize_ratio,
                                 zorder=3,
                                 alpha = alpha
                         )
 
 
 
-                ax.annotate(description, xy=(0.01*width, 0.02*height), ha="left", va="bottom", zorder=7, fontsize=10, color='#404040')
+                ax.annotate(description, xy=(0.01*width, 0.02*height), ha="left", va="bottom", zorder=7, fontsize=10 * figsize_ratio, color='#404040')
