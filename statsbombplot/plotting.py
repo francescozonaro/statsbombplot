@@ -148,7 +148,7 @@ def draw_actions(actions, description=""):
 
         figsize_ratio = config['fig_size']/12
         ax = draw_pitch()
-    
+
         for i, action in actions.iterrows():
 
                 x = action['start_x']
@@ -182,7 +182,7 @@ def draw_actions(actions, description=""):
                         fontsize=6 * figsize_ratio, 
                         ha='center', 
                         va='center',
-                        zorder=7)
+                        zorder=6)
 
                     ax.plot([x, x_end],
                             [y, y_end],
@@ -193,22 +193,23 @@ def draw_actions(actions, description=""):
                     )
 
                     if action.result_name == 'fail':
-                     ax.plot(x, y, 
-                        '.',  
-                        color='red',
-                        markersize=markersize*1.2,
-                        markeredgecolor='red',
-                        zorder=5,
-                        alpha = 0.3
-                    )
-                     ax.plot([x, x_end],
+                        ax.plot(x, y, 
+                            '.',  
+                            color='red',
+                            markersize=markersize*1.2,
+                            markeredgecolor='red',
+                            zorder=5,
+                            alpha = 0.3
+                        )
+                        ax.plot([x, x_end],
                             [y, y_end],
                             linestyle='-',
                             color = 'red',
                             linewidth=linewidth*2,
                             zorder=5,
                             alpha = 0.3
-                    )
+                        )
+                    
                      
                 elif action.type_name == "dribble":
                     ax.plot([x, x_end],
