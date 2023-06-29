@@ -13,7 +13,7 @@ Modified Jun 24 2023
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
-import matplotlib
+from tabulate import tabulate
 import numpy as np
 
 config = {
@@ -59,6 +59,14 @@ def _change_range(value, old_range, new_range):
     '''
     return ((value-old_range[0]) / (old_range[1]-old_range[0])) * (new_range[1]-new_range[0]) + new_range[0]
 
+def find_goal(df):
+    df = df[(df['type_id'] == 11) & (df['result_id'] == 1)]
+    return df.index
+
+def nice_time(row):
+    minute = int((row.period_id-1)*45 +row.time_seconds // 60)
+    second = int(row.time_seconds % 60)
+    return f"{minute}m{second}s"
 
 def draw_pitch(min_x=0, max_x=1):
     """
@@ -229,3 +237,22 @@ def draw_actions(actions, description=""):
                             zorder=5,
                             alpha = 0.3
                     )
+
+
+def draw_goals(actions):
+
+    goals = list(find_goal(actions))
+
+    for goal in goals:
+        starting_id = goal
+        df = actions[starting_id - 9: starting_id + 1].copy()
+        df = df.reset_index(drop=True)
+        
+        df["nice_time"] = df.apply(nice_time, axis=1)
+
+        draw_actions(df)
+        
+        cols = ['nice_time', 'player_name', 'type_name', 'result_name', 'team_name']
+        
+        print(tabulate(df[cols], headers = cols, showindex=True))
+        plt.show()
