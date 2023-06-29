@@ -166,7 +166,8 @@ def draw_actions(actions, description=""):
 
                 # Symbol + Line
 
-                if action.type_name != "dribble":
+                if (action.type_name != "dribble") & (action.type_name != "foul"):
+
                     ax.plot(x, y, 
                         '.',  
                         color='white',
@@ -190,11 +191,40 @@ def draw_actions(actions, description=""):
                             linewidth=linewidth,
                             zorder=5
                     )
-                else:
+
+                    if action.result_name == 'fail':
+                     ax.plot(x, y, 
+                        '.',  
+                        color='red',
+                        markersize=markersize*1.2,
+                        markeredgecolor='red',
+                        zorder=5,
+                        alpha = 0.3
+                    )
+                     ax.plot([x, x_end],
+                            [y, y_end],
+                            linestyle='-',
+                            color = 'red',
+                            linewidth=linewidth*2,
+                            zorder=5,
+                            alpha = 0.3
+                    )
+                     
+                elif action.type_name == "dribble":
                     ax.plot([x, x_end],
                             [y, y_end],
                             linestyle=':',
                             color = 'black',
                             linewidth=linewidth,
                             zorder=5
+                    )
+
+                    if action.result_name == 'fail':
+                     ax.plot([x, x_end],
+                            [y, y_end],
+                            linestyle='-',
+                            color = 'red',
+                            linewidth=linewidth*2,
+                            zorder=5,
+                            alpha = 0.3
                     )
