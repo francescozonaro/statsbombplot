@@ -13,6 +13,7 @@ Modified Jun 24 2023
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 
 config = {
@@ -158,8 +159,6 @@ def draw_actions(actions, description=""):
                 markersize = 30 * figsize_ratio
                 linewidth = 2 * figsize_ratio
 
-                print(i)
-
                 if i >= 1:
                     if actions.iloc[i-1].result_name == "success":
                         x = actions.iloc[i-1].end_x
@@ -173,7 +172,8 @@ def draw_actions(actions, description=""):
                         color='white',
                         markersize=markersize,
                         markeredgecolor='black',
-                        zorder=6
+                        zorder=6,
+                        alpha = 1
                     )
                     ax.text(x, y, 
                         i, 
