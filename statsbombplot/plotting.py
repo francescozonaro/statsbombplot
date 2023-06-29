@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import pandas as pd
 import numpy as np
+import xml.etree.ElementTree as ET
+from io import BytesIO
 from tabulate import tabulate
 
 config = {
@@ -319,3 +321,96 @@ def draw_passing_network(df_events, team_id):
         ax.plot(player_x, player_y, '.', markersize = 100*(marker_size)*figsize_ratio - 15*(marker_size)*figsize_ratio, color = 'white', zorder = 6)
         ax.annotate(player_name.split()[-1], xy=(player_x, player_y), ha='center', va='center', zorder=7, weight='bold', size = 8*figsize_ratio, path_effects=[pe.withStroke(linewidth = 2, foreground = 'white')])
 
+def draw_svg_actions(actions, starting_id):
+
+    ET.register_namespace("", "http://www.w3.org/2000/svg")
+
+    figsize_ratio = config['fig_size']/12
+    ax = draw_pitch()
+    df = actions[starting_id - 4: starting_id + 1].copy()
+    df = df.reset_index(drop=True)
+    
+    df["nice_time"] = df.apply(nice_time, axis=1)
+
+    shapes = []
+    labels = []
+
+    for i, action in df.iterrows():
+        x = action['start_x']
+        x_end = action['end_x']
+        y = action['start_y']
+        y_end = action['end_y']
+
+        markersize = 10 * figsize_ratio
+        linewidth = 2 * figsize_ratio
+
+        shape = plt.Circle((x, y), radius=markersize*figsize_ratio, edgecolor='black', linewidth=linewidth, facecolor='white', alpha=1, zorder=7)
+        shapes.append(shape)
+        labels.append(action.type_name)
+    
+    for i, (item, label) in enumerate(zip(shapes, labels)):
+        patch = ax.add_patch(item)
+        x = item.center[0]
+        y = item.center[1]
+        annotate = ax.annotate(label, xy=(x,y), xytext=(0,0),
+                            textcoords='offset points', color='w', ha='center',
+                            fontsize=8, bbox=dict(boxstyle='round, pad=0.5',
+                                                    fc=(.1, .1, .1, .92),
+                                                    ec=(1., 1., 1.), lw=1))
+
+        # Add text inside the circle
+        ax.text(x, y-0.3, i, color='black', ha='center', va='center',zorder=8)
+        ax.add_patch(patch)
+        patch.set_gid(f'mypatch_{i:03d}')
+        annotate.set_gid(f'mytooltip_{i:03d}')
+
+    f = BytesIO()
+    plt.savefig(f, format="svg")
+
+    # --- Add interactivity ---
+
+    # Create XML tree from the SVG file.
+    tree, xmlid = ET.XMLID(f.getvalue())
+    tree.set('onload', 'init(event)')
+
+    for i in shapes:
+        # Get the index of the shape
+        index = shapes.index(i)
+        # Hide the tooltips
+        tooltip = xmlid[f'mytooltip_{index:03d}']
+        tooltip.set('visibility', 'hidden')
+        # Assign onmouseover and onmouseout callbacks to patches.
+        mypatch = xmlid[f'mypatch_{index:03d}']
+        mypatch.set('onmouseover', "ShowTooltip(this)")
+        mypatch.set('onmouseout', "HideTooltip(this)")
+
+    # This is the script defining the ShowTooltip and HideTooltip functions.
+    script = """
+        <script type="text/ecmascript">
+        <![CDATA[
+
+        function init(event) {
+            if ( window.svgDocument == null ) {
+                svgDocument = event.target.ownerDocument;
+                }
+            }
+
+        function ShowTooltip(obj) {
+            var cur = obj.id.split("_")[1];
+            var tip = svgDocument.getElementById('mytooltip_' + cur);
+            tip.setAttribute('visibility', "visible")
+            }
+
+        function HideTooltip(obj) {
+            var cur = obj.id.split("_")[1];
+            var tip = svgDocument.getElementById('mytooltip_' + cur);
+            tip.setAttribute('visibility', "hidden")
+            }
+
+        ]]>
+        </script>
+        """
+
+    # Insert the script at the top of the file and save it.
+    tree.insert(0, ET.XML(script))
+    ET.ElementTree(tree).write('test.svg')
