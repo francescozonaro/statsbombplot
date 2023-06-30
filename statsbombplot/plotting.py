@@ -23,7 +23,7 @@ config = {
   "font_color": "black",
 
   "plot_edges": True,
-  "fig_size": 6,
+  "fig_size": 15,
   "font_size": 9,
   "width": 105,
   "height": 68,
@@ -155,108 +155,6 @@ def nice_time(row):
     second = int(row.time_seconds % 60)
     return f"{minute}m{second}s"
 
-def draw_actions(actions, description=""):
-
-        figsize_ratio = config['fig_size']/12
-        ax = draw_pitch()
-
-        for i, action in actions.iterrows():
-
-                x = action['start_x']
-                x_end = action['end_x']
-                y = action['start_y']
-                y_end = action['end_y']
-
-                markersize = 30 * figsize_ratio
-                linewidth = 2 * figsize_ratio
-
-                if i >= 1:
-                    if (actions.iloc[i-1].result_name == "success") & (action.type_name != "shot_penalty"):
-                        x = actions.iloc[i-1].end_x
-                        y = actions.iloc[i-1].end_y
-
-                # Symbol + Line
-
-                if (action.type_name != "dribble") & (action.type_name != "foul"):
-
-                    ax.plot(x, y, 
-                        '.',  
-                        color='white',
-                        markersize=markersize,
-                        markeredgecolor='black',
-                        zorder=6,
-                        alpha = 1
-                    )
-                    ax.text(x, y, 
-                        i, 
-                        color='black', 
-                        fontsize=6 * figsize_ratio, 
-                        ha='center', 
-                        va='center',
-                        zorder=6)
-
-                    ax.plot([x, x_end],
-                            [y, y_end],
-                            linestyle='-',
-                            color = 'black',
-                            linewidth=linewidth,
-                            zorder=5
-                    )
-
-                    if action.result_name == 'fail':
-                        ax.plot(x, y, 
-                            '.',  
-                            color='red',
-                            markersize=markersize*1.2,
-                            markeredgecolor='red',
-                            zorder=5,
-                            alpha = 0.3
-                        )
-                        ax.plot([x, x_end],
-                            [y, y_end],
-                            linestyle='-',
-                            color = 'red',
-                            linewidth=linewidth*2,
-                            zorder=5,
-                            alpha = 0.3
-                        )
-                elif action.type_name == "dribble":
-                    ax.plot([x, x_end],
-                            [y, y_end],
-                            linestyle=':',
-                            color = 'black',
-                            linewidth=linewidth,
-                            zorder=5
-                    )
-
-                    if action.result_name == 'fail':
-                     ax.plot([x, x_end],
-                            [y, y_end],
-                            linestyle='-',
-                            color = 'red',
-                            linewidth=linewidth*2,
-                            zorder=5,
-                            alpha = 0.3
-                    )
-
-def draw_goals(actions):
-
-    goals = list(find_goal(actions))
-
-    for goal in goals:
-        starting_id = goal
-        df = actions[starting_id - 9: starting_id + 1].copy()
-        df = df.reset_index(drop=True)
-        
-        df["nice_time"] = df.apply(nice_time, axis=1)
-
-        draw_actions(df)
-        
-        cols = ['nice_time', 'player_name', 'type_name', 'result_name', 'team_name']
-        
-        print(tabulate(df[cols], headers = cols, showindex=True))
-        plt.show()
-
 def draw_passing_network(df_events, team_id):
 
     df_team = df_events[df_events['team_id'] == team_id].copy()
@@ -321,45 +219,107 @@ def draw_passing_network(df_events, team_id):
         ax.plot(player_x, player_y, '.', markersize = 100*(marker_size)*figsize_ratio - 15*(marker_size)*figsize_ratio, color = 'white', zorder = 6)
         ax.annotate(player_name.split()[-1], xy=(player_x, player_y), ha='center', va='center', zorder=7, weight='bold', size = 8*figsize_ratio, path_effects=[pe.withStroke(linewidth = 2, foreground = 'white')])
 
-def draw_svg_actions(actions, starting_id):
+def draw_goals(actions):
+
+    goals = list(find_goal(actions))
+
+    for goal in goals:
+        starting_id = goal
+        df = actions[starting_id - 9: starting_id + 1].copy()
+        df = df.reset_index(drop=True)
+        
+        df["nice_time"] = df.apply(nice_time, axis=1)
+        
+        cols = ['nice_time', 'player_name', 'type_name', 'result_name', 'team_name']
+        
+        print(tabulate(df[cols], headers = cols, showindex=True))
+        draw_svg_actions(df, filename = "test_" + str(goal))
+        plt.show()
+
+def draw_svg_actions(actions, filename):
 
     ET.register_namespace("", "http://www.w3.org/2000/svg")
 
     figsize_ratio = config['fig_size']/12
     ax = draw_pitch()
-    df = actions[starting_id - 4: starting_id + 1].copy()
-    df = df.reset_index(drop=True)
-    
-    df["nice_time"] = df.apply(nice_time, axis=1)
 
     shapes = []
     labels = []
 
-    for i, action in df.iterrows():
-        x = action['start_x']
-        x_end = action['end_x']
-        y = action['start_y']
-        y_end = action['end_y']
+    for i, action in actions.iterrows():
 
-        markersize = 10 * figsize_ratio
-        linewidth = 2 * figsize_ratio
+            x = action['start_x']
+            x_end = action['end_x']
+            y = action['start_y']
+            y_end = action['end_y']
 
-        shape = plt.Circle((x, y), radius=markersize*figsize_ratio, edgecolor='black', linewidth=linewidth, facecolor='white', alpha=1, zorder=7)
-        shapes.append(shape)
-        labels.append(action.type_name)
+            markersize = 1 * figsize_ratio
+            linewidth = 1 * figsize_ratio
+            fontsize = 6 * figsize_ratio
+
+            if i >= 1:
+                if (actions.iloc[i-1].result_name == "success") & (action.type_name != "shot_penalty"):
+                    x = actions.iloc[i-1].end_x
+                    y = actions.iloc[i-1].end_y
+
+            # Symbol + Line
+
+            if (action.type_name != "dribble") & (action.type_name != "foul"):
+                shape = plt.Circle((x, y), radius=markersize, edgecolor='black', linewidth=linewidth, facecolor='white', alpha=1, zorder=6)
+                shapes.append(shape)
+                labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
+                line = patches.ConnectionPatch((x, y), (x_end, y_end), 'data', linestyle='-', color='black', linewidth=linewidth, zorder=5)
+                shapes.append(line)
+                labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
+
+                if action.result_name == 'fail':
+                    shape = plt.Circle((x, y), radius=markersize*1.2, edgecolor='red', linewidth=linewidth, facecolor='red', alpha=0.3, zorder=5)
+                    shapes.append(shape)
+                    labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
+                    line = patches.ConnectionPatch((x, y), (x_end, y_end), 'data', linestyle='-', color='red', linewidth=linewidth*2, alpha=0.3, zorder=5)
+                    shapes.append(line)
+                    labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
+
+            elif action.type_name == "dribble":
+                line = patches.ConnectionPatch((x, y), (x_end, y_end), 'data', linestyle=':', color='black', linewidth=linewidth, alpha=1, zorder=6)
+                shapes.append(line)
+                labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
+
+                if action.result_name == 'fail':
+                    line = patches.ConnectionPatch((x, y), (x_end, y_end), 'data', linestyle=':', color='red', linewidth=linewidth*2, alpha=0.3, zorder=5)
+                    shapes.append(line)
+                    labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
     
+    count = 0
     for i, (item, label) in enumerate(zip(shapes, labels)):
         patch = ax.add_patch(item)
-        x = item.center[0]
-        y = item.center[1]
-        annotate = ax.annotate(label, xy=(x,y), xytext=(0,0),
-                            textcoords='offset points', color='w', ha='center',
-                            fontsize=8, bbox=dict(boxstyle='round, pad=0.5',
+        
+        if isinstance(item, patches.ConnectionPatch):
+            x_start, y_start = item.get_path().vertices[0]
+            x_end, y_end = item.get_path().vertices[-1]
+
+            # Calculate the center point
+            x = (x_start + x_end) / 2
+            y = (y_start + y_end) / 2
+        else:
+            x = item.center[0]
+            y = item.center[1]
+
+            if item.get_facecolor() != (1.0, 0.0, 0.0, 0.3):
+                ax.text(x, y-0.1, count, fontsize=fontsize, color='black', ha='center', va='center',zorder=8)
+                count += 1
+
+        annotate = ax.annotate(label, xy=(x,y), xytext=(10,10),
+                            textcoords='offset points', color='w', ha='left',
+                            fontsize=fontsize, zorder=8, bbox=dict(boxstyle='round, pad=0.5',
                                                     fc=(.1, .1, .1, .92),
                                                     ec=(1., 1., 1.), lw=1))
+        
+        extra_height = 0.2  # Adjust this value as needed
+        bbox = annotate.get_bbox_patch()
+        bbox.set_boxstyle("round,pad=" + str(extra_height))
 
         # Add text inside the circle
-        ax.text(x, y-0.3, i, color='black', ha='center', va='center',zorder=8)
         ax.add_patch(patch)
         patch.set_gid(f'mypatch_{i:03d}')
         annotate.set_gid(f'mytooltip_{i:03d}')
@@ -413,4 +373,4 @@ def draw_svg_actions(actions, starting_id):
 
     # Insert the script at the top of the file and save it.
     tree.insert(0, ET.XML(script))
-    ET.ElementTree(tree).write('test.svg')
+    ET.ElementTree(tree).write(f'{filename}.svg')
