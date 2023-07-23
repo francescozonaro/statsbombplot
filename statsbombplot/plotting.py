@@ -374,3 +374,112 @@ def draw_svg_actions(actions, filename):
     # Insert the script at the top of the file and save it.
     tree.insert(0, ET.XML(script))
     ET.ElementTree(tree).write(f'{filename}.svg')
+
+
+def draw_shotmap(events, filename):
+
+    ET.register_namespace("", "http://www.w3.org/2000/svg")
+
+    figsize_ratio = config['fig_size']/12
+    ax = draw_pitch()
+
+    shapes = []
+    labels = []
+
+    for i, event in events.iterrows():
+
+            # TODO: Why 120|80?
+            if event.team_id == events.iloc[1].team_id:
+                x = _change_range(event.location[0], [0, 120], [0, 105])
+                y = _change_range(event.location[1], [0, 80], [0, 68])
+            else:
+                x = 105 - _change_range(event.location[0], [0, 120], [0, 105])
+                y = 68 - _change_range(event.location[1], [0, 80], [0, 68])
+
+            markersize = 1 * figsize_ratio
+            linewidth = 1 * figsize_ratio
+            fontsize = 6 * figsize_ratio
+
+            if event.extra['shot']['outcome']['name'] == 'Goal':
+                shape = plt.Circle((x, y), radius=markersize, edgecolor='black', linewidth=linewidth, facecolor='white', alpha=1, zorder=5)
+                shapes.append(shape)
+                labels.append(event.type_name + "\n" + event.player_name + "\n" + event.team_name)
+            elif event.extra['shot']['outcome']['name'] == 'Saved':
+                shape = plt.Circle((x, y), radius=markersize, edgecolor='black', linewidth=linewidth, facecolor='white', alpha=1, zorder=5)
+                shapes.append(shape)
+                labels.append(event.type_name + "\n" + event.player_name + "\n" + event.team_name)
+            else:
+                shape = plt.Circle((x, y), radius=markersize, edgecolor='black', linewidth=linewidth, facecolor='white', alpha=1, zorder=5)
+                shapes.append(shape)
+                labels.append(event.type_name + "\n" + event.player_name + "\n" + event.team_name)
+
+    for i, (item, label) in enumerate(zip(shapes, labels)):
+        patch = ax.add_patch(item)
+        
+        x = item.center[0]
+        y = item.center[1]
+
+        annotate = ax.annotate(label, xy=(x,y), xytext=(10,10),
+                            textcoords='offset points', color='w', ha='left',
+                            fontsize=fontsize, zorder=8, bbox=dict(boxstyle='round, pad=0.5',
+                                                    fc=(.1, .1, .1, .92),
+                                                    ec=(1., 1., 1.), lw=1))
+        
+        extra_height = 0.2
+        bbox = annotate.get_bbox_patch()
+        bbox.set_boxstyle("round,pad=" + str(extra_height))
+
+        ax.add_patch(patch)
+        patch.set_gid(f'mypatch_{i:03d}')
+        annotate.set_gid(f'mytooltip_{i:03d}')
+
+    f = BytesIO()
+    plt.savefig(f, format="svg")
+
+    # --- Add interactivity ---
+
+    # Create XML tree from the SVG file.
+    tree, xmlid = ET.XMLID(f.getvalue())
+    tree.set('onload', 'init(event)')
+
+    for i in shapes:
+        # Get the index of the shape
+        index = shapes.index(i)
+        # Hide the tooltips
+        tooltip = xmlid[f'mytooltip_{index:03d}']
+        tooltip.set('visibility', 'hidden')
+        # Assign onmouseover and onmouseout callbacks to patches.
+        mypatch = xmlid[f'mypatch_{index:03d}']
+        mypatch.set('onmouseover', "ShowTooltip(this)")
+        mypatch.set('onmouseout', "HideTooltip(this)")
+
+    # This is the script defining the ShowTooltip and HideTooltip functions.
+    script = """
+        <script type="text/ecmascript">
+        <![CDATA[
+
+        function init(event) {
+            if ( window.svgDocument == null ) {
+                svgDocument = event.target.ownerDocument;
+                }
+            }
+
+        function ShowTooltip(obj) {
+            var cur = obj.id.split("_")[1];
+            var tip = svgDocument.getElementById('mytooltip_' + cur);
+            tip.setAttribute('visibility', "visible")
+            }
+
+        function HideTooltip(obj) {
+            var cur = obj.id.split("_")[1];
+            var tip = svgDocument.getElementById('mytooltip_' + cur);
+            tip.setAttribute('visibility', "hidden")
+            }
+
+        ]]>
+        </script>
+        """
+
+    # Insert the script at the top of the file and save it.
+    tree.insert(0, ET.XML(script))
+    ET.ElementTree(tree).write(f'{filename}.svg')
