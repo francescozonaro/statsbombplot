@@ -26,11 +26,11 @@ def draw_shotmap(events, filename, team_left_id, title=""):
 
     for i, event in events.iterrows():
 
-            markersize = 1 * figsize_ratio
-            linewidth = 1 * figsize_ratio
+            markersize = 0.8 * figsize_ratio
+            linewidth = 0.5 * figsize_ratio
             fontsize = 6 * figsize_ratio
             shot_xG = round(event.extra['shot']['statsbomb_xg'],3)
-            alpha_xG = round(change_range(shot_xG, [0,1], [0.2,1]),3)
+            alpha_xG = round(change_range(shot_xG, [0,1], [0,1]),3)
 
             shot_technique = event.extra['shot']['technique']['name']
 
@@ -53,16 +53,22 @@ def draw_shotmap(events, filename, team_left_id, title=""):
                 center = (x, y)
                 size = markersize
                 star_vertices = draw_star(center, size)
-                shape = plt.Polygon(star_vertices, edgecolor='black', facecolor=shot_color, zorder = 6)
+                shape = plt.Polygon(star_vertices, edgecolor='black', linewidth=linewidth, facecolor=shot_color, zorder = 7)
                 shapes.append(shape)
                 labels.append("Goal" + f" ({shot_technique})" + "\n" + event.player_name + "\n" + event.team_name + "\n" + "xG: " + str(shot_xG))
             elif event.extra['shot']['outcome']['name'] == 'Saved':
-                shape = plt.Circle((x, y), radius=markersize, edgecolor='black', linewidth=linewidth, facecolor=shot_color, zorder=5)
+                shape = plt.Circle((x, y), radius=markersize, edgecolor='black', linewidth=linewidth, facecolor=shot_color, zorder=6)
                 shapes.append(shape)
                 labels.append(event.type_name + f" ({shot_technique})" +  "\n" + event.player_name + "\n" + event.team_name + "\n" + "xG: " + str(shot_xG))
             else:
-                shape = plt.Circle((x, y), radius=markersize, edgecolor='black', linewidth=linewidth, facecolor=shot_color, zorder=5)
+
+                
+                shape = plt.Circle((x, y), radius=markersize, edgecolor=(0,0,0,0.5), linewidth=linewidth, facecolor=(0,0,0,0), zorder=4)
                 shape.set_hatch('////')
+                shapes.append(shape)
+                labels.append(event.type_name + f" ({shot_technique})" + "\n" + event.player_name + "\n" + event.team_name + "\n" + "xG: " + str(shot_xG))
+                teams.append(event.team_id)
+                shape = plt.Circle((x, y), radius=markersize, edgecolor='black', linewidth=linewidth, facecolor=shot_color, zorder=5)
                 shapes.append(shape)
                 labels.append(event.type_name + f" ({shot_technique})" + "\n" + event.player_name + "\n" + event.team_name + "\n" + "xG: " + str(shot_xG))
 
@@ -105,10 +111,13 @@ def draw_shotmap(events, filename, team_left_id, title=""):
     goal_patch = mpatches.RegularPolygon((2, -2.05), numVertices=6, radius=1, facecolor=(1, 1, 1, 0.8), edgecolor='black', label='Goal')
     saved_patch = mpatches.Circle((10, -2.05), radius=1, facecolor=(1, 1, 1, 0.8), edgecolor='black', label='Saved')
     missed_patch = mpatches.Circle((21.25, -2.05), radius=1, facecolor=(1, 1, 1, 0.8), edgecolor='black', hatch='////', label='Missed')
+    low_xg_patch = mpatches.Circle((50.5, -2.05), radius=1, facecolor=(1, 1, 1, 0.8), edgecolor='black', label='Low xG')
+    high_xg_patch = mpatches.Circle((54.5, -2.05), radius=1, facecolor=(0, 0, 0, 0.8), edgecolor='black', label='High xG')
+
     
-    legend_elements = [goal_patch, saved_patch, missed_patch]
-    labels = ['Goal', 'On Target', 'Off Target']
-    labels_x_position = [3.5, 11.5, 22.75]
+    legend_elements = [goal_patch, saved_patch, missed_patch, low_xg_patch, high_xg_patch]
+    labels = ['Goal', 'On Target', 'Off Target', 'Low xG', 'High xG']
+    labels_x_position = [3.5, 11.5, 22.75, 43.25, 56.5]
 
     legend_y = -2.1
 

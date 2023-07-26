@@ -2,10 +2,10 @@ from .passing_network import (
     draw_passing_network
 ) 
 
-from .shotmap import (
+from .shots import (
     draw_shotmap
 )
 
-from .recoverymap import (
-    draw_recoverymap
+from .pressures import (
+    draw_pressures
 )

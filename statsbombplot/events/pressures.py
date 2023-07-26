@@ -4,7 +4,7 @@ from io import BytesIO
 from statsbombplot.utils import config, draw_pitch, change_range
 import matplotlib.patches as mpatches
 
-def draw_recoverymap(events, filename, title=""):
+def draw_pressures(events, filename, title=""):
 
     ET.register_namespace("", "http://www.w3.org/2000/svg")
 
@@ -35,11 +35,12 @@ def draw_recoverymap(events, filename, title=""):
             # Create a Polygon object representing the triangle
             vertices = [(x1, y1), (x2, y2), (x3, y3)]
             shape = plt.Polygon(vertices, closed=True, edgecolor='black', facecolor=(0.765, 0.388, 0.961, 0.8), linewidth=linewidth/2, zorder=5)
-
-
-            # shape = plt.Circle((x, y), radius=markersize, edgecolor='black', linewidth=linewidth, facecolor="purple", zorder=5)
             shapes.append(shape)
-            labels.append(event.type_name + "\n" + event.player_name)
+            labels.append(event.type_name + "\n" + 
+                          event.player_name + "\n" + 
+                          event.play_pattern_name + "\n" +
+                          str(event.minute) + ":" + '{:02d}'.format(event.second)
+                          )
 
 
     for i, (item, label) in enumerate(zip(shapes, labels)):
@@ -83,8 +84,8 @@ def draw_recoverymap(events, filename, title=""):
                                 arrowstyle='-', mutation_scale=10, linewidth=2, color=(0.88, 0.48, 0.37, 0.8), linestyle="dashed")
     
     legend_elements = [recovery_patch, attacking_direction_patch, mean_height_recovery]
-    labels = ['Ball Recovery', 'Attacking Direction', 'Mean Height of Recovery']
-    labels_x_position = [3.5, 20, 50]
+    labels = ['Press. Action', 'Attacking Direction', 'Mean Height of Press. Action']
+    labels_x_position = [3.5, 20, 49]
 
     legend_y = -2.1
 
