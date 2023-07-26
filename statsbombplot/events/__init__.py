@@ -5,3 +5,7 @@ from .passing_network import (
 from .shotmap import (
     draw_shotmap
 )
+
+from .recoverymap import (
+    draw_recoverymap
+)
