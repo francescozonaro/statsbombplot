@@ -1,3 +1,3 @@
 from statsbombplot import (
-    utils, events, actions, threesixty
+    utils, events, actions
 ) 

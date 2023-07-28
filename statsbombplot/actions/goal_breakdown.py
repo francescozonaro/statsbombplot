@@ -6,7 +6,7 @@ from tabulate import tabulate
 from statsbombplot.utils import nice_time, config, draw_pitch
 
 def find_goal(df):
-    df = df[((df['type_id'] == 11) & (df['result_id'] == 1)) | ((df['type_id'] == 12) & (df['result_id'] == 1))]
+    df = df[((df['type_id'] == 11) & (df['result_id'] == 1)) | ((df['type_id'] == 12) & (df['result_id'] == 1) & (df['period_id'] < 5)) | (df['result_id'] == 3)]
     return df.index
 
 def draw_goals(actions):
@@ -26,7 +26,7 @@ def draw_goals(actions):
         draw_actions(df, filename = "test_" + str(goal))
         plt.show()
 
-def draw_actions(actions, filename):
+def draw_actions(actions, filename, title = ""):
 
     ET.register_namespace("", "http://www.w3.org/2000/svg")
 
@@ -43,7 +43,7 @@ def draw_actions(actions, filename):
             y = action['start_y']
             y_end = action['end_y']
 
-            markersize = 1 * figsize_ratio
+            markersize = 0.8 * figsize_ratio
             linewidth = 1 * figsize_ratio
             fontsize = 6 * figsize_ratio
 
@@ -55,14 +55,20 @@ def draw_actions(actions, filename):
             # Symbol + Line
 
             if (action.type_name != "dribble") & (action.type_name != "foul"):
+
+                if action.result_id == 3:
+                    action.type_name = "owngoal"
+
                 shape = plt.Circle((x, y), radius=markersize, edgecolor='black', linewidth=linewidth, facecolor='white', alpha=1, zorder=6)
                 shapes.append(shape)
                 labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
-                line = patches.ConnectionPatch((x, y), (x_end, y_end), 'data', linestyle='-', color='black', linewidth=linewidth, zorder=5)
-                shapes.append(line)
-                labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
 
-                if action.result_name == 'fail':
+                if action.type_name != "clearance" or actions.iloc[i+1].type_name != 'corner_crossed':
+                    line = patches.ConnectionPatch((x, y), (x_end, y_end), 'data', linestyle='-', color='black', linewidth=linewidth, zorder=5)
+                    shapes.append(line)
+                    labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
+
+                if action.result_name == 'fail' or action.result_name == 'owngoal':
                     shape = plt.Circle((x, y), radius=markersize*1.2, edgecolor='red', linewidth=linewidth, facecolor='red', alpha=0.3, zorder=5)
                     shapes.append(shape)
                     labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
@@ -71,7 +77,13 @@ def draw_actions(actions, filename):
                     labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
 
             elif action.type_name == "dribble":
-                line = patches.ConnectionPatch((x, y), (x_end, y_end), 'data', linestyle=':', color='black', linewidth=linewidth, alpha=1, zorder=6)
+                distance = ((x_end - x) ** 2 + (y_end - y) ** 2) ** 0.5
+                if actions.iloc[i-1].type_name != "interception":
+                    if distance > 3:
+                        shape = plt.Circle((x, y), radius=markersize, edgecolor='black', linewidth=linewidth, facecolor='white', alpha=1, zorder=6)
+                        shapes.append(shape)
+                        labels.append("ball received" + "\n" + action.player_name + "\n" + action.team_name)
+                line = patches.ConnectionPatch((x, y), (x_end, y_end), 'data', linestyle=':', color='black', linewidth=linewidth, alpha=1, zorder=5)
                 shapes.append(line)
                 labels.append(action.type_name + "\n" + action.player_name + "\n" + action.team_name)
 
@@ -114,8 +126,11 @@ def draw_actions(actions, filename):
         patch.set_gid(f'mypatch_{i:03d}')
         annotate.set_gid(f'mytooltip_{i:03d}')
 
+    ax.text(0, 70, title, fontsize=15, va='center')
+    ax.text(92.5, -2.1, '@francescozonaro', fontsize=10, va='center')
+
     f = BytesIO()
-    plt.savefig(f, format="svg")
+    plt.savefig(f, format="svg", bbox_inches='tight')
 
     # --- Add interactivity ---
 
