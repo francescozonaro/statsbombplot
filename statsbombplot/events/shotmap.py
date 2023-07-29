@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 from statsbombplot.utils import config, draw_pitch, change_range
 
-def draw_shotmap(events, filename, team_left_id):
+def draw_shotmap(events, filename, team_left_id, left_color=(0.5, 0.78, 0.97, 1), right_color=(0.88, 0.48, 0.37, 1)):
 
     figsize_ratio = config['fig_size']/12
     ax = draw_pitch()
 
     teams = []
+    teams_name = []
 
     for i, event in events.iterrows():
 
@@ -23,16 +24,17 @@ def draw_shotmap(events, filename, team_left_id):
                 shot_technique = event.extra['shot']['body_part']['name']
 
             teams.append(event.team_id)
+            teams_name.append(event.team_name)
 
             # Statsbomb pitch dimensions: 120 length, 80 width
             if event.team_id != team_left_id:
                 x = change_range(event.location[0], [0, 120], [0, 105])
                 y = 68 - change_range(event.location[1], [0, 80], [0, 68])
-                shot_color = (0.88, 0.48, 0.37, 1)
+                shot_color = right_color
             else:
                 x = 105 - change_range(event.location[0], [0, 120], [0, 105])
                 y = change_range(event.location[1], [0, 80], [0, 68])
-                shot_color = (0.5, 0.78, 0.97, 1)
+                shot_color = left_color
 
             if event.extra['shot']['outcome']['name'] == 'Goal':
                 ax.scatter(x,y, s=markersize*1.5, edgecolor='black', linewidth=linewidth, facecolor=shot_color, zorder=7, marker='*')
@@ -58,4 +60,10 @@ def draw_shotmap(events, filename, team_left_id):
 
     ax.text(92.5, -2.1, '@francescozonaro', fontsize=10, va='center')
 
-    plt.savefig(filename, bbox_inches='tight')
+    for team, name in zip(teams, teams_name):
+        if team == team_left_id:
+            ax.text(1, 66, f'{name}', fontsize=10, va='center', ha='left')
+        else:
+            ax.text(104, 66, f'{name}', fontsize=10, va='center', ha='right')
+
+    plt.savefig(f'{filename}.png', bbox_inches='tight', format='png', dpi=300)

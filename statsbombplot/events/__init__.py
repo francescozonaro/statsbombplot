@@ -2,10 +2,10 @@ from .passing_network import (
     draw_passing_network
 ) 
 
-from .shots import (
+from .shotmap import (
     draw_shotmap
 )
 
-from .pressures import (
-    draw_pressures
+from .event_type_scatterplot import (
+    draw_event_type_scatter
 )

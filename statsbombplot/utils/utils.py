@@ -74,7 +74,7 @@ def draw_pitch(min_x=0, max_x=1):
 
     # This allows to plot a subsection of the pitch
     ratio = height / float((width * max_x)-(width * min_x))
-    f, ax = plt.subplots(1, 1, figsize=(fig_size, fig_size*ratio), dpi=500)
+    f, ax = plt.subplots(1, 1, figsize=(fig_size, fig_size*ratio), dpi=600)
 
     ax.set_ylim([0-5, height+5])
     ax.set_xlim([width*min_x-5, width*max_x+5])
