@@ -3,7 +3,7 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 from io import BytesIO
 from tabulate import tabulate
-from statsbombplot.utils import nice_time, config, draw_pitch
+from utils import nice_time, config, draw_pitch
 
 
 def find_goal(df):
@@ -29,8 +29,7 @@ def draw_match_goals(actions):
         cols = ["nice_time", "player_name", "type_name", "result_name", "team_name"]
 
         print(tabulate(df[cols], headers=cols, showindex=True))
-        draw_actions(df, filename="test_" + str(goal))
-        plt.show()
+        draw_actions(df, filename="imgs/test_" + str(goal), title="Title")
 
 
 def draw_actions(actions, filename, title=""):
@@ -251,8 +250,25 @@ def draw_actions(actions, filename, title=""):
         patch.set_gid(f"mypatch_{i:03d}")
         annotate.set_gid(f"mytooltip_{i:03d}")
 
-    ax.text(0, 70, title, fontsize=15, va="center")
+    goal_row = actions.iloc[len(actions) - 1]
+    ax.text(
+        1,
+        66,
+        f"{goal_row['player_name'] +  ' (' + goal_row['nice_time'] + ')'}",
+        fontsize=10,
+        va="center",
+        ha="left",
+    )
     ax.text(92.5, -2.1, "@francescozonaro", fontsize=10, va="center")
+
+    ax.text(
+        0,
+        -1.6,
+        f"Hover on lines and circles to see additional information for each event.",
+        fontsize=7,
+        va="center",
+        ha="left",
+    )
 
     f = BytesIO()
     plt.savefig(f, format="svg", bbox_inches="tight")
@@ -304,3 +320,33 @@ def draw_actions(actions, filename, title=""):
     # Insert the script at the top of the file and save it.
     tree.insert(0, ET.XML(script))
     ET.ElementTree(tree).write(f"{filename}.svg")
+
+
+import os
+import warnings
+import sys
+import socceraction.spadl as spadl
+from statsbombpy.api_client import NoAuthWarning
+from socceraction.data.statsbomb import StatsBombLoader
+
+warnings.simplefilter("ignore", NoAuthWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+api = StatsBombLoader(getter="remote", creds={"user": "", "passwd": ""})
+
+g = 3795506
+df_teams = api.teams(game_id=g)
+df_players = api.players(game_id=g)
+df_events = api.events(game_id=g, load_360=True)
+teams = list(df_events["team_name"].unique())
+teams_id = list(df_events["team_id"].unique())
+df_actions = spadl.statsbomb.convert_to_actions(df_events, home_team_id=teams_id[0])
+df_actions = (
+    spadl.add_names(df_actions)
+    .merge(api.teams(game_id=g))
+    .merge(api.players(game_id=g))
+)
+df_actions = df_actions.sort_values(
+    by=["period_id", "time_seconds"], ascending=[True, True]
+).reset_index(drop=True)
+
+draw_match_goals(df_actions)
