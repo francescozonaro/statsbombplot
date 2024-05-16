@@ -157,4 +157,4 @@ def draw_passing_network(df, filename, marker_color):
         ha="left",
     )
 
-    plt.savefig(f"{filename}.png", bbox_inches="tight", format="png", dpi=300)
+    plt.savefig(f"imgs/{filename}.png", bbox_inches="tight", format="png", dpi=300)

@@ -1,1 +1,1 @@
-from .goal_breakdown import draw_goals
+from .goal_breakdown import draw_match_goals

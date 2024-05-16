@@ -26,9 +26,9 @@ def draw_progressive_events(events, title, filename, drawAttempted, toggleTimest
     ax = draw_pitch()
 
     events["end_location"] = events["extra"].apply(
-        lambda x: x["carry"]["end_location"]
-        if "carry" in x
-        else x["pass"]["end_location"]
+        lambda x: (
+            x["carry"]["end_location"] if "carry" in x else x["pass"]["end_location"]
+        )
     )
 
     for i, event in events.iterrows():
@@ -177,4 +177,4 @@ def draw_progressive_events(events, title, filename, drawAttempted, toggleTimest
             ha="left",
         )
 
-    plt.savefig(f"{filename}.png", bbox_inches="tight", format="png", dpi=300)
+    plt.savefig(f"imgs/{filename}.png", bbox_inches="tight", format="png", dpi=300)

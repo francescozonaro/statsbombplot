@@ -118,4 +118,4 @@ def draw_event_type_scatter(
         ha="left",
     )
 
-    plt.savefig(f"{filename}.png", bbox_inches="tight", format="png", dpi=300)
+    plt.savefig(f"imgs/{filename}.png", bbox_inches="tight", format="png", dpi=300)
