@@ -1,9 +1,11 @@
+import socceraction.spadl as spadl
 import xml.etree.ElementTree as ET
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 from io import BytesIO
 from tabulate import tabulate
-from utils import nice_time, config, draw_pitch
+
+from utils import nice_time, config, draw_pitch, get_statsbomb_api
 
 
 def find_goal(df):
@@ -322,23 +324,16 @@ def draw_actions(actions, filename, title=""):
     ET.ElementTree(tree).write(f"{filename}.svg")
 
 
-import os
-import warnings
-import sys
-import socceraction.spadl as spadl
-from statsbombpy.api_client import NoAuthWarning
-from socceraction.data.statsbomb import StatsBombLoader
-
-warnings.simplefilter("ignore", NoAuthWarning)
-warnings.filterwarnings("ignore", category=FutureWarning)
-api = StatsBombLoader(getter="remote", creds={"user": "", "passwd": ""})
+api = get_statsbomb_api()
 
 g = 3795506
 df_teams = api.teams(game_id=g)
 df_players = api.players(game_id=g)
 df_events = api.events(game_id=g, load_360=True)
+
 teams = list(df_events["team_name"].unique())
 teams_id = list(df_events["team_id"].unique())
+
 df_actions = spadl.statsbomb.convert_to_actions(df_events, home_team_id=teams_id[0])
 df_actions = (
     spadl.add_names(df_actions)

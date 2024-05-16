@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from utils import config, draw_pitch, change_range
+from utils import config, draw_pitch, change_range, get_statsbomb_api
 
 
 def draw_shotmap(
@@ -160,14 +160,7 @@ def draw_shotmap(
     plt.savefig(f"imgs/{filename}.png", bbox_inches="tight", format="png", dpi=300)
 
 
-import warnings
-from statsbombpy.api_client import NoAuthWarning
-from socceraction.data.statsbomb import StatsBombLoader
-
-warnings.simplefilter("ignore", NoAuthWarning)
-warnings.filterwarnings("ignore", category=FutureWarning)
-api = StatsBombLoader(getter="remote", creds={"user": "", "passwd": ""})
-
+api = get_statsbomb_api()
 g = 3795506
 df_teams = api.teams(game_id=g)
 df_players = api.players(game_id=g)

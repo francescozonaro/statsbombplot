@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
-from utils import config, draw_pitch, change_range
-import matplotlib.lines as mlines
+from utils import config, draw_pitch, change_range, get_statsbomb_api
 import numpy as np
 
 
@@ -180,15 +179,7 @@ def draw_progressive_events(events, title, filename, drawAttempted, toggleTimest
     plt.savefig(f"imgs/{filename}.png", bbox_inches="tight", format="png", dpi=300)
 
 
-import os
-import warnings
-import sys
-from statsbombpy.api_client import NoAuthWarning
-from socceraction.data.statsbomb import StatsBombLoader
-
-warnings.simplefilter("ignore", NoAuthWarning)
-warnings.filterwarnings("ignore", category=FutureWarning)
-api = StatsBombLoader(getter="remote", creds={"user": "", "passwd": ""})
+api = get_statsbomb_api()
 
 g = 3795506
 df_teams = api.teams(game_id=g)

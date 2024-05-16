@@ -1,8 +1,5 @@
-import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
-from io import BytesIO
-from utils import config, draw_pitch, change_range
-import matplotlib.patches as mpatches
+from utils import config, draw_pitch, change_range, get_statsbomb_api
 import matplotlib.lines as mlines
 
 
@@ -121,16 +118,7 @@ def draw_event_type_scatter(
     plt.savefig(f"imgs/{filename}.png", bbox_inches="tight", format="png", dpi=300)
 
 
-import os
-import warnings
-import sys
-from statsbombpy.api_client import NoAuthWarning
-from socceraction.data.statsbomb import StatsBombLoader
-
-sys.path.append("..")
-warnings.simplefilter("ignore", NoAuthWarning)
-warnings.filterwarnings("ignore", category=FutureWarning)
-api = StatsBombLoader(getter="remote", creds={"user": "", "passwd": ""})
+api = get_statsbomb_api()
 
 g = 3795506
 df_teams = api.teams(game_id=g)

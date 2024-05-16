@@ -1,6 +1,6 @@
 import matplotlib.patheffects as pe
 import pandas as pd
-from utils import config, draw_pitch, change_range
+from utils import config, draw_pitch, change_range, get_statsbomb_api
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 
@@ -160,15 +160,7 @@ def draw_passing_network(df, filename, marker_color):
     plt.savefig(f"imgs/{filename}.png", bbox_inches="tight", format="png", dpi=300)
 
 
-import os
-import warnings
-import sys
-from statsbombpy.api_client import NoAuthWarning
-from socceraction.data.statsbomb import StatsBombLoader
-
-warnings.simplefilter("ignore", NoAuthWarning)
-warnings.filterwarnings("ignore", category=FutureWarning)
-api = StatsBombLoader(getter="remote", creds={"user": "", "passwd": ""})
+api = get_statsbomb_api()
 
 g = 3795506
 df_teams = api.teams(game_id=g)
