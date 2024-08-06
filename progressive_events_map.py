@@ -188,7 +188,6 @@ df_events = api.events(game_id=g, load_360=True)
 teams = list(df_events["team_name"].unique())
 teams_id = list(df_events["team_id"].unique())
 
-draw_id = 0
 types = ["Pass", "Carry"]
 df = df_events[df_events["type_name"].isin(types)]
 df = df[df["player_name"] == "Federico Chiesa"].reset_index(

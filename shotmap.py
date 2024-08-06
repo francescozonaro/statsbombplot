@@ -169,9 +169,7 @@ teams = list(df_events["team_name"].unique())
 teams_id = list(df_events["team_id"].unique())
 
 df_shots = df_events[
-    (df_events["type_name"] == "Shot") & (df_events["period_id"] < 5)
+    (df_events["type_name"] == "Shot") & (df_events["period_id"] < 5)  # No penalties
 ].reset_index(drop=True)
-df = api.games(competition_id=55, season_id=43)
-df[(df["home_team_id"] == 914) | (df["away_team_id"] == 914)].game_id.unique()
 
 draw_shotmap(df_shots, "shotmap", teams_id[0])
