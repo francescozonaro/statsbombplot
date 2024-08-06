@@ -301,16 +301,6 @@ def draw_actions(actions, filename, with_labels):
         ha="left",
     )
     ax.text(92.5, -2.1, "@francescozonaro", fontsize=10, va="center")
-
-    ax.text(
-        0,
-        -1.6,
-        f"Hover on lines and circles to see additional information for each event.",
-        fontsize=7,
-        va="center",
-        ha="left",
-    )
-
     plt.savefig(f"{filename}.png", format="png", bbox_inches="tight", dpi=300)
 
 
