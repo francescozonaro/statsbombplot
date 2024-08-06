@@ -1,3 +1,13 @@
+"""
+
+Based on Sergio Llana (@SergioMinuto90) passing network created on Sun Apr 19 2020
+
+Modified Jun 24 2023
+
+@author: Francesco Zonaro
+
+"""
+
 import matplotlib.patheffects as pe
 import pandas as pd
 from utils import config, draw_pitch, change_range, get_statsbomb_api

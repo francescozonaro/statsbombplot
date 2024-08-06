@@ -1,15 +1,3 @@
-"""
-
-Created on Sun Apr 19 2020
-
-@author: Sergio Llana (@SergioMinuto90)
-
-Modified Jun 24 2023
-
-@author: Francesco Zonaro
-
-"""
-
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
