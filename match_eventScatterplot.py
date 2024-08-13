@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
-from common import config, draw_pitch, change_range, get_statsbomb_api
+from utils import config, change_range, get_statsbomb_api
+from utils import Pitch
 import matplotlib.lines as mlines
 
 
@@ -12,7 +13,9 @@ def draw_event_type_scatter(
     marker_color=(0.765, 0.388, 0.961, 0.8),
 ):
     figsize_ratio = config["fig_size"] / 12
-    ax = draw_pitch()
+
+    pitch = Pitch(config)
+    f, ax = pitch.draw()
 
     shapes = []
     labels = []

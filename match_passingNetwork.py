@@ -10,7 +10,7 @@ Modified Jun 24 2023
 
 import matplotlib.patheffects as pe
 import pandas as pd
-from common import config, draw_pitch, change_range, get_statsbomb_api
+from utils import config, draw_pitch, change_range, get_statsbomb_api
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 

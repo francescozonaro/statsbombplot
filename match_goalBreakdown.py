@@ -3,7 +3,7 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 from tabulate import tabulate
 
-from common import config, draw_pitch, get_statsbomb_api
+from utils import config, draw_pitch, get_statsbomb_api
 
 
 def nice_time(row):
