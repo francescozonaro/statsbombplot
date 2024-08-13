@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
-from utils import config, draw_pitch, change_range, get_statsbomb_api
+from common import config, draw_pitch, change_range, get_statsbomb_api
 
 
 def draw_shotFreezed(

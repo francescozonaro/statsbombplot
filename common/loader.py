@@ -14,7 +14,7 @@ class Loader:
     def __init__(
         self,
         creds=None,
-    ) -> None:
+    ):
         if sb is None:
             raise ImportError(
                 """The 'statsbombpy' package is required. Install with 'pip install statsbombpy'."""
@@ -204,7 +204,6 @@ class Loader:
         if len(obj) == 0:
             return pd.DataFrame(columns=cols)
 
-        print(obj[55])
         eventsdf = pd.DataFrame(self._flatten_id(e) for e in obj)
         eventsdf["match_id"] = game_id
         eventsdf["timestamp"] = pd.to_timedelta(eventsdf["timestamp"])
