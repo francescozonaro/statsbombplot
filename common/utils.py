@@ -184,12 +184,6 @@ def draw_pitch(min_x=0, max_x=1):
     return ax
 
 
-def nice_time(row):
-    minute = int((row.period_id - 1) * 45 + row.time_seconds // 60)
-    second = int(row.time_seconds % 60)
-    return f"{minute}m{second}s"
-
-
 def get_statsbomb_api():
     api = StatsBombLoader(getter="remote", creds={"user": "", "passwd": ""})
     return api

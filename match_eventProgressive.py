@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from utils import config, draw_pitch, change_range, get_statsbomb_api
+from common import config, draw_pitch, change_range, get_statsbomb_api
 import numpy as np
 
 

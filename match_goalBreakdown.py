@@ -3,7 +3,13 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 from tabulate import tabulate
 
-from utils import nice_time, config, draw_pitch, get_statsbomb_api
+from common import config, draw_pitch, get_statsbomb_api
+
+
+def nice_time(row):
+    minute = int((row.period_id - 1) * 45 + row.time_seconds // 60)
+    second = int(row.time_seconds % 60)
+    return f"{minute}m{second}s"
 
 
 def find_goal(df):
