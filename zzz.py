@@ -1,5 +1,5 @@
 from common import get_statsbomb_api
-from match import ScatterplotSB, ProgressiveSB
+from match import ScatterplotSB, ProgressiveSB, ShotmapSB, ShotframeSB
 import pandas as pd
 
 pd.set_option("display.max_rows", None)
@@ -12,6 +12,8 @@ MENU_OPTIONS = {
 REPORT_OPTIONS = {
     1: "Draw scatterplots",
     2: "Draw progressive",
+    3: "Draw shotmap",
+    4: "Draw shot-frames",
     0: "Exit",
 }
 
@@ -117,6 +119,12 @@ def main():
                 elif choice == 2:
                     progressive = ProgressiveSB()
                     progressive.draw(game_id)
+                elif choice == 3:
+                    shotmap = ShotmapSB()
+                    shotmap.draw(game_id)
+                elif choice == 4:
+                    shotframe = ShotframeSB()
+                    shotframe.draw(game_id)
                 elif choice == 0:
                     break
                 else:
