@@ -1,5 +1,12 @@
 from common import get_statsbomb_api
-from match import ScatterplotSB, ProgressiveSB, ShotmapSB, ShotframeSB
+from match import (
+    ScatterplotSB,
+    ProgressiveSB,
+    ShotmapSB,
+    ShotframeSB,
+    GoalBreakdownSB,
+    PassingNetworkSB,
+)
 import pandas as pd
 
 pd.set_option("display.max_rows", None)
@@ -14,6 +21,8 @@ REPORT_OPTIONS = {
     2: "Draw progressive",
     3: "Draw shotmap",
     4: "Draw shot-frames",
+    5: "Draw goal breakdowns",
+    6: "Draw passing network",
     0: "Exit",
 }
 
@@ -125,6 +134,12 @@ def main():
                 elif choice == 4:
                     shotframe = ShotframeSB()
                     shotframe.draw(game_id)
+                elif choice == 5:
+                    gbs = GoalBreakdownSB()
+                    gbs.draw(game_id)
+                elif choice == 6:
+                    passingNetwork = PassingNetworkSB()
+                    passingNetwork.draw(game_id)
                 elif choice == 0:
                     break
                 else:
