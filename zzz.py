@@ -1,11 +1,11 @@
 from common import get_statsbomb_api
 from match import (
-    ScatterplotSB,
-    ProgressiveSB,
-    ShotmapSB,
-    ShotframeSB,
-    GoalBreakdownSB,
-    PassingNetworkSB,
+    ScatterplotSBP,
+    ProgressiveSBP,
+    ShotmapSBP,
+    ShotfreezedSBP,
+    # GoalBreakdownSB,
+    # PassingNetworkSB,
 )
 import pandas as pd
 
@@ -27,6 +27,7 @@ REPORT_OPTIONS = {
 }
 
 DEFAULT_GAME_ID = 3795506
+STATSBOMB_API = get_statsbomb_api()
 
 
 def print_menu(options):
@@ -37,8 +38,7 @@ def print_menu(options):
 
 
 def select_match():
-    api = get_statsbomb_api()
-    competitions = api.competitions()
+    competitions = STATSBOMB_API.competitions()
     unique_competitions = (
         competitions[["competition_id", "competition_name"]]
         .drop_duplicates()
@@ -73,7 +73,7 @@ def select_match():
         print("Invalid input. Exiting.")
         exit()
 
-    games = api.games(competition_id=comp_id, season_id=season_id)
+    games = STATSBOMB_API.games(competition_id=comp_id, season_id=season_id)
 
     print(
         games[
@@ -116,30 +116,37 @@ def main():
             # game_id = select_match()
             game_id = DEFAULT_GAME_ID
 
+            events = STATSBOMB_API.events(game_id, load_360=True)
+            players = STATSBOMB_API.players(game_id)
+            teams = STATSBOMB_API.teams(game_id)
+            teams["isHome"] = [True, False]
+
+            print(teams)
+
             while True:
                 print_menu(REPORT_OPTIONS)
                 choice = int(input("Enter your choice: "))
 
                 if choice == 1:
-                    scatterplot_modes = ["defensive", "passing"]
-                    scatterplot = ScatterplotSB()
-                    for scatterplot_mode in scatterplot_modes:
-                        scatterplot.draw(game_id, mode=scatterplot_mode)
+                    modes = ["defensive", "passing"]
+                    scatterplot = ScatterplotSBP()
+                    for mode in modes:
+                        scatterplot.draw(game_id, events, teams, mode)
                 elif choice == 2:
-                    progressive = ProgressiveSB()
-                    progressive.draw(game_id)
+                    progressive = ProgressiveSBP()
+                    progressive.draw(game_id, events, teams, players)
                 elif choice == 3:
-                    shotmap = ShotmapSB()
-                    shotmap.draw(game_id)
+                    shotmap = ShotmapSBP()
+                    shotmap.draw(game_id, events, teams)
                 elif choice == 4:
-                    shotframe = ShotframeSB()
-                    shotframe.draw(game_id)
-                elif choice == 5:
-                    gbs = GoalBreakdownSB()
-                    gbs.draw(game_id)
-                elif choice == 6:
-                    passingNetwork = PassingNetworkSB()
-                    passingNetwork.draw(game_id)
+                    shotfreeze = ShotfreezeSBP()
+                    shotfreeze.draw(game_id, events, players)
+                # elif choice == 5:
+                #     gbs = GoalBreakdownSB()
+                #     gbs.draw(game_id)
+                # elif choice == 6:
+                #     passingNetwork = PassingNetworkSB()
+                #     passingNetwork.draw(game_id)
                 elif choice == 0:
                     break
                 else:

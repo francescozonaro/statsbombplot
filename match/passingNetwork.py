@@ -18,9 +18,7 @@ import matplotlib.lines as mlines
 class PassingNetworkSB:
 
     def __init__(self):
-        self.api = get_statsbomb_api()
-        self.markersize = 50 * (config["fig_size"] / 12)
-        self.linewidth = 0.5 * (config["fig_size"] / 12)
+        super().__init__()
 
     def _draw_passing_network(self, df, filename, marker_color):
         df[["x", "y"]] = pd.DataFrame(df["location"].tolist())

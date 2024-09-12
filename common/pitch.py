@@ -4,10 +4,12 @@ import numpy as np
 
 
 class Pitch:
-    def __init__(self, config):
-        self.height = float(config["height"])
-        self.width = float(config["width"])
-        self.config = config
+    def __init__(self):
+        self.height = float(68)
+        self.width = float(105)
+        self.background_color = "white"
+        self.lines_color = "#bcbcbc"
+        self.fig_size = 15
 
     def _point_to_meters(self, p):
         """Convert a point's coordinates from a 0-1 range to meters."""
@@ -105,16 +107,17 @@ class Pitch:
         """
         Plot an empty horizontal football pitch, returning Matplotlib's ax object so we can keep adding elements to it.
         """
-        background_color = self.config["background_color"]
-        lines_color = self.config["lines_color"]
-        fig_size = self.config["fig_size"]
 
         ratio = self.height / float(self.width)
-        f, ax = plt.subplots(1, 1, figsize=(fig_size, fig_size * ratio), dpi=600)
+        f, ax = plt.subplots(
+            1, 1, figsize=(self.fig_size, self.fig_size * ratio), dpi=600
+        )
         ax.set_ylim([-5, self.height + 5])
         ax.set_xlim([-5, self.width + 5])
         ax.add_patch(
-            patches.Rectangle((0, 0), self.width, self.height, color=background_color)
+            patches.Rectangle(
+                (0, 0), self.width, self.height, color=self.background_color
+            )
         )
 
         # Plot outer lines
@@ -139,11 +142,10 @@ class Pitch:
                 alpha=0.8,
                 lw=1.5,
                 zorder=3,
-                color=lines_color,
+                color=self.lines_color,
             )
 
-        # Plot boxes and circles (code unchanged from your original draw_pitch function)
-        self._draw_pitch_elements(ax, lines_color)
+        self._draw_pitch_elements(ax, self.lines_color)
 
         plt.axis("off")
         return f, ax

@@ -1,51 +1,42 @@
 import matplotlib.pyplot as plt
-from common import config, Pitch, change_range, get_statsbomb_api
+import os
+
+from common import Pitch, change_range
+from .base import BaseSBP
 
 
-class ShotmapSB:
+class ShotmapSBP(BaseSBP):
 
     def __init__(self):
-        self.api = get_statsbomb_api()
-        self.markersize = 50 * (config["fig_size"] / 12)
-        self.linewidth = 0.5 * (config["fig_size"] / 12)
+        super().__init__()
 
-    def _draw_shotmap(
-        self,
-        events,
-        filename,
-        team_left_id,
-        left_color=(0.5, 0.78, 0.97, 1),
-        right_color=(0.88, 0.48, 0.37, 1),
-    ):
+    def _draw_shotmap(self, events, teams):
 
-        pitch = Pitch(config)
+        pitch = Pitch()
         f, ax = pitch.draw()
 
-        teams = []
-        teams_name = []
+        team_names = list(teams["team_name"])
+        team_ids = list(teams["team_id"])
 
         for i, event in events.iterrows():
             shot_xG = round(event.extra["shot"]["statsbomb_xg"], 3)
             multiplier_xG = round(change_range(shot_xG, [0, 1], [1, 5]), 3)
-            markersize = self.markersize * multiplier_xG
+            markersize = self.markerSize * multiplier_xG
 
             shot_technique = event.extra["shot"]["technique"]["name"]
 
             if shot_technique == "Normal":
                 shot_technique = event.extra["shot"]["body_part"]["name"]
 
-            teams.append(event.team_id)
-            teams_name.append(event.team_name)
-
             # Statsbomb pitch dimensions: 120 length, 80 width
-            if event.team_id != team_left_id:
+            if event.team_id != team_ids[0]:
                 x = change_range(event.location[0], [0, 120], [0, 105])
                 y = 68 - change_range(event.location[1], [0, 80], [0, 68])
-                shot_color = right_color
+                shot_color = self.awayColor
             else:
                 x = 105 - change_range(event.location[0], [0, 120], [0, 105])
                 y = change_range(event.location[1], [0, 80], [0, 68])
-                shot_color = left_color
+                shot_color = self.homeColor
 
             if event.extra["shot"]["outcome"]["name"] == "Goal":
                 ax.scatter(
@@ -53,7 +44,7 @@ class ShotmapSB:
                     y,
                     s=markersize * 1.5,
                     edgecolor="black",
-                    linewidth=self.linewidth,
+                    linewidth=self.lineWidth,
                     facecolor=shot_color,
                     zorder=7,
                     marker="*",
@@ -64,7 +55,7 @@ class ShotmapSB:
                     y,
                     s=markersize,
                     edgecolor="black",
-                    linewidth=self.linewidth,
+                    linewidth=self.lineWidth,
                     facecolor=shot_color,
                     zorder=6,
                     marker="o",
@@ -75,7 +66,7 @@ class ShotmapSB:
                     y,
                     s=markersize,
                     edgecolor="black",
-                    linewidth=self.linewidth,
+                    linewidth=self.lineWidth,
                     facecolor=shot_color,
                     zorder=5,
                     marker="X",
@@ -85,9 +76,9 @@ class ShotmapSB:
             plt.scatter(
                 [],
                 [],
-                s=self.markersize * 1.2,
+                s=self.markerSize * 1.2,
                 edgecolor="black",
-                linewidth=self.linewidth,
+                linewidth=self.lineWidth,
                 facecolor=(1, 1, 1, 0.8),
                 zorder=5,
                 marker="*",
@@ -96,9 +87,9 @@ class ShotmapSB:
             plt.scatter(
                 [],
                 [],
-                s=self.markersize,
+                s=self.markerSize,
                 edgecolor="black",
-                linewidth=self.linewidth,
+                linewidth=self.lineWidth,
                 facecolor=(1, 1, 1, 0.8),
                 zorder=5,
                 marker="o",
@@ -107,9 +98,9 @@ class ShotmapSB:
             plt.scatter(
                 [],
                 [],
-                s=self.markersize,
+                s=self.markerSize,
                 edgecolor="black",
-                linewidth=self.linewidth,
+                linewidth=self.lineWidth,
                 facecolor=(1, 1, 1, 0.8),
                 zorder=5,
                 marker="X",
@@ -118,9 +109,9 @@ class ShotmapSB:
             plt.scatter(
                 [],
                 [],
-                s=self.markersize / 3,
+                s=self.markerSize / 3,
                 edgecolor="black",
-                linewidth=self.linewidth,
+                linewidth=self.lineWidth,
                 facecolor=(1, 1, 1, 0.8),
                 zorder=5,
                 marker="o",
@@ -129,9 +120,9 @@ class ShotmapSB:
             plt.scatter(
                 [],
                 [],
-                s=self.markersize * 2,
+                s=self.markerSize,
                 edgecolor="black",
-                linewidth=self.linewidth,
+                linewidth=self.lineWidth,
                 facecolor=(1, 1, 1, 0.8),
                 zorder=5,
                 marker="o",
@@ -139,35 +130,39 @@ class ShotmapSB:
             ),
         ]
 
-        ax.legend(
+        legend = ax.legend(
             handles=legend_elements,
             loc="upper center",
             ncol=len(legend_elements),
             bbox_to_anchor=(0.5, 0.99),
-            fontsize=10,
+            fontsize=self.fontSize,
             fancybox=True,
             frameon=True,
             handletextpad=0.5,
         )
 
-        ax.text(92.5, -2.1, "@francescozonaro", fontsize=10, va="center")
+        ax.text(94.5, -2.1, "@francescozonaro", fontsize=self.fontSize, va="center")
 
-        for team, name in zip(teams, teams_name):
-            if team == team_left_id:
-                ax.text(1, 66, f"{name}", fontsize=10, va="center", ha="left")
-            else:
-                ax.text(104, 66, f"{name}", fontsize=10, va="center", ha="right")
+        ax.text(
+            1, 66, f"{team_names[0]}", fontsize=self.fontSize, va="center", ha="left"
+        )
 
-        plt.savefig(f"imgs/{filename}.png", bbox_inches="tight", format="png", dpi=300)
+        ax.text(
+            104, 66, f"{team_names[1]}", fontsize=self.fontSize, va="center", ha="right"
+        )
 
-    def draw(self, g):
-        api = get_statsbomb_api()
-        df_events = api.events(game_id=g, load_360=True)
-        teams_id = list(df_events["team_id"].unique())
+        return f, ax
 
-        df_shots = df_events[
-            (df_events["type_name"] == "Shot")
-            & (df_events["period_id"] < 5)  # No penalties
+    def draw(self, g, data, teams):
+
+        df = data[
+            (data["type_name"] == "Shot") & (data["period_id"] < 5)  # No penalties
         ].reset_index(drop=True)
 
-        self._draw_shotmap(df_shots, "shotmap", teams_id[0])
+        f, _ = self._draw_shotmap(df, teams)
+
+        folder = f"imgs/{g}"
+        filename = f"{folder}/shotmap.png"
+        os.makedirs(folder, exist_ok=True)
+        f.savefig(filename, bbox_inches="tight", format="png", dpi=300)
+        plt.close()

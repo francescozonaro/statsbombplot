@@ -1,6 +1,8 @@
-from .eventScatterplot import ScatterplotSB
-from .eventProgressive import ProgressiveSB
-from .shotMap import ShotmapSB
-from .shotFreezed import ShotframeSB
-from .goalBreakdown import GoalBreakdownSB
-from .passingNetwork import PassingNetworkSB
+from .base import BaseSBP
+from .eventScatterplot import ScatterplotSBP
+from .eventProgressive import ProgressiveSBP
+from .shotMap import ShotmapSBP
+from .shotFreezed import ShotfreezedSBP
+
+# from .goalBreakdown import GoalBreakdownSB
+# from .passingNetwork import PassingNetworkSB

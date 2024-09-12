@@ -1,25 +1,23 @@
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
-from common import config, change_range, get_statsbomb_api, Pitch
+import os
+
+from common import Pitch, change_range
+from .base import BaseSBP
 
 
-class ShotframeSB:
+class ShotfreezedSBP(BaseSBP):
 
     def __init__(self):
-        self.api = get_statsbomb_api()
-        self.markersize = 100 * (config["fig_size"] / 12)
-        self.linewidth = 0.5 * (config["fig_size"] / 12)
+        super().__init__()
 
-    def _draw_shotFreezed(
+    def _draw_shot_freezed(
         self,
         event,
-        filename,
         playerNameToJerseyNumber,
-        color=(0.5, 0.78, 0.97, 1),
-        opp_color=(1, 0.376, 0.137, 0.8),
     ):
 
-        pitch = Pitch(config)
+        pitch = Pitch()
         f, ax = pitch.draw()
 
         shot_xG = round(event.extra["shot"]["statsbomb_xg"], 3)
@@ -36,16 +34,16 @@ class ShotframeSB:
         end_y = 68 - change_range(
             event["extra"]["shot"]["end_location"][1], [0, 80], [0, 68]
         )
-        shot_color = color
+        shot_color = self.mainColor
 
         ax.scatter(
             x,
             y,
-            s=self.markersize * 1.5,
+            s=self.markerSize * 2,
             edgecolor="black",
-            linewidth=linewidth,
+            linewidth=self.lineWidth,
             facecolor=shot_color,
-            zorder=6,
+            zorder=11,
             marker="*",
         )
 
@@ -53,7 +51,7 @@ class ShotframeSB:
             [x, end_x],
             [y, end_y],
             color=(0, 0, 0, 0.2),
-            linewidth=self.linewidth * 1.5,
+            linewidth=self.lineWidth * 1.5,
             zorder=5,
             linestyle="--",
         )
@@ -68,18 +66,18 @@ class ShotframeSB:
             )
 
             if player["teammate"]:
-                freezed_player_color = color
+                freezed_player_color = self.mainColor
             else:
-                freezed_player_color = opp_color
+                freezed_player_color = self.altColor
 
             ax.scatter(
                 freezed_player_x,
                 freezed_player_y,
-                s=self.markersize,
+                s=self.markerSize * 2,
                 edgecolor="black",
-                linewidth=self.linewidth,
+                linewidth=self.lineWidth,
                 facecolor=freezed_player_color,
-                zorder=8,
+                zorder=9,
                 marker="o",
             )
 
@@ -87,8 +85,8 @@ class ShotframeSB:
                 freezed_player_x + 0.025,
                 freezed_player_y - 0.05,
                 f"{playerNameToJerseyNumber[player['player']['name']]}",  # text to display (customize as needed)
-                fontsize=5,
-                zorder=10,
+                fontsize=self.fontSize - 2,
+                zorder=9,
                 ha="center",
                 va="center",
                 color="white",
@@ -101,9 +99,9 @@ class ShotframeSB:
             plt.scatter(
                 [],
                 [],
-                s=self.markersize * 1.5,
+                s=self.markerSize * 1.5,
                 edgecolor="black",
-                linewidth=self.linewidth,
+                linewidth=self.lineWidth,
                 facecolor=shot_color,
                 zorder=5,
                 marker="*",
@@ -112,10 +110,10 @@ class ShotframeSB:
             plt.scatter(
                 [],
                 [],
-                s=self.markersize,
+                s=self.markerSize,
                 edgecolor="black",
-                linewidth=linewidth,
-                facecolor=color,
+                linewidth=self.lineWidth,
+                facecolor=self.mainColor,
                 zorder=5,
                 marker="o",
                 label="Teammate",
@@ -123,10 +121,10 @@ class ShotframeSB:
             plt.scatter(
                 [],
                 [],
-                s=self.markersize,
+                s=self.markerSize,
                 edgecolor="black",
-                linewidth=self.linewidth,
-                facecolor=opp_color,
+                linewidth=self.lineWidth,
+                facecolor=self.altColor,
                 zorder=5,
                 marker="o",
                 label="Opponent",
@@ -138,18 +136,18 @@ class ShotframeSB:
             loc="upper center",
             ncol=len(legend_elements),
             bbox_to_anchor=(0.5, 0.99),
-            fontsize=10,
+            fontsize=self.fontSize,
             fancybox=True,
             frameon=True,
             handletextpad=0.5,
         )
 
-        ax.text(92.5, -2.1, "@francescozonaro", fontsize=10, va="center")
+        ax.text(92.5, -2.1, "@francescozonaro", fontsize=self.fontSize, va="center")
         ax.text(
             1,
             66,
             f"{event['player_name']} | {event['extra']['shot']['outcome']['name']} | {shot_xG} xG",
-            fontsize=10,
+            fontsize=self.fontSize,
             va="center",
             ha="left",
         )
@@ -157,34 +155,32 @@ class ShotframeSB:
             1,
             64,
             f"{event['minute']}:{event['second']}",
-            fontsize=10,
+            fontsize=self.fontSize,
             va="center",
             ha="left",
         )
-        plt.savefig(f"imgs/{filename}.png", bbox_inches="tight", format="png", dpi=300)
-        plt.close()
 
-    def draw(self, g):
-        api = get_statsbomb_api()
-        events = api.events(game_id=g)
-        players = api.players(game_id=g)
+        return f, ax
+
+    def draw(self, g, data, teams, players):
+
         playerNameToJerseyNumber = players.set_index("player_name")[
             "jersey_number"
         ].to_dict()
 
-        events = events[
-            ["player_name", "type_name", "extra", "location", "minute", "second"]
-        ].reset_index(drop=True)
-        events = events[events["type_name"] == "Shot"].reset_index(drop=True)
+        df = data[data["type_name"] == "Shot"].reset_index(drop=True)
 
-        for i, row in events.iterrows():
+        for i, row in df.iterrows():
             try:
-                self._draw_shotFreezed(
+                f, ax = self._draw_shot_freezed(
                     row,
-                    f"freezing_{g}_shot_{i}_{row['player_name']}",
                     playerNameToJerseyNumber,
-                    color=(1, 0.376, 0.137, 0.8),
-                    opp_color=(0.5, 0.78, 0.97, 1),
                 )
+
+                folder = f"imgs/{g}/{row['team_name']}"
+                filename = f"{folder}/ShotfreezeSBP_{i}_{row['player_name']}.png"
+                os.makedirs(folder, exist_ok=True)
+                f.savefig(filename, bbox_inches="tight", format="png", dpi=300)
+                plt.close()
             except Exception as e:
-                pass
+                plt.close()

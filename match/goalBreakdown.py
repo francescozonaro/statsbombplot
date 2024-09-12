@@ -9,9 +9,7 @@ from common import config, Pitch, get_statsbomb_api
 class GoalBreakdownSB:
 
     def __init__(self):
-        self.api = get_statsbomb_api()
-        self.markersize = 50 * (config["fig_size"] / 12)
-        self.linewidth = 0.5 * (config["fig_size"] / 12)
+        super().__init__()
 
     def _nice_time(self, row):
         minute = int((row.period_id - 1) * 45 + row.time_seconds // 60)

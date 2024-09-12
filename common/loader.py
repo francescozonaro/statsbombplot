@@ -345,6 +345,7 @@ class Loader:
             else:
                 newd[k] = v
         newd["extra"] = extra
+
         return newd
 
     def _flatten(self, d):

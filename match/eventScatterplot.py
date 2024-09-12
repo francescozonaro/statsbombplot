@@ -1,30 +1,29 @@
 import matplotlib.pyplot as plt
-from common import config, change_range, get_statsbomb_api
-from common import Pitch
 import matplotlib.lines as mlines
+import os
+
+from common import Pitch, change_range
+from .base import BaseSBP
 
 
-class ScatterplotSB:
+class ScatterplotSBP(BaseSBP):
 
     def __init__(self):
-        self.api = get_statsbomb_api()
-        self.markersize = 50 * (config["fig_size"] / 12)
-        self.linewidth = 0.5 * (config["fig_size"] / 12)
+        super().__init__()
+        self.mainColor = self.homeColor
 
     def _draw_event_type_scatter(
         self,
         events,
-        filename,
-        event_type,
+        label,
         draw_mean_height=True,
-        marker_shape="o",
-        marker_color=(0.765, 0.388, 0.961, 0.8),
     ):
 
-        pitch = Pitch(config)
+        pitch = Pitch()
         f, ax = pitch.draw()
 
         count_opponent_half = 0
+
         for i, event in events.iterrows():
 
             # Statsbomb pitch dimensions: 120 length, 80 width
@@ -37,25 +36,25 @@ class ScatterplotSB:
             ax.scatter(
                 x,
                 y,
-                s=self.markersize,
+                s=self.markerSize,
                 edgecolor="black",
-                linewidth=self.linewidth,
-                facecolor=marker_color,
+                linewidth=self.lineWidth,
+                facecolor=self.mainColor,
                 zorder=7,
-                marker=marker_shape,
+                marker="o",
             )
 
         legend_elements = [
             plt.scatter(
                 [],
                 [],
-                s=self.markersize,
+                s=self.markerSize,
                 edgecolor="black",
-                linewidth=self.linewidth,
-                facecolor=marker_color,
+                linewidth=self.lineWidth,
+                facecolor=self.mainColor,
                 zorder=7,
-                marker=marker_shape,
-                label=event_type,
+                marker="o",
+                label=label,
             )
         ]
 
@@ -85,7 +84,7 @@ class ScatterplotSB:
                         color=(0.88, 0.48, 0.37, 0.8),
                         linewidth=2,
                         linestyle="dashed",
-                        label=f"Mean Height of {event_type}",
+                        label=f"Mean Height of {label}",
                     )
                 ]
             )
@@ -95,13 +94,12 @@ class ScatterplotSB:
             loc="upper center",
             ncol=len(legend_elements),
             bbox_to_anchor=(0.5, 0.99),
-            fontsize=10,
+            fontsize=self.fontSize,
             fancybox=True,
             frameon=True,
             handletextpad=0.5,
         )
 
-        percentage_opponent_half = round(100 * count_opponent_half / len(events), 2)
         ax.text(92.5, -2.1, "@francescozonaro", fontsize=10, va="center")
         ax.text(
             0,
@@ -111,6 +109,8 @@ class ScatterplotSB:
             va="center",
             ha="left",
         )
+
+        percentage_opponent_half = round(100 * count_opponent_half / len(events), 2)
         ax.text(
             0,
             -4.1,
@@ -120,66 +120,57 @@ class ScatterplotSB:
             ha="left",
         )
 
-        plt.savefig(f"imgs/{filename}.png", bbox_inches="tight", format="png", dpi=300)
+        return f, ax
 
     def draw(
         self,
         g,
+        data,
+        teams,
         mode,
-        marker_shape="o",
-        marker_color=[(0.5, 0.78, 0.97, 1)],
     ):
 
-        df_events = self.api.events(game_id=g, load_360=True)
-        teams = list(df_events["team_name"].unique())
-        team_ids = list(df_events["team_id"].unique())
+        team_names = list(teams["team_name"])
+        team_ids = list(teams["team_id"])
+        is_home = list(teams["isHome"])
 
-        # COLORS
-        if len(marker_color) == 0:
-            raise ValueError("marker_color list cannot be empty.")
-        elif len(marker_color) == len(team_ids):
-            pass
-        elif len(marker_color) > len(team_ids):
-            marker_color = marker_color[:2]
-        else:
-            marker_color = marker_color * len(team_ids)
-
-        for team_id, team, marker_color in zip(team_ids, teams, marker_color):
+        for team_id, team_name, home in zip(team_ids, team_names, is_home):
 
             opposing_team_id = next(t for t in team_ids if t != team_id)
+            self.mainColor = self.homeColor if home else self.awayColor
 
             if mode == "defensive":
+                event_type_name = "Def Action"
                 types = [
                     "Block",
                     "Interception",
                     "Clearance",
                     "Ball Recovery",
                 ]
-                df = df_events[df_events["type_name"].isin(types)]
+                df = data[data["type_name"].isin(types)]
                 df = df[df["team_id"] == team_id].reset_index(drop=True)
                 # For this plot we consider only situations where an opponent has the ball
                 df = df[df["possession_team_id"] == opposing_team_id]
                 # Ignoring the keeper
                 df = df[df["position_name"] != "Goalkeeper"]
-
-                event_type_name = "Def. Action"
             elif mode == "passing":
-                types = ["Pass"]
-                df = df_events[df_events["type_name"].isin(types)]
-                df = df[df["team_id"] == team_id].reset_index(drop=True)
-
                 event_type_name = "Passing"
+                types = ["Pass"]
+                df = data[data["type_name"].isin(types)]
+                df = df[df["team_id"] == team_id].reset_index(drop=True)
             else:
                 raise ValueError(f"{mode} isn't supported")
 
-            event_type = f"{team} {event_type_name}"
-            filename = f"{g}_{team_id}_scatterplot_{event_type_name}"
+            event_type = f"{team_name} {event_type_name}"
 
-            self._draw_event_type_scatter(
+            f, _ = self._draw_event_type_scatter(
                 df,
-                filename=filename,
-                event_type=event_type,
+                label=event_type,
                 draw_mean_height=True,
-                marker_shape=marker_shape,
-                marker_color=marker_color,
             )
+
+            folder = f"imgs/{g}/{team_name}"
+            filename = f"{folder}/ScatterplotSBP_{event_type_name.lower().replace(' ', '')}.png"
+            os.makedirs(folder, exist_ok=True)
+            f.savefig(filename, bbox_inches="tight", format="png", dpi=300)
+            plt.close()
