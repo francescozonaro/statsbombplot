@@ -13,7 +13,7 @@ def main():
     matchTeams = STATSBOMB_API.teams(gameId)
 
     match = Match(gameId, matchEvents, matchTeams, matchPlayers)
-    match.drawPassingNetworks()
+    match.drawShotFreezed()
 
 
 if __name__ == "__main__":

@@ -1,7 +1,8 @@
 import pandas as pd
+import os
 
-from elements.passingNetwork import PassingNetwork
-from utils.common import changeRange, addAnnotations, saveFigure, addLegend
+from elements.passingNetwork import PassingNetwork, ShotFreezed
+from utils.common import changeRange, addNotes, saveFigure, addLegend
 
 
 class Match:
@@ -20,6 +21,9 @@ class Match:
         self.teamNames = list([self.homeTeamName, self.awayTeamName])
         self.teamIdentifiers = list([self.homeTeamId, self.awayTeamId])
         self.teamColors = list([self.homeTeamColor, self.awayTeamColor])
+
+        self.folder = f"imgs/{g}"
+        os.makedirs(self.folder, exist_ok=True)
 
     def drawPassingNetworks(self):
         for identifier, markerColor, teamName in zip(
@@ -79,9 +83,35 @@ class Match:
             ]
 
             addLegend(ax, legendElements)
-            addAnnotations(
+            addNotes(
                 ax,
                 author="@francescozonaro",
                 extra_text=extra_text,
             )
-            saveFigure(fig, f"imgs/passingNetwork_{self.gameId}_{teamName}.png")
+            saveFigure(
+                fig, f"{self.folder}/passingNetwork_{self.gameId}_{teamName}.png"
+            )
+
+    def drawShotFreezed(self):
+
+        playerNameToJerseyNumber = self.players.set_index("player_name")[
+            "jersey_number"
+        ].to_dict()
+
+        shots = self.events[self.events["type_name"] == "Shot"].reset_index(drop=True)
+
+        for i, shot in shots.iterrows():
+
+            shotFreezed = ShotFreezed()
+
+            fig, ax, legendElements = shotFreezed.draw(
+                shot,
+                playerNameToJerseyNumber,
+            )
+
+            addLegend(ax, legendElements)
+            addNotes(
+                ax,
+                author="@francescozonaro",
+            )
+            saveFigure(fig, f"{self.folder}/passingNetwork_{self.gameId}_{i}.png")

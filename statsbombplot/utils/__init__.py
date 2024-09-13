@@ -3,7 +3,7 @@ from .common import (
     getStatsbombAPI,
     adjustColor,
     deriveNearColors,
-    addAnnotations,
+    addNotes,
     saveFigure,
     addLegend,
 )

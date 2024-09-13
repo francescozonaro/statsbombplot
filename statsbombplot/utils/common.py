@@ -42,7 +42,7 @@ def deriveNearColors(color_hex):
     return [color1, color2]
 
 
-def addAnnotations(ax, author="@francescozonaro", extra_text=None):
+def addNotes(ax, author, extra_text=None):
     """
     Adds author tag and extra text to the bottom left of the plot.
     """
