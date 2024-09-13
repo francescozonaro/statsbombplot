@@ -1,5 +1,0 @@
-['Starting XI' 'Half Start' 'Pass' 'Ball Receipt*' 'Carry' 'Pressure'
- 'Duel' 'Block' 'Interception' 'Clearance' 'Shot' 'Goal Keeper' 'Dribble'
- 'Foul Committed' 'Ball Recovery' 'Dispossessed' 'Foul Won' 'Miscontrol'
- 'Dribbled Past' 'Injury Stoppage' 'Player Off' 'Player On' 'Half End'
- 'Substitution' 'Tactical Shift' 'Referee Ball-Drop']
