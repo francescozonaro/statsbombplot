@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import os
 
-from common import Pitch, change_range
-from .base import BaseSBP
+from utils import Pitch, change_range
+from .matchBase import BaseMatchSBP
 
 
-class ShotfreezedSBP(BaseSBP):
+class ShotfreezedSBP(BaseMatchSBP):
 
     def __init__(self):
         super().__init__()

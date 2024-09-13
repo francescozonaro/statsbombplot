@@ -2,15 +2,14 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import os
 
-from common import Pitch, change_range
-from .base import BaseSBP
+from utils import Pitch, change_range
+from match.matchBase import BaseMatchSBP
 
 
-class ScatterplotSBP(BaseSBP):
+class ScatterplotSBP(BaseMatchSBP):
 
-    def __init__(self):
-        super().__init__()
-        self.mainColor = self.homeColor
+    def __init__(self, base):
+        super().__init__(base.game_id, base.events, base.teams, base.players)
 
     def _draw_event_type_scatter(
         self,
@@ -124,15 +123,13 @@ class ScatterplotSBP(BaseSBP):
 
     def draw(
         self,
-        g,
-        data,
-        teams,
         mode,
     ):
 
-        team_names = list(teams["team_name"])
-        team_ids = list(teams["team_id"])
-        is_home = list(teams["isHome"])
+        data = self.events
+        team_names = list([self.home_team_name, self.away_team_name])
+        team_ids = list([self.home_team_id, self.away_team_id])
+        is_home = list([True, False])
 
         for team_id, team_name, home in zip(team_ids, team_names, is_home):
 

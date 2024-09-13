@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import os
 
-from common import Pitch, change_range
-from .base import BaseSBP
+from utils import Pitch, change_range
+from .matchBase import BaseMatchSBP
 
 
-class ShotmapSBP(BaseSBP):
+class ShotmapSBP(BaseMatchSBP):
 
     def __init__(self):
         super().__init__()

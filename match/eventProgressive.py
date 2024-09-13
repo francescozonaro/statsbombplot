@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 
-from common import Pitch, change_range, adjust_color, derive_near_colors
-from .base import BaseSBP
+from utils import Pitch, change_range, adjust_color, derive_near_colors
+from .matchBase import BaseMatchSBP
 
 
-class ProgressiveSBP(BaseSBP):
+class ProgressiveSBP(BaseMatchSBP):
 
     def __init__(self):
         super().__init__()

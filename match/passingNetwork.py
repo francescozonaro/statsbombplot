@@ -10,12 +10,14 @@ Modified Jun 24 2023
 
 import matplotlib.patheffects as pe
 import pandas as pd
-from common import config, Pitch, change_range, get_statsbomb_api
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 
+from utils import Pitch, change_range
+from .matchBase import BaseMatchSBP
 
-class PassingNetworkSB:
+
+class PassingNetworkSBP(BaseMatchSBP):
 
     def __init__(self):
         super().__init__()
@@ -47,8 +49,7 @@ class PassingNetworkSB:
         pair_pass_count = pair_pass_count[pair_pass_count["num_passes"] > 3]
         player_position = df.groupby("player_name").agg({"x": "mean", "y": "mean"})
 
-        figsize_ratio = config["fig_size"] / 12
-        pitch = Pitch(config)
+        pitch = Pitch()
         f, ax = pitch.draw()
 
         max_player_count = player_pass_count.num_passes.max()
@@ -68,7 +69,7 @@ class PassingNetworkSB:
                 [player1_y, player2_y],
                 linestyle="-",
                 alpha=0.4,
-                lw=2.5 * line_width * figsize_ratio,
+                lw=2.5 * self.lineWidth,
                 zorder=3,
                 color=marker_color,
             )
@@ -83,7 +84,7 @@ class PassingNetworkSB:
                 player_x,
                 player_y,
                 ".",
-                markersize=100 * (marker_size) * figsize_ratio,
+                markersize=100,
                 color=marker_color,
                 zorder=5,
             )
@@ -91,8 +92,7 @@ class PassingNetworkSB:
                 player_x,
                 player_y,
                 ".",
-                markersize=100 * (marker_size) * figsize_ratio
-                - 15 * (marker_size) * figsize_ratio,
+                markersize=100 - 15,
                 color="white",
                 zorder=6,
             )
@@ -103,7 +103,7 @@ class PassingNetworkSB:
                 va="center",
                 zorder=7,
                 weight="bold",
-                size=8 * figsize_ratio,
+                size=8,
                 path_effects=[pe.withStroke(linewidth=2, foreground="white")],
             )
 
@@ -179,12 +179,11 @@ class PassingNetworkSB:
 
         plt.savefig(f"imgs/{filename}.png", bbox_inches="tight", format="png", dpi=300)
 
-    def draw(self, g):
-        api = get_statsbomb_api()
-        df_events = api.events(game_id=g, load_360=True)
-        teams_id = list(df_events["team_id"].unique())
+    def draw(self, g, events, teams):
 
-        df_team = df_events[df_events["team_id"] == teams_id[0]].copy()
+        teams_id = list(teams["team_id"])
+
+        df_team = events[events["team_id"] == teams_id[0]].copy()
         index_first_sub = df_team[df_team.type_name == "Substitution"].index.min()
         df_events_pre_sub = df_team[df_team.index < index_first_sub]
         df_passes = df_events_pre_sub[df_events_pre_sub.type_name == "Pass"]
