@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 
-from elements import PassingNetwork, ShotFreezed
+from elements import PassingNetwork, ShotFrame
 from utils.common import addNotes, saveFigure, addLegend
 
 
@@ -15,8 +15,8 @@ class Match:
         self.homeTeamId = matchTeams.iloc[0]["team_id"]
         self.awayTeamName = matchTeams.iloc[1]["team_name"]
         self.awayTeamId = matchTeams.iloc[1]["team_id"]
-        self.homeTeamColor = "#42a5f5"
-        self.awayTeamColor = "#f76c5e"
+        self.homeTeamColor = "#124559"
+        self.awayTeamColor = "#61c089"
 
         self.teamNames = list([self.homeTeamName, self.awayTeamName])
         self.teamIdentifiers = list([self.homeTeamId, self.awayTeamId])
@@ -82,7 +82,7 @@ class Match:
                 fig, f"{self.folder}/passingNetwork_{self.gameId}_{teamName}.png"
             )
 
-    def drawShotFreezed(self):
+    def drawShotFrames(self):
 
         playerNameToJerseyNumber = self.players.set_index("player_name")[
             "jersey_number"
@@ -92,16 +92,37 @@ class Match:
 
         for i, shot in shots.iterrows():
 
-            shotFreezed = ShotFreezed(self.homeTeamColor, self.awayTeamColor)
+            if shot.team_id == self.homeTeamId:
+                shotFreezed = ShotFrame(self.homeTeamColor, self.awayTeamColor)
+            else:
+                shotFreezed = ShotFrame(self.awayTeamColor, self.homeTeamColor)
 
-            fig, ax, legendElements = shotFreezed.draw(
-                shot,
-                playerNameToJerseyNumber,
-            )
+            if shot["period_id"] < 5:
+                if (
+                    "extra" in shot
+                    and "shot" in shot["extra"]
+                    and "freeze_frame" in shot["extra"]["shot"]
+                ):
 
-            addLegend(ax, legendElements)
-            addNotes(
-                ax,
-                author="@francescozonaro",
-            )
-            saveFigure(fig, f"{self.folder}/passingNetwork_{self.gameId}_{i}.png")
+                    fig, ax, legendElements = shotFreezed.draw(
+                        shot,
+                        playerNameToJerseyNumber,
+                    )
+
+                    shotOutcome = shot.extra["shot"]["outcome"]["name"].lower()
+                    shotTechnique = shot.extra["shot"]["technique"]["name"].lower()
+                    shotValue = shot.extra["shot"]["statsbomb_xg"]
+
+                    if shotTechnique == "normal":
+                        shotTechnique = shot.extra["shot"]["body_part"]["name"].lower()
+
+                    extra = [
+                        f"{shot.player_name} shot at {shot.minute}:{shot.second} with {shotTechnique} had an xG of {round(shotValue, 3)} and resulted in {shotOutcome}"
+                    ]
+                    addLegend(ax, legendElements)
+                    addNotes(ax, author="@francescozonaro", extra_text=extra)
+                    saveFigure(fig, f"{self.folder}/shotFreezed_{self.gameId}_{i}.png")
+                else:
+                    print(f"Skipping shot {i}: 'freeze_frame' not available.")
+            else:
+                print(f"Skipping shot {i}: Penalty shots are excluded.")

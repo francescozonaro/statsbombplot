@@ -4,7 +4,7 @@ import matplotlib.patheffects as path_effects
 from utils import Pitch
 
 
-class ShotFreezed:
+class ShotFrame:
 
     def __init__(self, mainColor, altColor):
         self.mainColor = mainColor
@@ -121,4 +121,5 @@ class ShotFreezed:
             ),
         ]
 
+        plt.close()
         return f, ax, legendElements
