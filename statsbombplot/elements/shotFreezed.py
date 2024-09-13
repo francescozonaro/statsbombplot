@@ -1,13 +1,17 @@
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 
-from utils import Pitch, changeRange
+from utils import Pitch
 
 
 class ShotFreezed:
 
-    def __init__(self):
-        pass
+    def __init__(self, mainColor, altColor):
+        self.mainColor = mainColor
+        self.altColor = altColor
+        self.markerSize = 60
+        self.lineWidth = 0.6
+        self.fontSize = 8
 
     def draw(
         self,
@@ -18,14 +22,10 @@ class ShotFreezed:
         pitch = Pitch()
         f, ax = pitch.draw()
 
-        x = changeRange(shot.location[0], [0, 120], [0, 105])
-        y = 68 - changeRange(shot.location[1], [0, 80], [0, 68])
-        end_x = changeRange(
-            shot["extra"]["shot"]["end_location"][0], [0, 120], [0, 105]
-        )
-        end_y = 68 - changeRange(
-            shot["extra"]["shot"]["end_location"][1], [0, 80], [0, 68]
-        )
+        x = shot.location[0]
+        y = 80 - shot.location[1]
+        end_x = shot["extra"]["shot"]["end_location"][0]
+        end_y = 80 - shot["extra"]["shot"]["end_location"][1]
         shot_color = self.mainColor
 
         ax.scatter(
@@ -52,8 +52,8 @@ class ShotFreezed:
 
         for player in frame:
 
-            freezed_player_x = changeRange(player["location"][0], [0, 120], [0, 105])
-            freezed_player_y = 68 - changeRange(player["location"][1], [0, 80], [0, 68])
+            freezed_player_x = player["location"][0]
+            freezed_player_y = 80 - player["location"][1]
 
             if player["teammate"]:
                 freezed_player_color = self.mainColor

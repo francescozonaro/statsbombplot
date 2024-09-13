@@ -5,8 +5,8 @@ import numpy as np
 
 class Pitch:
     def __init__(self):
-        self.height = float(68)
-        self.width = float(105)
+        self.height = float(80)  # Updated height
+        self.width = float(120)  # Updated width
         self.background_color = "white"
         self.lines_color = "#bcbcbc"
         self.fig_size = 15
@@ -21,30 +21,32 @@ class Pitch:
 
     def _draw_pitch_elements(self, ax, lines_color):
         line_pts = [
-            [
-                self._point_to_meters([0.5, 0]),
-                self._point_to_meters([0.5, 1]),
-            ],  # center line
-            # left box
-            [[0, 13.85], [16.5, 13.85]],
-            [[0, 54.15], [16.5, 54.15]],
-            [[16.5, 13.85], [16.5, 54.15]],
-            # left goal
-            [[0, 24.85], [5.5, 24.85]],
-            [[0, 43.15], [5.5, 43.15]],
-            [[5.5, 24.85], [5.5, 43.15]],
-            [[0.0, 29.85], [0.0, 38.15]],
-            [[0.1, 29.85], [0.1, 38.15]],
-            # right box
-            [[105, 13.85], [88.5, 13.85]],
-            [[105, 54.15], [88.5, 54.15]],
-            [[88.5, 13.85], [88.5, 54.15]],
-            # right goal
-            [[105, 24.85], [99.5, 24.85]],
-            [[105, 43.15], [99.5, 43.15]],
-            [[99.5, 24.85], [99.5, 43.14]],
-            [[104.9, 29.85], [104.9, 38.15]],
-            [[105, 29.85], [105, 38.15]],
+            # Center line
+            [self._point_to_meters([0.5, 0]), self._point_to_meters([0.5, 1])],
+            # Left penalty box
+            [[0, 18], [17, 18]],  # Bottom line
+            [[0, 62], [17, 62]],  # Top line
+            [[17, 18], [17, 62]],  # Side line
+            # Left goal area
+            [[0, 31.5], [6, 31.5]],  # Bottom line
+            [[0, 49.5], [6, 49.5]],  # Top line
+            [[6, 31.5], [6, 49.5]],  # Side line
+            [[-0.1, 36], [-0.1, 44]],  # Goal posts (left goal)
+            [[0.0, 36], [0.0, 44]],  # Goal posts (left goal)
+            [[0.1, 36], [0.1, 44]],
+            [[0.2, 36], [0.2, 44]],
+            # Right penalty box
+            [[120, 18], [103, 18]],  # Bottom line
+            [[120, 62], [103, 62]],  # Top line
+            [[103, 18], [103, 62]],  # Side line
+            # Right goal area
+            [[120, 31.5], [114, 31.5]],  # Bottom line
+            [[120, 49.5], [114, 49.5]],  # Top line
+            [[114, 31.5], [114, 49.5]],  # Side line
+            [[119.8, 36], [119.8, 44]],
+            [[119.9, 36], [119.9, 44]],  # Goal posts (right goal)
+            [[120, 36], [120, 44]],
+            [[120.1, 36], [120.1, 44]],
         ]
 
         for line_pt in line_pts:
@@ -58,12 +60,13 @@ class Pitch:
                 color=lines_color,
             )
 
+        # Left penalty arc
         ax.add_patch(
             patches.Wedge(
-                (94.0, 34.0),
-                9,
-                130,
-                230,
+                (11.0, 40),  # Center of the arc
+                10,  # Radius
+                308,
+                52,
                 fill=True,
                 edgecolor=lines_color,
                 facecolor=lines_color,
@@ -73,12 +76,13 @@ class Pitch:
             )
         )
 
+        # Right penalty arc
         ax.add_patch(
             patches.Wedge(
-                (11.0, 34.0),
-                9,
-                310,
-                50,
+                (109.0, 40),  # Center of the arc
+                10,  # Radius
+                128,
+                232,
                 fill=True,
                 edgecolor=lines_color,
                 facecolor=lines_color,
@@ -88,10 +92,11 @@ class Pitch:
             )
         )
 
+        # Center circle
         ax.add_patch(
             patches.Wedge(
-                (52.5, 34),
-                9.5,
+                (60, 40),  # Middle of the pitch
+                10,  # Radius of the center circle
                 0,
                 360,
                 fill=True,
@@ -122,16 +127,16 @@ class Pitch:
 
         # Plot outer lines
         line_pts = [
-            [self._point_to_meters([0, 0]), self._point_to_meters([0, 1])],  # left line
+            [self._point_to_meters([0, 0]), self._point_to_meters([0, 1])],  # Left line
             [
                 self._point_to_meters([1, 0]),
                 self._point_to_meters([1, 1]),
-            ],  # right line
-            [self._point_to_meters([0, 1]), self._point_to_meters([1, 1])],  # top line
+            ],  # Right line
+            [self._point_to_meters([0, 1]), self._point_to_meters([1, 1])],  # Top line
             [
                 self._point_to_meters([0, 0]),
                 self._point_to_meters([1, 0]),
-            ],  # bottom line
+            ],  # Bottom line
         ]
 
         for line_pt in line_pts:

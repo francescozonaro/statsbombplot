@@ -6,15 +6,6 @@ warnings.simplefilter("ignore", NoAuthWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
-def changeRange(value, oldRange, newRange):
-    """
-    Convert a value from one range to another one, maintaining ratio.
-    """
-    return ((value - oldRange[0]) / (oldRange[1] - oldRange[0])) * (
-        newRange[1] - newRange[0]
-    ) + newRange[0]
-
-
 def getStatsbombAPI():
     api = Loader(creds={"user": "", "passwd": ""})
     return api
@@ -46,7 +37,7 @@ def addNotes(ax, author, extra_text=None):
     """
     Adds author tag and extra text to the bottom left of the plot.
     """
-    ax.text(92.5, -2.1, author, fontsize=10, va="center")
+    ax.text(105.8, -2.1, author, fontsize=10, va="center")
 
     if extra_text:
         for i, text in enumerate(extra_text):
@@ -68,7 +59,7 @@ def addLegend(ax, legendElements):
         handles=legendElements,
         loc="upper center",
         ncol=len(legendElements),
-        bbox_to_anchor=(0.5, 0.99),
+        bbox_to_anchor=(0.5, 1),
         fontsize=10,
         fancybox=True,
         frameon=True,

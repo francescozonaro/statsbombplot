@@ -1,8 +1,8 @@
 import pandas as pd
 import os
 
-from elements.passingNetwork import PassingNetwork, ShotFreezed
-from utils.common import changeRange, addNotes, saveFigure, addLegend
+from elements import PassingNetwork, ShotFreezed
+from utils.common import addNotes, saveFigure, addLegend
 
 
 class Match:
@@ -22,7 +22,7 @@ class Match:
         self.teamIdentifiers = list([self.homeTeamId, self.awayTeamId])
         self.teamColors = list([self.homeTeamColor, self.awayTeamColor])
 
-        self.folder = f"imgs/{g}"
+        self.folder = f"imgs/{gameId}"
         os.makedirs(self.folder, exist_ok=True)
 
     def drawPassingNetworks(self):
@@ -50,18 +50,8 @@ class Match:
             df[["x", "y"]] = pd.DataFrame(df["location"].tolist())
             df[["x_end", "y_end"]] = pd.DataFrame(df["location_end"].tolist())
 
-            df["x"] = df["x"].apply(
-                lambda value: changeRange(value, [0, 120], [0, 105])
-            )
-            df["y"] = 68 - df["y"].apply(
-                lambda value: changeRange(value, [0, 80], [0, 68])
-            )
-            df["x_end"] = df["x_end"].apply(
-                lambda value: changeRange(value, [0, 120], [0, 105])
-            )
-            df["y_end"] = df["y_end"].apply(
-                lambda value: changeRange(value, [0, 80], [0, 68])
-            )
+            df["y"] = 80 - df["y"]
+
             df = df[["player_name", "x", "y", "receiver", "x_end", "y_end"]]
 
             playerPassCount = df.groupby("player_name").size().to_frame("num_passes")
@@ -102,7 +92,7 @@ class Match:
 
         for i, shot in shots.iterrows():
 
-            shotFreezed = ShotFreezed()
+            shotFreezed = ShotFreezed(self.homeTeamColor, self.awayTeamColor)
 
             fig, ax, legendElements = shotFreezed.draw(
                 shot,

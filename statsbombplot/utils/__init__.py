@@ -1,5 +1,4 @@
 from .common import (
-    changeRange,
     getStatsbombAPI,
     adjustColor,
     deriveNearColors,
