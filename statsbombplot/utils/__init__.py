@@ -1,7 +1,5 @@
 from .common import (
     getStatsbombAPI,
-    adjustColor,
-    deriveNearColors,
     addNotes,
     saveFigure,
     addLegend,
