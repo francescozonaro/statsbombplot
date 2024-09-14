@@ -6,22 +6,22 @@ from utils import Pitch
 
 class ShotFrame:
 
-    def __init__(self, mainColor, altColor):
-        self.mainColor = mainColor
-        self.altColor = altColor
+    def __init__(self, homeColor, awayColor, nameMapping):
+        self.homeColor = homeColor
+        self.awayColor = awayColor
+        self.nameMapping = nameMapping
 
-    def draw(
-        self,
-        x,
-        y,
-        end_x,
-        end_y,
-        frame,
-        playerNameToJerseyNumber,
-    ):
+    def draw(self, x, y, end_x, end_y, frame, isHome):
 
         pitch = Pitch()
         f, ax = pitch.draw()
+
+        if isHome:
+            mainColor = self.homeColor
+            oppColor = self.awayColor
+        else:
+            mainColor = self.awayColor
+            oppColor = self.homeColor
 
         ax.scatter(
             x,
@@ -29,7 +29,7 @@ class ShotFrame:
             s=120,
             edgecolor="black",
             linewidth=0.6,
-            facecolor=self.mainColor,
+            facecolor=mainColor,
             zorder=11,
             marker="*",
         )
@@ -49,9 +49,9 @@ class ShotFrame:
             freezed_player_y = 80 - player["location"][1]
 
             if player["teammate"]:
-                freezed_player_color = self.mainColor
+                freezed_player_color = mainColor
             else:
-                freezed_player_color = self.altColor
+                freezed_player_color = oppColor
 
             ax.scatter(
                 freezed_player_x,
@@ -67,7 +67,7 @@ class ShotFrame:
             ax.text(
                 freezed_player_x + 0.025,
                 freezed_player_y - 0.05,
-                f"{playerNameToJerseyNumber[player['player']['name']]}",
+                f"{self.nameMapping[player['player']['name']]}",
                 fontsize=6,
                 zorder=9,
                 ha="center",
@@ -85,7 +85,7 @@ class ShotFrame:
                 s=90,
                 edgecolor="black",
                 linewidth=0.6,
-                facecolor=self.mainColor,
+                facecolor=mainColor,
                 zorder=5,
                 marker="*",
                 label="Shot location",
@@ -96,7 +96,7 @@ class ShotFrame:
                 s=60,
                 edgecolor="black",
                 linewidth=0.6,
-                facecolor=self.mainColor,
+                facecolor=mainColor,
                 zorder=5,
                 marker="o",
                 label="Teammate",
@@ -107,7 +107,7 @@ class ShotFrame:
                 s=60,
                 edgecolor="black",
                 linewidth=0.6,
-                facecolor=self.altColor,
+                facecolor=oppColor,
                 zorder=5,
                 marker="o",
                 label="Opponent",

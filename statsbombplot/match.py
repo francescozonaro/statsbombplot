@@ -88,14 +88,18 @@ class Match:
             "jersey_number"
         ].to_dict()
 
+        shotFrame = ShotFrame(
+            self.homeTeamColor, self.awayTeamColor, playerNameToJerseyNumber
+        )
+
         shots = self.events[self.events["type_name"] == "Shot"].reset_index(drop=True)
 
         for i, shot in shots.iterrows():
 
             if shot.team_id == self.homeTeamId:
-                shotFreezed = ShotFrame(self.homeTeamColor, self.awayTeamColor)
+                isHome = True
             else:
-                shotFreezed = ShotFrame(self.awayTeamColor, self.homeTeamColor)
+                isHome = False
 
             if shot["period_id"] < 5:
                 if (
@@ -104,13 +108,13 @@ class Match:
                     and "freeze_frame" in shot["extra"]["shot"]
                 ):
 
-                    fig, ax, legendElements = shotFreezed.draw(
+                    fig, ax, legendElements = shotFrame.draw(
                         shot.location[0],
                         80 - shot.location[1],
                         shot["extra"]["shot"]["end_location"][0],
                         80 - shot["extra"]["shot"]["end_location"][1],
                         shot["extra"]["shot"]["freeze_frame"],
-                        playerNameToJerseyNumber,
+                        isHome,
                     )
 
                     shotOutcome = shot.extra["shot"]["outcome"]["name"].lower()
