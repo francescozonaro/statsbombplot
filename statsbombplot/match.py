@@ -6,7 +6,7 @@ from utils.common import addNotes, saveFigure, addLegend
 
 
 class Match:
-    def __init__(self, gameId, matchEvents, matchTeams, matchPlayers):
+    def __init__(self, gameId, matchEvents, matchTeams, matchPlayers, folder):
         self.gameId = gameId
         self.events = matchEvents
         self.players = matchPlayers
@@ -22,7 +22,7 @@ class Match:
         self.teamIdentifiers = list([self.homeTeamId, self.awayTeamId])
         self.teamColors = list([self.homeTeamColor, self.awayTeamColor])
 
-        self.folder = f"imgs/{gameId}"
+        self.folder = folder
         os.makedirs(self.folder, exist_ok=True)
 
     def drawPassingNetworks(self):
