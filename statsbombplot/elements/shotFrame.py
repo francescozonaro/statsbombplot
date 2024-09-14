@@ -9,32 +9,27 @@ class ShotFrame:
     def __init__(self, mainColor, altColor):
         self.mainColor = mainColor
         self.altColor = altColor
-        self.markerSize = 60
-        self.lineWidth = 0.6
-        self.fontSize = 8
 
     def draw(
         self,
-        shot,
+        x,
+        y,
+        end_x,
+        end_y,
+        frame,
         playerNameToJerseyNumber,
     ):
 
         pitch = Pitch()
         f, ax = pitch.draw()
 
-        x = shot.location[0]
-        y = 80 - shot.location[1]
-        end_x = shot["extra"]["shot"]["end_location"][0]
-        end_y = 80 - shot["extra"]["shot"]["end_location"][1]
-        shot_color = self.mainColor
-
         ax.scatter(
             x,
             y,
-            s=self.markerSize * 2,
+            s=120,
             edgecolor="black",
-            linewidth=self.lineWidth,
-            facecolor=shot_color,
+            linewidth=0.6,
+            facecolor=self.mainColor,
             zorder=11,
             marker="*",
         )
@@ -43,12 +38,10 @@ class ShotFrame:
             [x, end_x],
             [y, end_y],
             color=(0, 0, 0, 0.2),
-            linewidth=self.lineWidth * 1.5,
+            linewidth=0.9,
             zorder=5,
             linestyle="--",
         )
-
-        frame = shot["extra"]["shot"]["freeze_frame"]
 
         for player in frame:
 
@@ -63,9 +56,9 @@ class ShotFrame:
             ax.scatter(
                 freezed_player_x,
                 freezed_player_y,
-                s=self.markerSize * 2,
+                s=120,
                 edgecolor="black",
-                linewidth=self.lineWidth,
+                linewidth=0.6,
                 facecolor=freezed_player_color,
                 zorder=9,
                 marker="o",
@@ -75,7 +68,7 @@ class ShotFrame:
                 freezed_player_x + 0.025,
                 freezed_player_y - 0.05,
                 f"{playerNameToJerseyNumber[player['player']['name']]}",
-                fontsize=self.fontSize - 2,
+                fontsize=6,
                 zorder=9,
                 ha="center",
                 va="center",
@@ -89,10 +82,10 @@ class ShotFrame:
             plt.scatter(
                 [],
                 [],
-                s=self.markerSize * 1.5,
+                s=90,
                 edgecolor="black",
-                linewidth=self.lineWidth,
-                facecolor=shot_color,
+                linewidth=0.6,
+                facecolor=self.mainColor,
                 zorder=5,
                 marker="*",
                 label="Shot location",
@@ -100,9 +93,9 @@ class ShotFrame:
             plt.scatter(
                 [],
                 [],
-                s=self.markerSize,
+                s=60,
                 edgecolor="black",
-                linewidth=self.lineWidth,
+                linewidth=0.6,
                 facecolor=self.mainColor,
                 zorder=5,
                 marker="o",
@@ -111,9 +104,9 @@ class ShotFrame:
             plt.scatter(
                 [],
                 [],
-                s=self.markerSize,
+                s=60,
                 edgecolor="black",
-                linewidth=self.lineWidth,
+                linewidth=0.6,
                 facecolor=self.altColor,
                 zorder=5,
                 marker="o",

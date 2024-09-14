@@ -105,7 +105,11 @@ class Match:
                 ):
 
                     fig, ax, legendElements = shotFreezed.draw(
-                        shot,
+                        shot.location[0],
+                        80 - shot.location[1],
+                        shot["extra"]["shot"]["end_location"][0],
+                        80 - shot["extra"]["shot"]["end_location"][1],
+                        shot["extra"]["shot"]["freeze_frame"],
                         playerNameToJerseyNumber,
                     )
 
