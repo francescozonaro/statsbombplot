@@ -1,16 +1,9 @@
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import os
+import json
 
-from utils import (
-    Pitch,
-    getStatsbombAPI,
-    addLegend,
-    addNotes,
-    saveFigure,
-)
-from requests.exceptions import HTTPError
-from models import Match
+from utils import Pitch, getStatsbombAPI, addLegend, addNotes, saveFigure, fetchMatch
 
 
 class ShotFrame:
@@ -125,20 +118,13 @@ class ShotFrame:
         return f, ax, legendElements
 
 
-STATSBOMB_API = getStatsbombAPI()
-gameId = 3879868
+with open("config.json", "r") as f:
+    config = json.load(f)
 
-try:
-    matchEvents = STATSBOMB_API.events(gameId, load_360=True)
-except HTTPError:
-    print(f"No 360 data available for this match. Loading basic data.")
-    matchEvents = STATSBOMB_API.events(gameId, load_360=False)
-
-players = STATSBOMB_API.players(gameId)
-teams = STATSBOMB_API.teams(gameId)
-match = Match(gameId, matchEvents, teams, players)
-
-folder = f"imgs/{gameId}"
+gameId = config.get("gameId")
+load_360 = config.get("load_360", True)
+folder = os.path.join(config.get("folder", "imgs/"), str(gameId))
+match = fetchMatch(gameId, load_360)
 os.makedirs(folder, exist_ok=True)
 
 

@@ -1,6 +1,9 @@
 import warnings
+
 from statsbombpy.api_client import NoAuthWarning
 from .loader import Loader
+from requests.exceptions import HTTPError
+from models import Match
 
 warnings.simplefilter("ignore", NoAuthWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -9,6 +12,41 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 def getStatsbombAPI():
     api = Loader(creds={"user": "", "passwd": ""})
     return api
+
+
+def fetchMatch(gameId, load_360=True):
+    """
+    Fetches events, players, and teams from the API and creates a Match object.
+
+    Parameters:
+    - gameId: The ID of the game to fetch data for.
+    - api: The StatsBomb API instance.
+    - folder: The base folder to store images or outputs.
+    - load_360: Whether to load 360-degree data (default: True).
+
+    Returns:
+    - match: The Match object created using fetched data.
+    - folder_path: The path where match-related images or outputs can be stored.
+    """
+
+    api = getStatsbombAPI()
+    # Fetch match events, players, and teams
+    try:
+        print(f"Fetching events for gameId: {gameId}")
+        matchEvents = api.events(gameId, load_360=load_360)
+    except HTTPError:
+        print(f"No 360 data available for gameId: {gameId}. Loading basic data.")
+        matchEvents = api.events(gameId, load_360=False)
+
+    print(f"Fetching players and teams for gameId: {gameId}")
+    players = api.players(gameId)
+    teams = api.teams(gameId)
+
+    # Create and return the Match object
+    match = Match(gameId, matchEvents, teams, players)
+    print(f"Match object created for gameId: {gameId}")
+
+    return match
 
 
 def addNotes(ax, author, extra_text=None):
