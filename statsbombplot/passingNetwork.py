@@ -133,8 +133,8 @@ with open("config.json", "r") as f:
     config = json.load(f)
 
 gameId = config.get("gameId")
-load_360 = config.get("load_360", True)
-folder = os.path.join(config.get("folder", "imgs/"), str(gameId))
+load_360 = config.get("load_360")
+folder = os.path.join(config.get("folder"), str(gameId))
 match = fetchMatch(gameId, load_360)
 os.makedirs(folder, exist_ok=True)
 
