@@ -118,12 +118,9 @@ class ShotFrame:
         return f, ax, legendElements
 
 
-with open("config.json", "r") as f:
-    config = json.load(f)
-
-gameId = config.get("gameId")
-load_360 = config.get("load_360")
-folder = os.path.join(config.get("folder"), str(gameId))
+gameId = 3795506
+load_360 = True
+folder = os.path.join("imgs/", str(gameId))
 match = fetchMatch(gameId, load_360)
 os.makedirs(folder, exist_ok=True)
 

@@ -15,9 +15,7 @@ import pandas as pd
 import os
 import json
 
-from utils import Pitch, getStatsbombAPI, addLegend, addNotes, saveFigure, fetchMatch
-from requests.exceptions import HTTPError
-from models import Match
+from utils import Pitch, addLegend, addNotes, saveFigure, fetchMatch
 
 
 class PassingNetwork:
@@ -129,14 +127,12 @@ class PassingNetwork:
         return f, ax, legendElements
 
 
-with open("config.json", "r") as f:
-    config = json.load(f)
-
-gameId = config.get("gameId")
-load_360 = config.get("load_360")
-folder = os.path.join(config.get("folder"), str(gameId))
+gameId = 3795506
+load_360 = True
+folder = os.path.join("imgs/", str(gameId))
 match = fetchMatch(gameId, load_360)
 os.makedirs(folder, exist_ok=True)
+
 
 for identifier, markerColor, teamName in zip(
     match.teamIdentifiers, match.teamColors, match.teamNames
