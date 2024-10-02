@@ -49,10 +49,6 @@ def fetchMatch(gameId, load_360=True):
     return match
 
 
-def fetchAllSeasonMatches(competitionId, seasonId, load_360=True):
-    pass
-
-
 def addNotes(ax, author, extra_text=None):
     """
     Adds author tag and extra text to the bottom left of the plot.

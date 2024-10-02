@@ -18,13 +18,6 @@ df = df[df["type_name"] == "Pass"]
 df = df[df["player_name"] == "Gianluigi Donnarumma"]
 df = df.dropna(subset=["freeze_frame_360"])
 
-playerNameToJerseyNumber = match.players.set_index("player_name")[
-    "jersey_number"
-].to_dict()
-
-print(df.iloc[6].extra)
-exit()
-
 mainColor = match.awayTeamColor
 oppColor = match.homeTeamColor
 
