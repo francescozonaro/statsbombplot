@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
@@ -12,105 +13,91 @@ from utils import (
     fetchMatch,
 )
 
+
+# Helper functions
+def calculate_pass_length(row):
+    start_x, start_y = row.location
+    end_x, end_y = row["extra"]["pass"]["end_location"]
+    return np.sqrt((end_x - start_x) ** 2 + (end_y - start_y) ** 2)
+
+
+def calculate_pass_angle(x, y, end_x, end_y):
+    dx, dy = end_x - x, end_y - y
+    return np.arctan2(dy, dx)
+
+
+# Setup
 api = getStatsbombAPI()
 df = api.games(competition_id=55, season_id=282)
-print(df.columns)
 df = df[df[["home_team_name", "away_team_name"]].isin(["France"]).any(axis=1)]
 games = list(df["game_id"])
 
+playerName = "Mike Maignan"
+load_360 = True
+folder = os.path.join(
+    "imgs/", str(f"distribution_{playerName.lower().replace(' ', '_')}")
+)
+os.makedirs(folder, exist_ok=True)
+
+# Arrays to store pass data
+all_x = []
+all_y = []
+
+angles = []
+pass_lengths = []
+pass_counts = [0] * 8
+pass_lengths_per_zone = [[] for _ in range(8)]
+
+# Constants
+NUM_ZONES = 8
+MAX_ANGLE = np.pi
+
 for gameId in games:
-
-    load_360 = True
-    folder = os.path.join("imgs/", str(gameId))
     match = fetchMatch(gameId, load_360)
-    os.makedirs(folder, exist_ok=True)
-
     df = match.events
     passes = df[df["type_name"] == "Pass"]
-    passes = passes[passes["player_name"] == "Mike Maignan"]
-    # passes = passes.dropna(subset=["freeze_frame_360"])
-
-    mainColor = match.awayTeamColor
-    oppColor = match.homeTeamColor
-
-    plt.close()
-    pitch = Pitch()
-    f, ax = pitch.draw()
+    passes = passes[passes["player_name"] == playerName]
 
     for i, row in passes.iterrows():
-
         x = row.location[0]
         y = 80 - row.location[1]
         end_x = row["extra"]["pass"]["end_location"][0]
         end_y = 80 - row["extra"]["pass"]["end_location"][1]
 
-        ax.scatter(
-            x,
-            y,
-            s=150,
-            edgecolor="black",
-            linewidth=0.6,
-            facecolor="#669bbc",
-            zorder=9,
-            marker="o",
-        )
+        # Ignore passes behind goalkeeper's position
+        if end_x < x:
+            continue
 
-        if row["under_pressure"]:
-            lineColor = "#588157"
-        else:
-            lineColor = "#e5e5e5"
+        all_x.append(x)
+        all_y.append(y)
 
-        if "outcome" in row["extra"]["pass"]:
-            lineColor = "#f4978e"
+avg_x = sum(all_x) / len(all_x) if all_x else None
+avg_y = sum(all_y) / len(all_y) if all_y else None
 
-        ax.plot(
-            [x, end_x],
-            [y, end_y],
-            color=lineColor,
-            linewidth=1.5,
-            zorder=5,
-            linestyle="-",
-        )
+plt.close()
+pitch = Pitch()
+f, ax = pitch.draw()
 
-    legendElements = [
-        plt.scatter(
-            [],
-            [],
-            s=70,
-            edgecolor="black",
-            linewidth=0.6,
-            facecolor="#669bbc",
-            zorder=5,
-            marker="o",
-            label="Maignan",
-        ),
-        mlines.Line2D(
-            [],
-            [],
-            color="#d3d3d3",
-            linewidth=3,
-            linestyle="solid",
-            label=f"Generic",
-        ),
-        mlines.Line2D(
-            [],
-            [],
-            color="#e76f51",
-            linewidth=3,
-            linestyle="solid",
-            label=f"Incomplete",
-        ),
-        mlines.Line2D(
-            [],
-            [],
-            color="#588157",
-            linewidth=3,
-            linestyle="solid",
-            label=f"Under press",
-        ),
-    ]
+ax.plot(avg_x, avg_y, ".", markersize=100, color="#669bbc", zorder=5)
+ax.plot(avg_x, avg_y, ".", markersize=85, color="white", zorder=6)
 
-    extra = [f"{match.homeTeamName} vs {match.awayTeamName}"]
-    addLegend(ax, legendElements=legendElements)
-    addNotes(ax, extra_text=extra, author="@francescozonaro")
-    saveFigure(f, f"{folder}/360pass_{match.gameId}.png")
+# Add a legend for the radar chart
+legendElements = [
+    plt.scatter(
+        [],
+        [],
+        s=70,
+        edgecolor="black",
+        linewidth=0.6,
+        facecolor="#669bbc",
+        zorder=5,
+        marker="o",
+        label=playerName,
+    ),
+]
+extra = [f"Maignan radar distribution"]
+addLegend(ax, legendElements=legendElements)
+addNotes(ax, extra_text=extra, author="@francescozonaro")
+
+# Save the figure
+saveFigure(f, f"{folder}/radar.png")
