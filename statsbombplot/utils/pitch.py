@@ -8,7 +8,7 @@ class Pitch:
         self.height = float(80)  # Updated height
         self.width = float(120)  # Updated width
         self.background_color = "white"
-        self.lines_color = "#bcbcbc"
+        self.lines_color = "#606060"
         self.fig_size = 15
 
     def _point_to_meters(self, p):

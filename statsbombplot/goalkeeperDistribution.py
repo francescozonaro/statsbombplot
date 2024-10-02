@@ -25,7 +25,7 @@ os.makedirs(folder, exist_ok=True)
 
 pitch = Pitch()
 
-ZONES_X = 12
+ZONES_X = 6
 ZONES_Y = 6
 RECT_X = pitch.width / ZONES_X
 RECT_Y = pitch.height / ZONES_Y
@@ -48,20 +48,38 @@ for gameId in games:
             pass_counts[zone_y, zone_x] += 1
 
 f, ax = pitch.draw()
-cmap = plt.get_cmap("Reds")
+color = "#e76f51"
+
 for i in range(ZONES_Y):
     for j in range(ZONES_X):
         count = pass_counts[i, j]
-        color = cmap(count / np.max(pass_counts) if np.max(pass_counts) > 0 else 1)
-        rect = Rectangle(
+        alphaFactor = 0.8 * count / np.max(pass_counts)
+        fill_rect = Rectangle(
             (j * RECT_X, 80 - (i + 1) * RECT_Y),
             RECT_X,
             RECT_Y,
             color=color,
-            alpha=0.6,
-            edgecolor="black",
+            alpha=alphaFactor,
+            edgecolor="none",  # No edge for the fill
+            linewidth=0,
+            zorder=8,
         )
-        ax.add_patch(rect)
+
+        # Create the edge rectangle
+        edge_rect = Rectangle(
+            (j * RECT_X, 80 - (i + 1) * RECT_Y),
+            RECT_X,
+            RECT_Y,
+            edgecolor="#0c0c0c",
+            facecolor="none",
+            linewidth=0.3,
+            zorder=9,
+        )
+
+        # Add both patches to the axis
+        ax.add_patch(fill_rect)
+        ax.add_patch(edge_rect)
+
 
 # Add a legend
 legendElements = [
@@ -71,10 +89,21 @@ legendElements = [
         s=70,
         edgecolor="black",
         linewidth=0.6,
-        facecolor="#669bbc",
+        facecolor="#ffffff",
         zorder=5,
-        marker="o",
-        label=playerName,
+        marker="s",
+        label="Few passes",
+    ),
+    plt.scatter(
+        [],
+        [],
+        s=70,
+        edgecolor="black",
+        linewidth=0.6,
+        facecolor="#415a77",
+        zorder=5,
+        marker="s",
+        label="Many passes",
     ),
 ]
 extra = [f"{playerName} pass distribution"]
