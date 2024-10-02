@@ -11,7 +11,6 @@ from utils import (
     fetchMatch,
 )
 
-# Setup
 api = getStatsbombAPI()
 df = api.games(competition_id=55, season_id=43)
 df = df[df[["home_team_name", "away_team_name"]].isin(["Italy"]).any(axis=1)]
@@ -40,7 +39,7 @@ for gameId in games:
 
     for i, row in passes.iterrows():
         end_x = row["extra"]["pass"]["end_location"][0]
-        end_y = 80 - row["extra"]["pass"]["end_location"][1]  # Adjust y coordinate
+        end_y = 80 - row["extra"]["pass"]["end_location"][1]
 
         zone_x = int(end_x // RECT_X)
         zone_y = int(end_y // RECT_Y)
