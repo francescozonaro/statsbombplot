@@ -32,19 +32,15 @@ def fetchMatch(gameId, load_360=True):
     api = getStatsbombAPI()
     # Fetch match events, players, and teams
     try:
-        print(f"Fetching events for gameId: {gameId}")
         matchEvents = api.events(gameId, load_360=load_360)
     except HTTPError:
-        print(f"No 360 data available for gameId: {gameId}. Loading basic data.")
         matchEvents = api.events(gameId, load_360=False)
 
-    print(f"Fetching players and teams for gameId: {gameId}")
     players = api.players(gameId)
     teams = api.teams(gameId)
 
     # Create and return the Match object
     match = Match(gameId, matchEvents, teams, players)
-    print(f"Match object created for gameId: {gameId}")
 
     return match
 
