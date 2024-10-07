@@ -16,7 +16,9 @@ os.makedirs(folder, exist_ok=True)
 
 class Banger:
 
-    def __init__(self, playerName, teamName, xG, bodyPart, playType):
+    def __init__(
+        self, playerName, teamName, opponentName, minute, xG, bodyPart, playType
+    ):
 
         self.playerName = playerName
         playerParts = playerName.split()
@@ -28,9 +30,15 @@ class Banger:
         if len(teamParts) > 1:
             self.teamName = f"{teamParts[0]}"
 
+        self.opponentName = opponentName
+        opponentParts = opponentName.split()
+        if len(opponentParts) > 1:
+            self.opponentName = f"{opponentParts[0]}"
+
         self.xG = xG
         self.bodyPart = bodyPart
         self.playType = playType
+        self.minute = minute
 
 
 bangers = []
@@ -44,28 +52,121 @@ for gameId in tqdm(games, leave=False):
         if row["extra"]["shot"]["statsbomb_xg"] < 0.1:
             if row["extra"]["shot"]["outcome"]["name"] == "Goal":
 
+                teamName = row["team_name"]
+
+                if teamName == match.homeTeamName:
+                    opponentName = match.awayTeamName
+                else:
+                    opponentName = match.homeTeamName
+
+                goalMinute = f"{row['minute']}:{row['second']:02d}"
+
                 banger = Banger(
                     playerName=row["player_name"],
-                    teamName=row["team_name"],
+                    teamName=teamName,
+                    opponentName=opponentName,
+                    minute=goalMinute,
                     xG=round(row["extra"]["shot"]["statsbomb_xg"], 3),
                     bodyPart=row["extra"]["shot"]["body_part"]["name"],
                     playType=row["extra"]["shot"]["type"]["name"],
                 )
                 bangers.append(banger)
 
-fig = plt.figure(figsize=(7, 10), dpi=600)
+plt.rcParams["font.family"] = "Arial"
+
+fig = plt.figure(figsize=(10, 7), dpi=600)
 ax = plt.subplot()
 
-nrows = len(bangers)
-ncols = 7
+ax.set_xlim(0, 1)
+ax.set_ylim(0, 1)
+ax.set_axis_off()
 
-ax.set_xlim(0, ncols + 1)
-ax.set_ylim(-0.65, nrows + 1)
+# Title
+plt.text(
+    x=0.05,
+    y=1.1,
+    s="EURO 2020 | A proper title",
+    va="center",
+    ha="left",
+    fontsize=22,
+    color="black",
+    weight="heavy",
+)
+plt.rcParams["font.family"] = "Menlo"
 
-for y, banger in enumerate(bangers):
+plt.text(
+    x=0.05,
+    y=1.02,
+    s="A fitting description for whatever I was trying to do..",
+    va="center",
+    ha="left",
+    fontsize=9,
+    color="#4E616C",
+)
+
+# Cols
+ax.text(
+    x=0.66,
+    y=0.95,
+    s="SHOT xG",
+    size=9,
+    ha="center",
+    va="center",
+    weight="extra bold",
+)
+ax.text(
+    x=0.78,
+    y=0.95,
+    s="BODY PART",
+    size=9,
+    ha="center",
+    va="center",
+    weight="extra bold",
+)
+ax.text(
+    x=0.9,
+    y=0.95,
+    s="PLAY TYPE",
+    size=9,
+    ha="center",
+    va="center",
+    weight="extra bold",
+)
+
+# Lines
+ax.plot(
+    [0.05, 0.95],
+    [0.9, 0.9],
+    lw=0.7,
+    color="black",
+    zorder=3,
+)
+ax.plot(
+    [0.05, 0.95],
+    [0.1, 0.1],
+    lw=0.7,
+    color="black",
+    zorder=3,
+)
+
+sortedBangers = sorted(bangers, key=lambda b: b.xG)
+bangersList = sortedBangers[0:8]
+
+for i, banger in enumerate(bangersList):
+    rowHeight = 1 - 0.15 - i * 0.1
+
+    if i % 2 == 0:
+        ax.fill_between(
+            x=[0.05, 0.95],
+            y1=rowHeight - 0.05,
+            y2=rowHeight + 0.05,
+            color="#d7c8c1",
+            zorder=-1,
+        )
+
     ax.text(
-        x=0.15,
-        y=y,
+        x=0.06,
+        y=rowHeight,
         s=f"{banger.playerName}",
         weight="bold",
         size=9,
@@ -73,116 +174,56 @@ for y, banger in enumerate(bangers):
         va="center",
     )
     ax.text(
-        x=3.15,
-        y=y,
-        s=f"{banger.teamName}",
+        x=0.3,
+        y=rowHeight,
+        s=f"{banger.teamName} vs {banger.opponentName} ({banger.minute})",
         weight="bold",
         size=9,
-        ha="center",
+        ha="left",
         va="center",
     )
     ax.text(
-        x=4.65,
-        y=y,
+        x=0.66,
+        y=rowHeight,
         s=f"{banger.xG}",
         size=9,
         ha="center",
         va="center",
     )
     ax.text(
-        x=6.15,
-        y=y,
+        x=0.78,
+        y=rowHeight,
         s=f"{banger.bodyPart}",
         size=9,
         ha="center",
         va="center",
     )
     ax.text(
-        x=7.65,
-        y=y,
+        x=0.9,
+        y=rowHeight,
         s=f"{banger.playType}",
         size=9,
         ha="center",
         va="center",
     )
 
-ax.plot(
-    [ax.get_xlim()[0], ax.get_xlim()[1]],
-    [nrows - 0.5, nrows - 0.5],
-    lw=1,
-    color="black",
-    zorder=3,
-)
-ax.plot(
-    [ax.get_xlim()[0], ax.get_xlim()[1]], [-0.5, -0.5], lw=1, color="black", zorder=3
-)
-
-for x in range(nrows):
-    if x % 2 == 0:
-        ax.fill_between(
-            x=[ax.get_xlim()[0], ax.get_xlim()[1]],
-            y1=x - 0.5,
-            y2=x + 0.5,
-            color="#d7c8c1",
-            zorder=-1,
-        )
-    ax.plot(
-        [ax.get_xlim()[0], ax.get_xlim()[1]],
-        [x - 0.5, x - 0.5],
-        lw=1,
-        color="grey",
-        ls=":",
-        zorder=3,
-    )
-
-ax.set_axis_off()
 ax.text(
-    x=4.65,
-    y=nrows + 0.05,
-    s="SHOT xG",
-    size=9,
-    ha="center",
-    va="center",
-    weight="bold",
-)
-ax.text(
-    x=6.15,
-    y=nrows + 0.05,
-    s="BODY PART",
-    size=9,
-    ha="center",
-    va="center",
-    weight="bold",
-)
-ax.text(
-    x=7.65,
-    y=nrows + 0.05,
-    s="PLAY TYPE",
-    size=9,
-    ha="center",
-    va="center",
-    weight="bold",
-)
-
-fig.text(
-    x=0.15,
-    y=0.92,
-    s="EURO2020 BANGERS GOALS COLLECTION",
-    va="bottom",
+    x=0.05,
+    y=0.03,
+    s=f"Data from Opta as of 7th October 2024",
+    size=7,
     ha="left",
-    fontsize=14,
-    color="black",
-    weight="bold",
+    va="center",
 )
-fig.text(
-    x=0.15,
-    y=0.87,
-    s="Players in the top 85th percentile of crosses attempted & at least 1,000 minutes played.\nSeason 2022/2023 | viz by @sonofacorner.\nData from Opta as of 9th of January 2023",
-    va="bottom",
-    ha="left",
-    fontsize=7,
-    color="#4E616C",
+ax.text(
+    x=0.95,
+    y=0.03,
+    s=f"@francescozonaro",
+    size=7,
+    ha="right",
+    va="center",
 )
+
 
 plt.savefig(
     f"{folder}/test.png",
