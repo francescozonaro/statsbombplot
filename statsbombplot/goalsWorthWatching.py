@@ -5,9 +5,15 @@ from utils import (
     getStatsbombAPI,
     fetchMatch,
 )
+from datetime import datetime
 
 api = getStatsbombAPI()
-df = api.games(competition_id=55, season_id=43)
+
+# 106 or 3
+
+df = api.games(competition_id=43, season_id=106)
+competitionName = df["competition_name"].iloc[0]
+seasonName = df["season_name"].iloc[0]
 games = list(df["game_id"])
 folder = os.path.join("imgs/", str(f"goalsWorthWatching"))
 load_360 = True
@@ -106,10 +112,10 @@ ax.set_axis_off()
 plt.text(
     x=0.05,
     y=1.1,
-    s="GOALS WORTH WATCHING | EURO 2020 Edition",
+    s=f"GOALS WORTH WATCHING | {competitionName} {seasonName} Edition",
     va="center",
     ha="left",
-    fontsize=18,
+    fontsize=17,
     color="black",
     weight="bold",
 )
@@ -130,7 +136,7 @@ plt.rcParams["font.family"] = "Menlo"
 plt.text(
     x=0.05,
     y=1.025,
-    s="Remarkable goals from Euro 2020, selected for their exceptional expected goals (xG) values,\nstriking technique and precise placement, making them well worth revisiting.",
+    s=f"Remarkable goals from {competitionName} {seasonName}, selected for their exceptional xG values,\nstriking technique and precise placement, making them well worth revisiting.",
     va="center",
     ha="left",
     fontsize=9,
@@ -243,7 +249,7 @@ for i, banger in enumerate(bangersList):
 ax.text(
     x=0.05,
     y=0.03,
-    s=f"Data from Opta as of 7th October 2024",
+    s=f"Data from Opta as of {datetime.now().strftime('%d %B %Y')}",
     size=7,
     ha="left",
     va="center",
