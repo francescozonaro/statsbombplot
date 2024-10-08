@@ -8,6 +8,10 @@ from utils import (
 
 api = getStatsbombAPI()
 df = api.games(competition_id=55, season_id=43)
+df = df[
+    (df["home_team_name"].isin(["England", "Italy"]))
+    | (df["away_team_name"].isin(["England", "Italy"]))
+]
 games = list(df["game_id"])
 folder = os.path.join("imgs/", str(f"findBangers"))
 load_360 = True
@@ -45,32 +49,32 @@ bangers = []
 
 for gameId in tqdm(games, leave=False):
     match = fetchMatch(gameId, load_360)
+
     df = match.events
     shots = df[df["type_name"] == "Shot"]
 
     for i, row in shots.iterrows():
-        if row["extra"]["shot"]["statsbomb_xg"] < 0.1:
-            if row["extra"]["shot"]["outcome"]["name"] == "Goal":
+        if row["extra"]["shot"]["outcome"]["name"] == "Goal":
 
-                teamName = row["team_name"]
+            teamName = row["team_name"]
 
-                if teamName == match.homeTeamName:
-                    opponentName = match.awayTeamName
-                else:
-                    opponentName = match.homeTeamName
+            if teamName == match.homeTeamName:
+                opponentName = match.awayTeamName
+            else:
+                opponentName = match.homeTeamName
 
-                goalMinute = f"{row['minute']}:{row['second']:02d}"
+            goalMinute = f"{row['minute']}:{row['second']:02d}"
 
-                banger = Banger(
-                    playerName=row["player_name"],
-                    teamName=teamName,
-                    opponentName=opponentName,
-                    minute=goalMinute,
-                    xG=round(row["extra"]["shot"]["statsbomb_xg"], 3),
-                    bodyPart=row["extra"]["shot"]["body_part"]["name"],
-                    playType=row["extra"]["shot"]["type"]["name"],
-                )
-                bangers.append(banger)
+            banger = Banger(
+                playerName=row["player_name"],
+                teamName=teamName,
+                opponentName=opponentName,
+                minute=goalMinute,
+                xG=round(row["extra"]["shot"]["statsbomb_xg"], 3),
+                bodyPart=row["extra"]["shot"]["body_part"]["name"],
+                playType=row["extra"]["shot"]["type"]["name"],
+            )
+            bangers.append(banger)
 
 plt.rcParams["font.family"] = "Arial"
 
@@ -85,19 +89,30 @@ ax.set_axis_off()
 plt.text(
     x=0.05,
     y=1.1,
-    s="EURO 2020 | A proper title",
+    s="Low xG goals from Italy/England matches in EURO 2020",
     va="center",
     ha="left",
-    fontsize=22,
+    fontsize=18,
     color="black",
-    weight="heavy",
+    weight="bold",
 )
+plt.text(
+    x=0.05,
+    y=1.15,
+    s="   ",
+    va="center",
+    ha="left",
+    fontsize=8,
+    color="black",
+    weight="bold",
+)
+
 plt.rcParams["font.family"] = "Menlo"
 
 plt.text(
     x=0.05,
-    y=1.02,
-    s="A fitting description for whatever I was trying to do..",
+    y=1.025,
+    s="A collection of goals with the lowest xG scored in matches featuring England and Italy\nthroughout their journey to the EURO 2020 final.",
     va="center",
     ha="left",
     fontsize=9,
@@ -149,6 +164,9 @@ ax.plot(
     zorder=3,
 )
 
+filteredBangers = filter(
+    lambda b: (b.teamName == "Italy" or b.teamName == "England"), bangers
+)
 sortedBangers = sorted(bangers, key=lambda b: b.xG)
 bangersList = sortedBangers[0:8]
 
