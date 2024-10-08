@@ -13,7 +13,7 @@ df = df[
     | (df["away_team_name"].isin(["England", "Italy"]))
 ]
 games = list(df["game_id"])
-folder = os.path.join("imgs/", str(f"findBangers"))
+folder = os.path.join("imgs/", str(f"goalsWorthWatching"))
 load_360 = True
 os.makedirs(folder, exist_ok=True)
 
@@ -49,22 +49,16 @@ bangers = []
 
 for gameId in tqdm(games, leave=False):
     match = fetchMatch(gameId, load_360)
-
     df = match.events
     shots = df[df["type_name"] == "Shot"]
-
     for i, row in shots.iterrows():
         if row["extra"]["shot"]["outcome"]["name"] == "Goal":
-
             teamName = row["team_name"]
-
             if teamName == match.homeTeamName:
                 opponentName = match.awayTeamName
             else:
                 opponentName = match.homeTeamName
-
             goalMinute = f"{row['minute']}:{row['second']:02d}"
-
             banger = Banger(
                 playerName=row["player_name"],
                 teamName=teamName,
@@ -80,7 +74,6 @@ plt.rcParams["font.family"] = "Arial"
 
 fig = plt.figure(figsize=(10, 7), dpi=600)
 ax = plt.subplot()
-
 ax.set_xlim(0, 1)
 ax.set_ylim(0, 1)
 ax.set_axis_off()
@@ -109,6 +102,7 @@ plt.text(
 
 plt.rcParams["font.family"] = "Menlo"
 
+# Subtitle
 plt.text(
     x=0.05,
     y=1.025,
@@ -164,9 +158,6 @@ ax.plot(
     zorder=3,
 )
 
-filteredBangers = filter(
-    lambda b: (b.teamName == "Italy" or b.teamName == "England"), bangers
-)
 sortedBangers = sorted(bangers, key=lambda b: b.xG)
 bangersList = sortedBangers[0:8]
 
@@ -244,7 +235,7 @@ ax.text(
 
 
 plt.savefig(
-    f"{folder}/test.png",
+    f"{folder}/table.png",
     dpi=600,
     facecolor="#EFE9E6",
     bbox_inches="tight",
