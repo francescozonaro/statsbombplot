@@ -8,10 +8,6 @@ from utils import (
 
 api = getStatsbombAPI()
 df = api.games(competition_id=55, season_id=43)
-df = df[
-    (df["home_team_name"].isin(["England", "Italy"]))
-    | (df["away_team_name"].isin(["England", "Italy"]))
-]
 games = list(df["game_id"])
 folder = os.path.join("imgs/", str(f"goalsWorthWatching"))
 load_360 = True
@@ -21,7 +17,17 @@ os.makedirs(folder, exist_ok=True)
 class Banger:
 
     def __init__(
-        self, playerName, teamName, opponentName, minute, xG, bodyPart, playType
+        self,
+        playerName,
+        teamName,
+        opponentName,
+        minute,
+        xG,
+        location,
+        endLocation,
+        technique,
+        bodyPart,
+        playType,
     ):
 
         self.playerName = playerName
@@ -40,9 +46,24 @@ class Banger:
             self.opponentName = f"{opponentParts[0]}"
 
         self.xG = xG
+        self.location = location
+        self.endLocation = endLocation
+        self.technique = technique
         self.bodyPart = bodyPart
         self.playType = playType
         self.minute = minute
+
+        xBanger = 1 - self.xG
+
+        if self.technique != "Normal":
+            xBanger += 0.05
+
+        distance = ((40 - endLocation[1]) ** 2 + (0 - endLocation[2] * 2) ** 2) ** 0.5
+
+        if distance > 5:
+            xBanger += 0.075
+
+        self.xBanger = round(xBanger, 2)
 
 
 bangers = []
@@ -65,6 +86,9 @@ for gameId in tqdm(games, leave=False):
                 opponentName=opponentName,
                 minute=goalMinute,
                 xG=round(row["extra"]["shot"]["statsbomb_xg"], 3),
+                location=row["location"],
+                endLocation=row["extra"]["shot"]["end_location"],
+                technique=row["extra"]["shot"]["technique"]["name"],
                 bodyPart=row["extra"]["shot"]["body_part"]["name"],
                 playType=row["extra"]["shot"]["type"]["name"],
             )
@@ -82,7 +106,7 @@ ax.set_axis_off()
 plt.text(
     x=0.05,
     y=1.1,
-    s="Low xG goals from Italy/England matches in EURO 2020",
+    s="GOALS WORTH WATCHING | EURO 2020 Edition",
     va="center",
     ha="left",
     fontsize=18,
@@ -106,7 +130,7 @@ plt.rcParams["font.family"] = "Menlo"
 plt.text(
     x=0.05,
     y=1.025,
-    s="A collection of goals with the lowest xG scored in matches featuring England and Italy\nthroughout their journey to the EURO 2020 final.",
+    s="Remarkable goals from Euro 2020, selected for their exceptional expected goals (xG) values,\nstriking technique and precise placement, making them well worth revisiting.",
     va="center",
     ha="left",
     fontsize=9,
@@ -117,7 +141,7 @@ plt.text(
 ax.text(
     x=0.66,
     y=0.95,
-    s="SHOT xG",
+    s="xBanger",
     size=9,
     ha="center",
     va="center",
@@ -126,7 +150,7 @@ ax.text(
 ax.text(
     x=0.78,
     y=0.95,
-    s="BODY PART",
+    s="TECHNIQUE",
     size=9,
     ha="center",
     va="center",
@@ -158,7 +182,7 @@ ax.plot(
     zorder=3,
 )
 
-sortedBangers = sorted(bangers, key=lambda b: b.xG)
+sortedBangers = sorted(bangers, key=lambda b: b.xBanger, reverse=True)
 bangersList = sortedBangers[0:8]
 
 for i, banger in enumerate(bangersList):
@@ -194,7 +218,7 @@ for i, banger in enumerate(bangersList):
     ax.text(
         x=0.66,
         y=rowHeight,
-        s=f"{banger.xG}",
+        s=f"{banger.xBanger}",
         size=9,
         ha="center",
         va="center",
@@ -202,7 +226,7 @@ for i, banger in enumerate(bangersList):
     ax.text(
         x=0.78,
         y=rowHeight,
-        s=f"{banger.bodyPart}",
+        s=f"{banger.technique}",
         size=9,
         ha="center",
         va="center",
