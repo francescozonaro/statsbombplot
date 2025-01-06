@@ -9,3 +9,5 @@ from utils import Pitch, getStatsbombAPI, addLegend, addNotes, saveFigure, fetch
 api = getStatsbombAPI()
 
 print(api.competitions())
+
+# Git-board testing
