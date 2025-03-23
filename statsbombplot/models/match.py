@@ -8,8 +8,8 @@ class Match:
         self.homeTeamId = matchTeams.iloc[0]["team_id"]
         self.awayTeamName = matchTeams.iloc[1]["team_name"]
         self.awayTeamId = matchTeams.iloc[1]["team_id"]
-        self.homeTeamColor = "#8ecae6"
-        self.awayTeamColor = "#e07a5f"
+        self.homeTeamColor = "#3f8ae6"
+        self.awayTeamColor = "#f04a5f"
 
         self.teamNames = list([self.homeTeamName, self.awayTeamName])
         self.teamIdentifiers = list([self.homeTeamId, self.awayTeamId])
