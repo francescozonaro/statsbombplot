@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import random
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from tqdm import tqdm
@@ -11,6 +12,7 @@ from utils import (
     saveFigure,
     fetchMatch,
     fetchRandomMatch,
+    fetchRandomSeason,
 )
 
 
@@ -62,7 +64,6 @@ class GoalkeeperDistribution:
                 marker="o",
                 alpha=0.4,
             )
-
             ax.plot(
                 [startPoint[0], endPoint[0]],
                 [startPoint[1], endPoint[1]],
@@ -101,7 +102,7 @@ class GoalkeeperDistribution:
         return f, ax, legendElements
 
 
-# Script target
+# Target keeper
 playerName = "Gianluigi Donnarumma"
 teamName = "Italy"
 teamColor = "#1a759f"
