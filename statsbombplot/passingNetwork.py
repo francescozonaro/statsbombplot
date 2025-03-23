@@ -133,7 +133,6 @@ folder = os.path.join("imgs/", str(gameId))
 match = fetchMatch(gameId, load_360)
 os.makedirs(folder, exist_ok=True)
 
-
 for identifier, markerColor, teamName in zip(
     match.teamIdentifiers, match.teamColors, match.teamNames
 ):

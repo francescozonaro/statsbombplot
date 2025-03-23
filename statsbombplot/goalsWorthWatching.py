@@ -8,10 +8,7 @@ from utils import (
 from datetime import datetime
 
 api = getStatsbombAPI()
-
-# 106 or 3
-
-df = api.games(competition_id=43, season_id=106)
+df = api.games(competition_id=43, season_id=106)  # or 3
 competitionName = df["competition_name"].iloc[0]
 seasonName = df["season_name"].iloc[0]
 games = list(df["game_id"])

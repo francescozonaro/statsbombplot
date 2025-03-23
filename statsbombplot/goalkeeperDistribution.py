@@ -10,6 +10,7 @@ from utils import (
     addNotes,
     saveFigure,
     fetchMatch,
+    fetchRandomMatch,
 )
 
 
@@ -49,20 +50,19 @@ class GoalkeeperDistribution:
                 ax.add_patch(fill_rect)
                 ax.add_patch(edge_rect)
 
-
         for startPoint, endPoint in zip(starting_points, ending_points):
             ax.scatter(
-                    startPoint[0],
-                    startPoint[1],
-                    s=120,
-                    edgecolor="black",
-                    linewidth=0.6,
-                    facecolor=self.markerColor,
-                    zorder=5,
-                    marker="o",
-                    alpha=0.4
-                )
-            
+                startPoint[0],
+                startPoint[1],
+                s=120,
+                edgecolor="black",
+                linewidth=0.6,
+                facecolor=self.markerColor,
+                zorder=5,
+                marker="o",
+                alpha=0.4,
+            )
+
             ax.plot(
                 [startPoint[0], endPoint[0]],
                 [startPoint[1], endPoint[1]],
@@ -101,19 +101,18 @@ class GoalkeeperDistribution:
         return f, ax, legendElements
 
 
+# Script target
 playerName = "Gianluigi Donnarumma"
 teamName = "Italy"
 teamColor = "#1a759f"
 load_360 = True
 
-
+# Games
 api = getStatsbombAPI()
 df = api.games(competition_id=55, season_id=43)
 df = df[df[["home_team_name", "away_team_name"]].isin([teamName]).any(axis=1)]
 games = list(df["game_id"])
-folder = os.path.join(
-    "imgs/", str(f"goalkeeperDistribution")
-)
+folder = os.path.join("imgs/", str(f"goalkeeperDistribution"))
 os.makedirs(folder, exist_ok=True)
 
 ZONES_X = 6
@@ -130,24 +129,35 @@ for gameId in tqdm(games, leave=False):
     df = match.events
     passes = df[df["type_name"] == "Pass"]
     passes = passes[passes["player_name"] == playerName]
-    passes = passes[passes['extra'].apply(lambda x: x['pass']['outcome'] if isinstance(x, dict) and 'pass' in x and 'outcome' in x['pass'] else None).isna()]
+    passes = passes[
+        passes["extra"]
+        .apply(
+            lambda x: (
+                x["pass"]["outcome"]
+                if isinstance(x, dict) and "pass" in x and "outcome" in x["pass"]
+                else None
+            )
+        )
+        .isna()
+    ]
 
     for i, row in passes.iterrows():
-        start_x = row['location'][0]
-        start_y = row['location'][1]
+        start_x = row["location"][0]
+        start_y = row["location"][1]
         end_x = row["extra"]["pass"]["end_location"][0]
         end_y = 80 - row["extra"]["pass"]["end_location"][1]
         zone_x = int(end_x // RECT_X)
         zone_y = int(end_y // RECT_Y)
 
-        startingPoints.append(row["location"])   
-        endingPoints.append(row["extra"]["pass"]["end_location"])        
-
+        startingPoints.append(row["location"])
+        endingPoints.append(row["extra"]["pass"]["end_location"])
         if zone_x < ZONES_X and zone_y < ZONES_Y:
             pass_counts[zone_y, zone_x] += 1
 
 goalkeeperDistribution = GoalkeeperDistribution(markerColor=teamColor)
-fig, ax, legendElements = goalkeeperDistribution.draw(pass_counts, startingPoints, endingPoints)
+fig, ax, legendElements = goalkeeperDistribution.draw(
+    pass_counts, startingPoints, endingPoints
+)
 extra = [f"{playerName} pass distribution throughout EURO 2020"]
 addLegend(ax, legendElements=legendElements)
 addNotes(ax, extra_text=extra, author="@francescozonaro")

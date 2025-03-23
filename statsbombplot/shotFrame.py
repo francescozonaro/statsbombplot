@@ -1,9 +1,15 @@
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import os
-import json
 
-from utils import Pitch, getStatsbombAPI, addLegend, addNotes, saveFigure, fetchMatch
+from utils import (
+    Pitch,
+    addLegend,
+    addNotes,
+    saveFigure,
+    fetchMatch,
+    fetchRandomMatch,
+)
 
 
 class ShotFrame:
@@ -13,10 +19,16 @@ class ShotFrame:
         self.awayColor = awayColor
         self.nameMapping = nameMapping
 
-    def draw(self, x, y, end_x, end_y, frame, isHome):
+    def draw(self, shot, isHome):
 
         pitch = Pitch()
         f, ax = pitch.draw()
+
+        x = shot.location[0]
+        y = 80 - shot.location[1]
+        end_x = shot["extra"]["shot"]["end_location"][0]
+        end_y = 80 - shot["extra"]["shot"]["end_location"][1]
+        frame = shot["extra"]["shot"]["freeze_frame"]
 
         if isHome:
             mainColor = self.homeColor
@@ -118,59 +130,46 @@ class ShotFrame:
         return f, ax, legendElements
 
 
-gameId = 3795506
-load_360 = True
-folder = os.path.join("imgs/", str(gameId))
-match = fetchMatch(gameId, load_360)
+match = fetchRandomMatch(seed=602210)
+folder = os.path.join("imgs/", str(match.gameId))
 os.makedirs(folder, exist_ok=True)
 
+homeTeamColor = match.homeTeamColor
+awayTeamColor = match.awayTeamColor
+playerNameToJerseyNumber = {
+    player["player_name"]: player["jersey_number"]
+    for _, player in match.players.iterrows()
+}
 
-playerNameToJerseyNumber = match.players.set_index("player_name")[
-    "jersey_number"
-].to_dict()
-
-shotFrame = ShotFrame(
-    match.homeTeamColor, match.awayTeamColor, playerNameToJerseyNumber
-)
-
+shotFrame = ShotFrame(homeTeamColor, awayTeamColor, playerNameToJerseyNumber)
 shots = match.events[match.events["type_name"] == "Shot"].reset_index(drop=True)
+validShots = shots[
+    (shots["period_id"] < 5)
+    & shots["extra"].apply(
+        lambda x: isinstance(x, dict)
+        and "shot" in x
+        and "freeze_frame" in x.get("shot", {})
+    )
+]
 
-for i, shot in shots.iterrows():
-    if shot.team_id == match.homeTeamId:
-        isHome = True
-    else:
-        isHome = False
+for i, shot in validShots.iterrows():
 
-    if shot["period_id"] < 5:
-        if (
-            "extra" in shot
-            and "shot" in shot["extra"]
-            and "freeze_frame" in shot["extra"]["shot"]
-        ):
+    isHome = shot.team_id == match.homeTeamId
+    fig, ax, legendElements = shotFrame.draw(shot, isHome)
 
-            fig, ax, legendElements = shotFrame.draw(
-                shot.location[0],
-                80 - shot.location[1],
-                shot["extra"]["shot"]["end_location"][0],
-                80 - shot["extra"]["shot"]["end_location"][1],
-                shot["extra"]["shot"]["freeze_frame"],
-                isHome,
-            )
+    shotOutcome = shot.extra["shot"]["outcome"]["name"].lower()
+    shotTechnique = (
+        shot.extra["shot"]["body_part"]["name"].lower()
+        if shot.extra["shot"]["technique"]["name"].lower() == "normal"
+        else shot.extra["shot"]["technique"]["name"].lower()
+    )
+    shotValue = shot.extra["shot"]["statsbomb_xg"]
 
-            shotOutcome = shot.extra["shot"]["outcome"]["name"].lower()
-            shotTechnique = shot.extra["shot"]["technique"]["name"].lower()
-            shotValue = shot.extra["shot"]["statsbomb_xg"]
+    formattedTime = f"{shot.minute}:{shot.second:02d}"
+    extra = [
+        f"At {formattedTime}, {shot.player_name} took a shot with {shotTechnique}, had an xG of {round(shotValue, 3)}, and it resulted in {shotOutcome}."
+    ]
 
-            if shotTechnique == "normal":
-                shotTechnique = shot.extra["shot"]["body_part"]["name"].lower()
-
-            extra = [
-                f"{shot.player_name} shot at {shot.minute}:{shot.second} with {shotTechnique} had an xG of {round(shotValue, 3)} and resulted in {shotOutcome}"
-            ]
-            addLegend(ax, legendElements)
-            addNotes(ax, author="@francescozonaro", extra_text=extra)
-            saveFigure(fig, f"{folder}/shotFreezed_{match.gameId}_{i}.png")
-        else:
-            print(f"Skipping shot {i}: 'freeze_frame' not available.")
-    else:
-        print(f"Skipping shot {i}: Penalty shots are excluded.")
+    addLegend(ax, legendElements)
+    addNotes(ax, author="@francescozonaro", extra_text=extra)
+    saveFigure(fig, f"{folder}/shotFreezed_{match.gameId}_{i}.png")

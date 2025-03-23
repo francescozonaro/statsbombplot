@@ -1,4 +1,5 @@
 import warnings
+import random
 
 from statsbombpy.api_client import NoAuthWarning
 from .loader import Loader
@@ -9,6 +10,7 @@ warnings.simplefilter("ignore", NoAuthWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
+# Fetching
 def getStatsbombAPI():
     api = Loader(creds={"user": "", "passwd": ""})
     return api
@@ -45,6 +47,19 @@ def fetchMatch(gameId, load_360=True):
     return match
 
 
+def fetchRandomMatch(seed=None):
+    if seed is not None:
+        random.seed(seed)
+
+    api = getStatsbombAPI()
+    competitions = api.competitions()
+    randomRow = competitions.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
+    games = api.games(randomRow.competition_id, randomRow.season_id)
+    randomGame = games.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
+    return fetchMatch(gameId=randomGame.game_id, load_360=True)
+
+
+# Graphics
 def addNotes(ax, author, extra_text=None):
     """
     Adds author tag and extra text to the bottom left of the plot.
