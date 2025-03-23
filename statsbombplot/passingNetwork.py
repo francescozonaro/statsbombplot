@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import pandas as pd
 import os
-import json
 
 from utils import Pitch, addLegend, addNotes, saveFigure, fetchMatch
 
