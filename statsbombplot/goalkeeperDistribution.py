@@ -1,6 +1,5 @@
 import numpy as np
 import os
-import random
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from tqdm import tqdm
@@ -11,125 +10,48 @@ from utils import (
     addNotes,
     saveFigure,
     fetchMatch,
-    fetchRandomMatch,
-    fetchRandomSeason,
 )
 
+#
+# PLAYER_NAME = "Jordan Pickford"
+# TEAM_NAME = "England"
+# MARKER_COLOR = "#f0150f"
+# PLAYER_NAME = "Gianluigi Donnarumma"
+# TEAM_NAME = "Italy"
+# MARKER_COLOR = "#1f759f"
+# COMPETITION_ID = 55
+# SEASON_ID = 43
 
-class GoalkeeperDistribution:
-    def __init__(self, markerColor):
-        self.markerColor = markerColor
-
-    def draw(self, pass_counts, starting_points, ending_points):
-
-        pitch = Pitch()
-        f, ax = pitch.draw()
-
-        for i in range(ZONES_Y):
-            for j in range(ZONES_X):
-                count = pass_counts[i, j]
-                alphaFactor = 0.8 * count / np.max(pass_counts)
-                fill_rect = Rectangle(
-                    (j * RECT_X, 80 - (i + 1) * RECT_Y),
-                    RECT_X,
-                    RECT_Y,
-                    facecolor=self.markerColor,
-                    alpha=alphaFactor,
-                    edgecolor="none",
-                    linewidth=0,
-                    zorder=9,
-                )
-                edge_rect = Rectangle(
-                    (j * RECT_X, 80 - (i + 1) * RECT_Y),
-                    RECT_X,
-                    RECT_Y,
-                    edgecolor="#0c0c0c",
-                    facecolor="none",
-                    linewidth=0.3,
-                    zorder=9,
-                )
-
-                ax.add_patch(fill_rect)
-                ax.add_patch(edge_rect)
-
-        for startPoint, endPoint in zip(starting_points, ending_points):
-            ax.scatter(
-                startPoint[0],
-                startPoint[1],
-                s=120,
-                edgecolor="black",
-                linewidth=0.6,
-                facecolor=self.markerColor,
-                zorder=5,
-                marker="o",
-                alpha=0.4,
-            )
-            ax.plot(
-                [startPoint[0], endPoint[0]],
-                [startPoint[1], endPoint[1]],
-                linestyle="-",
-                alpha=0.2,
-                lw=0.6,
-                zorder=5,
-                color="#0c0c0c",
-            )
-
-        legendElements = [
-            plt.scatter(
-                [],
-                [],
-                s=70,
-                edgecolor="black",
-                linewidth=0.6,
-                facecolor="#ffffff",
-                zorder=5,
-                marker="s",
-                label="Few passes",
-            ),
-            plt.scatter(
-                [],
-                [],
-                s=70,
-                edgecolor="black",
-                linewidth=0.6,
-                facecolor=self.markerColor,
-                zorder=5,
-                marker="s",
-                label="Many passes",
-            ),
-        ]
-
-        return f, ax, legendElements
+PLAYER_NAME = "Claudio Andrés Bravo Muñoz"
+TEAM_NAME = "Barcelona"
+MARKER_COLOR = "#1f759f"
+COMPETITION_ID = 11  # 55
+SEASON_ID = 27  # 43
+#
 
 
-# Target keeper
-playerName = "Gianluigi Donnarumma"
-teamName = "Italy"
-teamColor = "#1a759f"
-load_360 = True
-
-# Games
+LOAD_360 = True
 api = getStatsbombAPI()
-df = api.games(competition_id=55, season_id=43)
-df = df[df[["home_team_name", "away_team_name"]].isin([teamName]).any(axis=1)]
+df = api.games(competition_id=COMPETITION_ID, season_id=SEASON_ID)
+df = df[df[["home_team_name", "away_team_name"]].isin([TEAM_NAME]).any(axis=1)]
 games = list(df["game_id"])
 folder = os.path.join("imgs/", str(f"goalkeeperDistribution"))
 os.makedirs(folder, exist_ok=True)
 
-ZONES_X = 6
-ZONES_Y = 6
+#
+ZONES_X = 10
+ZONES_Y = 10
 RECT_X = 120 / ZONES_X
 RECT_Y = 80 / ZONES_Y
-pass_counts = np.zeros((ZONES_Y, ZONES_X))
-
+passCounts = np.zeros((ZONES_Y, ZONES_X))
 startingPoints = []
 endingPoints = []
 
 for gameId in tqdm(games, leave=False):
-    match = fetchMatch(gameId, load_360)
+    match = fetchMatch(gameId, LOAD_360)
     df = match.events
     passes = df[df["type_name"] == "Pass"]
-    passes = passes[passes["player_name"] == playerName]
+    passes = passes[passes["player_name"] == PLAYER_NAME]
     passes = passes[
         passes["extra"]
         .apply(
@@ -153,13 +75,86 @@ for gameId in tqdm(games, leave=False):
         startingPoints.append(row["location"])
         endingPoints.append(row["extra"]["pass"]["end_location"])
         if zone_x < ZONES_X and zone_y < ZONES_Y:
-            pass_counts[zone_y, zone_x] += 1
+            passCounts[zone_y, zone_x] += 1
 
-goalkeeperDistribution = GoalkeeperDistribution(markerColor=teamColor)
-fig, ax, legendElements = goalkeeperDistribution.draw(
-    pass_counts, startingPoints, endingPoints
-)
-extra = [f"{playerName} pass distribution throughout EURO 2020"]
+pitch = Pitch()
+f, ax = pitch.draw()
+
+for i in range(ZONES_Y):
+    for j in range(ZONES_X):
+        zonePasses = passCounts[i, j]
+        alphaFactor = 0.9 * zonePasses / np.max(passCounts)
+        fill_rect = Rectangle(
+            (j * RECT_X, 80 - (i + 1) * RECT_Y),
+            RECT_X,
+            RECT_Y,
+            facecolor=MARKER_COLOR,
+            alpha=alphaFactor,
+            edgecolor="none",
+            linewidth=0,
+            zorder=9,
+        )
+        edge_rect = Rectangle(
+            (j * RECT_X, 80 - (i + 1) * RECT_Y),
+            RECT_X,
+            RECT_Y,
+            edgecolor="#0c0c0c",
+            facecolor="none",
+            linewidth=0.3,
+            zorder=9,
+        )
+
+        ax.add_patch(fill_rect)
+        ax.add_patch(edge_rect)
+
+for startPoint, endPoint in zip(startingPoints, endingPoints):
+    ax.scatter(
+        startPoint[0],
+        startPoint[1],
+        s=120,
+        edgecolor="black",
+        linewidth=0.6,
+        facecolor=MARKER_COLOR,
+        zorder=5,
+        marker="o",
+        alpha=0.4,
+    )
+    ax.plot(
+        [startPoint[0], endPoint[0]],
+        [startPoint[1], endPoint[1]],
+        linestyle="-",
+        alpha=0.2,
+        lw=0.6,
+        zorder=5,
+        color="#0c0c0c",
+    )
+
+legendElements = [
+    plt.scatter(
+        [],
+        [],
+        s=70,
+        edgecolor="black",
+        linewidth=0.6,
+        facecolor="#ffffff",
+        zorder=5,
+        marker="s",
+        label="Few passes",
+    ),
+    plt.scatter(
+        [],
+        [],
+        s=70,
+        edgecolor="black",
+        linewidth=0.6,
+        facecolor=MARKER_COLOR,
+        zorder=5,
+        marker="s",
+        label="Many passes",
+    ),
+]
+
+extra = [f"{PLAYER_NAME} pass distribution throughout EURO 2020"]
 addLegend(ax, legendElements=legendElements)
 addNotes(ax, extra_text=extra, author="@francescozonaro")
-saveFigure(fig, f"{folder}/{playerName.lower().replace(' ', "")}Distribution.png")
+saveFigure(f, f"{folder}/{PLAYER_NAME.lower().replace(' ', "")}Distribution.png")
