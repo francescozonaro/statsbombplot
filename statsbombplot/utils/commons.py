@@ -60,13 +60,19 @@ def fetchRandomMatch(seed=None):
     return fetchMatch(gameId=randomGame.game_id, load_360=True)
 
 
+def getAllMatchesFromSeason(competitionId, seasonId):
+    games = getStatsbombAPI().games(competition_id=competitionId, season_id=seasonId)
+    return list(games["game_id"])
+
+
 def getAllTeamMatchesFromSeason(competitionId, seasonId, teamName):
-    df = getStatsbombAPI().games(competition_id=competitionId, season_id=seasonId)
-    df = df[df[["home_team_name", "away_team_name"]].isin([teamName]).any(axis=1)]
-    return list(df["game_id"])
+    games = getStatsbombAPI().games(competition_id=competitionId, season_id=seasonId)
+    games = games[
+        games[["home_team_name", "away_team_name"]].isin([teamName]).any(axis=1)
+    ]
+    return list(games["game_id"])
 
 
-# Graphics
 def addNotes(ax, author, extra_text=None):
     """
     Adds author tag and extra text to the bottom left of the plot.

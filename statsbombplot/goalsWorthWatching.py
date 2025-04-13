@@ -1,20 +1,19 @@
 import os
 import matplotlib.pyplot as plt
+
 from tqdm import tqdm
-from utils import (
-    getStatsbombAPI,
-    fetchMatch,
-)
+from utils import getAllMatchesFromSeason, fetchMatch
 from datetime import datetime
 
-api = getStatsbombAPI()
-df = api.games(competition_id=43, season_id=106)  # or 3
-competitionName = df["competition_name"].iloc[0]
-seasonName = df["season_name"].iloc[0]
-games = list(df["game_id"])
+COMPETITION_NAME = "EURO 2020"
+COMPETITION_ID = 55
+SEASON_ID = 43
+
 folder = os.path.join("imgs/", str(f"goalsWorthWatching"))
-load_360 = True
 os.makedirs(folder, exist_ok=True)
+plt.rcParams["font.family"] = "Monospace"
+
+games = getAllMatchesFromSeason(competitionId=COMPETITION_ID, seasonId=SEASON_ID)
 
 
 class Banger:
@@ -72,9 +71,9 @@ class Banger:
 bangers = []
 
 for gameId in tqdm(games, leave=False):
-    match = fetchMatch(gameId, load_360)
-    df = match.events
-    shots = df[df["type_name"] == "Shot"]
+    match = fetchMatch(gameId, load_360=True)
+    events = match.events
+    shots = events[events["type_name"] == "Shot"]
     for i, row in shots.iterrows():
         if row["extra"]["shot"]["outcome"]["name"] == "Goal":
             teamName = row["team_name"]
@@ -97,7 +96,8 @@ for gameId in tqdm(games, leave=False):
             )
             bangers.append(banger)
 
-plt.rcParams["font.family"] = "Arial"
+sortedBangers = sorted(bangers, key=lambda b: b.xBanger, reverse=True)
+bangersList = sortedBangers[0:8]
 
 fig = plt.figure(figsize=(10, 7), dpi=600)
 ax = plt.subplot()
@@ -109,7 +109,7 @@ ax.set_axis_off()
 plt.text(
     x=0.05,
     y=1.1,
-    s=f"GOALS WORTH WATCHING | {competitionName} {seasonName} Edition",
+    s=f"GOALS WORTH WATCHING - {COMPETITION_NAME} Edition",
     va="center",
     ha="left",
     fontsize=17,
@@ -127,13 +127,11 @@ plt.text(
     weight="bold",
 )
 
-plt.rcParams["font.family"] = "Menlo"
-
 # Subtitle
 plt.text(
     x=0.05,
     y=1.025,
-    s=f"Remarkable goals from {competitionName} {seasonName}, selected for their exceptional xG values,\nstriking technique and precise placement, making them well worth revisiting.",
+    s=f"Remarkable goals from {COMPETITION_NAME}, selected for their exceptional xG values,\nstriking technique and precise placement, making them well worth revisiting.",
     va="center",
     ha="left",
     fontsize=9,
@@ -153,7 +151,7 @@ ax.text(
 ax.text(
     x=0.78,
     y=0.95,
-    s="TECHNIQUE",
+    s="Technique",
     size=9,
     ha="center",
     va="center",
@@ -162,7 +160,7 @@ ax.text(
 ax.text(
     x=0.9,
     y=0.95,
-    s="PLAY TYPE",
+    s="Play type",
     size=9,
     ha="center",
     va="center",
@@ -185,8 +183,6 @@ ax.plot(
     zorder=3,
 )
 
-sortedBangers = sorted(bangers, key=lambda b: b.xBanger, reverse=True)
-bangersList = sortedBangers[0:8]
 
 for i, banger in enumerate(bangersList):
     rowHeight = 1 - 0.15 - i * 0.1
@@ -262,7 +258,7 @@ ax.text(
 
 
 plt.savefig(
-    f"{folder}/table.png",
+    f"{folder}/{COMPETITION_NAME.lower().replace(' ', '')}.png",
     dpi=600,
     facecolor="#EFE9E6",
     bbox_inches="tight",

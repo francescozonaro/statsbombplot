@@ -13,6 +13,11 @@ from utils import (
     normalizeString,
 )
 
+folder = os.path.join("imgs/", str(f"goalkeeperZonalDistribution"))
+os.makedirs(folder, exist_ok=True)
+plt.rcParams["font.family"] = "Monospace"
+
+
 # PLAYER_NAME = "Jordan Pickford"
 # TEAM_NAME = "England"
 # MARKER_COLOR = "#f0150f"
@@ -31,8 +36,6 @@ MARKER_COLOR = "#1f759f"
 COMPETITION_ID = 11
 SEASON_ID = 27
 
-folder = os.path.join("imgs/", str(f"goalkeeperDistribution"))
-os.makedirs(folder, exist_ok=True)
 games = getAllTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, TEAM_NAME)
 
 ZONES_X = 4

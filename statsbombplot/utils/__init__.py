@@ -5,6 +5,7 @@ from .commons import (
     addLegend,
     fetchMatch,
     fetchRandomMatch,
+    getAllMatchesFromSeason,
     getAllTeamMatchesFromSeason,
     normalizeString,
 )
