@@ -5,6 +5,8 @@ from .commons import (
     addLegend,
     fetchMatch,
     fetchRandomMatch,
+    getAllTeamMatchesFromSeason,
+    normalizeString,
 )
 from .pitch import Pitch
 from .loader import Loader

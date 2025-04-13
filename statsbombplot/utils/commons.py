@@ -1,5 +1,6 @@
 import warnings
 import random
+import unicodedata
 
 from statsbombpy.api_client import NoAuthWarning
 from .loader import Loader
@@ -59,6 +60,12 @@ def fetchRandomMatch(seed=None):
     return fetchMatch(gameId=randomGame.game_id, load_360=True)
 
 
+def getAllTeamMatchesFromSeason(competitionId, seasonId, teamName):
+    df = getStatsbombAPI().games(competition_id=competitionId, season_id=seasonId)
+    df = df[df[["home_team_name", "away_team_name"]].isin([teamName]).any(axis=1)]
+    return list(df["game_id"])
+
+
 # Graphics
 def addNotes(ax, author, extra_text=None):
     """
@@ -99,3 +106,9 @@ def saveFigure(fig, filename, dpi=300):
     Saves the figure to a file with the given dpi.
     """
     fig.savefig(filename, bbox_inches="tight", format="png", dpi=dpi)
+
+
+def normalizeString(input):
+    return (
+        unicodedata.normalize("NFKD", input).encode("ASCII", "ignore").decode("ASCII")
+    )
