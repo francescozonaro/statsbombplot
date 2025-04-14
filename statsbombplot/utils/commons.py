@@ -77,7 +77,7 @@ def addNotes(ax, author, extra_text=None):
     """
     Adds author tag and extra text to the bottom left of the plot.
     """
-    ax.text(105.8, -2.1, author, fontsize=10, va="center")
+    ax.text(104.8, -2.1, author, fontsize=10, va="center")
 
     if extra_text:
         for i, text in enumerate(extra_text):
@@ -85,7 +85,7 @@ def addNotes(ax, author, extra_text=None):
                 0,
                 -2.1 - 2 * i,
                 text,
-                fontsize=7,
+                fontsize=8,
                 va="center",
                 ha="left",
             )
@@ -102,8 +102,9 @@ def addLegend(ax, legendElements):
         bbox_to_anchor=(0.5, 1),
         fontsize=10,
         fancybox=True,
-        frameon=True,
+        frameon=False,
         handletextpad=0.5,
+        handleheight=1.2,
     )
 
 
