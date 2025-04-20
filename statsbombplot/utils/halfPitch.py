@@ -20,6 +20,35 @@ class HalfPitch:
         return np.array([p[0] / self.width, p[1] / self.height])
 
     def _draw_pitch_elements(self, ax, lines_color):
+
+        # Plot outer lines
+        outer_line_pts = [
+            [self._point_to_meters([0, 0]), self._point_to_meters([0, 1])],  # Left line
+            [
+                self._point_to_meters([1, 0]),
+                self._point_to_meters([1, 1]),
+            ],  # Right line
+            [
+                self._point_to_meters([0.5, 1]),
+                self._point_to_meters([1, 1]),
+            ],  # Top line
+            [
+                self._point_to_meters([0.5, 0]),
+                self._point_to_meters([1, 0]),
+            ],  # Bottom line
+        ]
+
+        for line_pt in outer_line_pts:
+            ax.plot(
+                [line_pt[0][0], line_pt[1][0]],
+                [line_pt[0][1], line_pt[1][1]],
+                "-",
+                alpha=0.8,
+                lw=1.5,
+                zorder=3,
+                color=self.lines_color,
+            )
+
         line_pts = [
             # Center line
             [self._point_to_meters([0.5, 0]), self._point_to_meters([0.5, 1])],
@@ -138,31 +167,6 @@ class HalfPitch:
             )
         )
 
-        # Plot outer lines
-        line_pts = [
-            [self._point_to_meters([0, 0]), self._point_to_meters([0, 1])],  # Left line
-            [
-                self._point_to_meters([1, 0]),
-                self._point_to_meters([1, 1]),
-            ],  # Right line
-            [self._point_to_meters([0, 1]), self._point_to_meters([1, 1])],  # Top line
-            [
-                self._point_to_meters([0, 0]),
-                self._point_to_meters([1, 0]),
-            ],  # Bottom line
-        ]
-
-        for line_pt in line_pts:
-            ax.plot(
-                [line_pt[0][0], line_pt[1][0]],
-                [line_pt[0][1], line_pt[1][1]],
-                "-",
-                alpha=0.8,
-                lw=1.5,
-                zorder=3,
-                color=self.lines_color,
-            )
-
         self._draw_pitch_elements(ax, self.lines_color)
 
         plt.axis("off")
@@ -174,40 +178,12 @@ class HalfPitch:
         """
 
         ax.set_ylim([-5, self.height + 5])
-        ax.set_xlim([-5 + self.width / 2, self.width + 5])
+        ax.set_xlim([self.width / 2 - 5, self.width + 5])
         ax.add_patch(
             patches.Rectangle(
                 (0, 0), self.width, self.height, color=self.background_color
             )
         )
-
-        # Plot outer lines
-        line_pts = [
-            [self._point_to_meters([0, 0]), self._point_to_meters([0, 1])],  # Left line
-            [
-                self._point_to_meters([1, 0]),
-                self._point_to_meters([1, 1]),
-            ],  # Right line
-            [
-                self._point_to_meters([0.5, 1]),
-                self._point_to_meters([1, 1]),
-            ],  # Top line
-            [
-                self._point_to_meters([0.5, 0]),
-                self._point_to_meters([1, 0]),
-            ],  # Bottom line
-        ]
-
-        for line_pt in line_pts:
-            ax.plot(
-                [line_pt[0][0], line_pt[1][0]],
-                [line_pt[0][1], line_pt[1][1]],
-                "-",
-                alpha=0.8,
-                lw=1.5,
-                zorder=3,
-                color=self.lines_color,
-            )
 
         self._draw_pitch_elements(ax, self.lines_color)
 
