@@ -3,7 +3,7 @@ import matplotlib.patches as patches
 import numpy as np
 
 
-class FullPitch:
+class HalfPitch:
     def __init__(self):
         self.height = float(80)  # Updated height
         self.width = float(120)  # Updated width
@@ -118,7 +118,7 @@ class FullPitch:
             1, 1, figsize=(self.fig_size, self.fig_size * ratio), dpi=300
         )
         ax.set_ylim([-5, self.height + 5])
-        ax.set_xlim([-5, self.width + 5])
+        ax.set_xlim([self.width / 2 - 5, self.width + 5])
         ax.add_patch(
             patches.Rectangle(
                 (0, 0), self.width, self.height, color=self.background_color
@@ -161,7 +161,7 @@ class FullPitch:
         """
 
         ax.set_ylim([-5, self.height + 5])
-        ax.set_xlim([-5, self.width + 5])
+        ax.set_xlim([-5 + self.width / 2, self.width + 5])
         ax.add_patch(
             patches.Rectangle(
                 (0, 0), self.width, self.height, color=self.background_color
@@ -198,22 +198,22 @@ class FullPitch:
         ax.axis("off")
         return ax
 
-    def addPitchNotes(self, ax, author, extra_text=None):
-        """
-        Adds author tag and extra text to the bottom left of the plot.
-        """
-        ax.text(105.2, -2.4, author, fontsize=10, va="center")
+    # def addPitchNotes(self, ax, author, extra_text=None):
+    #     """
+    #     Adds author tag and extra text to the bottom left of the plot.
+    #     """
+    #     ax.text(105.2, -2.4, author, fontsize=10, va="center")
 
-        if extra_text:
-            for i, text in enumerate(extra_text):
-                ax.text(
-                    -0.25,
-                    -2.4 - 2 * i,
-                    text,
-                    fontsize=10,
-                    va="center",
-                    ha="left",
-                )
+    #     if extra_text:
+    #         for i, text in enumerate(extra_text):
+    #             ax.text(
+    #                 -0.25,
+    #                 -2.4 - 2 * i,
+    #                 text,
+    #                 fontsize=10,
+    #                 va="center",
+    #                 ha="left",
+    #             )
 
     def addPitchLegend(self, ax, legendElements):
         """

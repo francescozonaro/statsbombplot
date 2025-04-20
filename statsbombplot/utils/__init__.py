@@ -9,4 +9,5 @@ from .commons import (
     normalizeString,
 )
 from .fullPitch import FullPitch
+from .halfPitch import HalfPitch
 from .loader import Loader

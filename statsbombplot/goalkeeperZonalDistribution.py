@@ -93,7 +93,7 @@ for i in range(ZONES_Y):
             edgecolor="#0c0c0c",
             facecolor="none",
             linewidth=0.3,
-            linestyle=(0, (3, 3, 1, 3)),
+            linestyle=(0, (3, 3)),
             zorder=9,
         )
 
