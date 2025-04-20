@@ -14,7 +14,7 @@ import matplotlib.lines as mlines
 import pandas as pd
 import os
 
-from utils import Pitch, addLegend, addNotes, saveFigure, fetchMatch
+from utils import FullPitch, saveFigure, fetchMatch
 
 folder = os.path.join("imgs/", str(f"passingNetwork"))
 os.makedirs(folder, exist_ok=True)
@@ -66,7 +66,7 @@ for identifier, teamName, teamColor in zip(
     maxPlayerPassCount = playerPassCount.num_passes.max()
     maxPairPassCount = pairPassCount.num_passes.max()
 
-    pitch = Pitch()
+    pitch = FullPitch()
     fig, ax = pitch.draw()
 
     for pair_key, row in pairPassCount.iterrows():
@@ -168,8 +168,8 @@ for identifier, teamName, teamColor in zip(
         "Only events occurring before the first substitution are included.",
     ]
 
-    addLegend(ax, legendElements)
-    addNotes(
+    pitch.addPitchLegend(ax, legendElements)
+    pitch.addPitchNotes(
         ax,
         author="@francescozonaro",
         extra_text=extra_text,

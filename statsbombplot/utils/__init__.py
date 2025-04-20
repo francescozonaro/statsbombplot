@@ -1,13 +1,12 @@
 from .commons import (
     getStatsbombAPI,
-    addNotes,
     saveFigure,
-    addLegend,
     fetchMatch,
     fetchRandomMatch,
     getAllMatchesFromSeason,
     getAllTeamMatchesFromSeason,
+    getCompetitionTeamNames,
     normalizeString,
 )
-from .pitch import Pitch
+from .fullPitch import FullPitch
 from .loader import Loader

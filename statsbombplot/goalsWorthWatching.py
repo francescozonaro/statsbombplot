@@ -99,7 +99,7 @@ for gameId in tqdm(games, leave=False):
 sortedBangers = sorted(bangers, key=lambda b: b.xBanger, reverse=True)
 bangersList = sortedBangers[0:8]
 
-fig = plt.figure(figsize=(10, 7), dpi=600)
+fig = plt.figure(figsize=(10, 7), dpi=300)
 ax = plt.subplot()
 ax.set_xlim(0, 1)
 ax.set_ylim(0, 1)
@@ -259,7 +259,7 @@ ax.text(
 
 plt.savefig(
     f"{folder}/{COMPETITION_NAME.lower().replace(' ', '')}.png",
-    dpi=600,
+    dpi=300,
     facecolor="#EFE9E6",
     bbox_inches="tight",
     edgecolor="none",

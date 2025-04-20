@@ -4,9 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from tqdm import tqdm
 from utils import (
-    Pitch,
-    addLegend,
-    addNotes,
+    FullPitch,
     saveFigure,
     fetchMatch,
     getAllTeamMatchesFromSeason,
@@ -32,7 +30,7 @@ plt.rcParams["font.family"] = "Monospace"
 
 PLAYER_NAME = "Claudio Andrés Bravo Muñoz"
 TEAM_NAME = "Barcelona"
-MARKER_COLOR = "#1f759f"
+TEAM_COLOR = "#1f759f"
 COMPETITION_ID = 11
 SEASON_ID = 27
 
@@ -51,7 +49,7 @@ for gameId in tqdm(games, leave=False):
     df = match.events
     isPass = df["type_name"] == "Pass"
     isTargetPlayer = df["player_name"] == PLAYER_NAME
-    # Considering how Statsbomb data works, a pass is successful if there iss not "outcome" field in the extra dict
+    # Considering how Statsbomb data works, a pass is successful if there is no "outcome" field in the extra dict
     # Any outcome specification is negative (eg. Incomplete, Out, Unknown)
     isSuccessful = df["extra"].apply(
         lambda x: not (isinstance(x, dict) and "pass" in x and "outcome" in x["pass"])
@@ -71,7 +69,7 @@ for gameId in tqdm(games, leave=False):
         if zoneX < ZONES_X and zoneY < ZONES_Y:
             passCounts[zoneY, zoneX] += 1
 
-pitch = Pitch()
+pitch = FullPitch()
 f, ax = pitch.draw()
 
 for i in range(ZONES_Y):
@@ -82,7 +80,7 @@ for i in range(ZONES_Y):
             (j * RECT_X, 80 - (i + 1) * RECT_Y),
             RECT_X,
             RECT_Y,
-            facecolor=MARKER_COLOR,
+            facecolor=TEAM_COLOR,
             alpha=alphaFactor,
             edgecolor="none",
             linewidth=0,
@@ -105,18 +103,18 @@ for i in range(ZONES_Y):
 for startPoint, endPoint in zip(startingPoints, endingPoints):
     ax.scatter(
         startPoint[0],
-        startPoint[1],
+        80 - startPoint[1],
         s=120,
         edgecolor="black",
         linewidth=0.6,
-        facecolor=MARKER_COLOR,
+        facecolor=TEAM_COLOR,
         zorder=5,
         marker="o",
         alpha=0.4,
     )
     ax.plot(
         [startPoint[0], endPoint[0]],
-        [startPoint[1], endPoint[1]],
+        [80 - startPoint[1], 80 - endPoint[1]],
         linestyle="-",
         alpha=0.2,
         lw=0.6,
@@ -142,7 +140,7 @@ legendElements = [
         s=70,
         edgecolor="black",
         linewidth=0.6,
-        facecolor=MARKER_COLOR,
+        facecolor=TEAM_COLOR,
         zorder=5,
         marker="s",
         label="High pass volume",
@@ -150,8 +148,8 @@ legendElements = [
 ]
 
 extra = [f"{PLAYER_NAME} zonal pass distribution"]
-addLegend(ax, legendElements=legendElements)
-addNotes(ax, extra_text=extra, author="@francescozonaro")
+pitch.addPitchLegend(ax, legendElements=legendElements)
+pitch.addPitchNotes(ax, extra_text=extra, author="@francescozonaro")
 saveFigure(
     f,
     f"{folder}/{normalizeString(PLAYER_NAME).replace(' ', '')}ZonalDistribution.png",

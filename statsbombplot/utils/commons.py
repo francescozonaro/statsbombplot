@@ -65,47 +65,17 @@ def getAllMatchesFromSeason(competitionId, seasonId):
     return list(games["game_id"])
 
 
+def getCompetitionTeamNames(competitionId, seasonId):
+    games = getStatsbombAPI().games(competition_id=competitionId, season_id=seasonId)
+    return list(games["home_team_name"].unique())
+
+
 def getAllTeamMatchesFromSeason(competitionId, seasonId, teamName):
     games = getStatsbombAPI().games(competition_id=competitionId, season_id=seasonId)
     games = games[
         games[["home_team_name", "away_team_name"]].isin([teamName]).any(axis=1)
     ]
     return list(games["game_id"])
-
-
-def addNotes(ax, author, extra_text=None):
-    """
-    Adds author tag and extra text to the bottom left of the plot.
-    """
-    ax.text(104.8, -2.1, author, fontsize=10, va="center")
-
-    if extra_text:
-        for i, text in enumerate(extra_text):
-            ax.text(
-                0,
-                -2.1 - 2 * i,
-                text,
-                fontsize=8,
-                va="center",
-                ha="left",
-            )
-
-
-def addLegend(ax, legendElements):
-    """
-    Adds legend at the top of the plot
-    """
-    ax.legend(
-        handles=legendElements,
-        loc="upper center",
-        ncol=len(legendElements),
-        bbox_to_anchor=(0.5, 1),
-        fontsize=10,
-        fancybox=True,
-        frameon=False,
-        handletextpad=0.5,
-        handleheight=1.2,
-    )
 
 
 def saveFigure(fig, filename, dpi=300):

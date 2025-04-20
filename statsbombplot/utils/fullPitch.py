@@ -3,7 +3,7 @@ import matplotlib.patches as patches
 import numpy as np
 
 
-class Pitch:
+class FullPitch:
     def __init__(self):
         self.height = float(80)  # Updated height
         self.width = float(120)  # Updated width
@@ -28,9 +28,9 @@ class Pitch:
             [[0, 62], [17, 62]],  # Top line
             [[17, 18], [17, 62]],  # Side line
             # Left goal area
-            [[0, 31.5], [6, 31.5]],  # Bottom line
+            [[0, 30.5], [6, 30.5]],  # Bottom line
             [[0, 49.5], [6, 49.5]],  # Top line
-            [[6, 31.5], [6, 49.5]],  # Side line
+            [[6, 30.5], [6, 49.5]],  # Side line
             [[-0.1, 36], [-0.1, 44]],  # Goal posts (left goal)
             [[0.0, 36], [0.0, 44]],  # Goal posts (left goal)
             [[0.1, 36], [0.1, 44]],
@@ -40,9 +40,9 @@ class Pitch:
             [[120, 62], [103, 62]],  # Top line
             [[103, 18], [103, 62]],  # Side line
             # Right goal area
-            [[120, 31.5], [114, 31.5]],  # Bottom line
+            [[120, 30.5], [114, 30.5]],  # Bottom line
             [[120, 49.5], [114, 49.5]],  # Top line
-            [[114, 31.5], [114, 49.5]],  # Side line
+            [[114, 30.5], [114, 49.5]],  # Side line
             [[119.8, 36], [119.8, 44]],
             [[119.9, 36], [119.9, 44]],  # Goal posts (right goal)
             [[120, 36], [120, 44]],
@@ -115,7 +115,7 @@ class Pitch:
 
         ratio = self.height / float(self.width)
         f, ax = plt.subplots(
-            1, 1, figsize=(self.fig_size, self.fig_size * ratio), dpi=600
+            1, 1, figsize=(self.fig_size, self.fig_size * ratio), dpi=300
         )
         ax.set_ylim([-5, self.height + 5])
         ax.set_xlim([-5, self.width + 5])
@@ -154,3 +154,36 @@ class Pitch:
 
         plt.axis("off")
         return f, ax
+
+    def addPitchNotes(self, ax, author, extra_text=None):
+        """
+        Adds author tag and extra text to the bottom left of the plot.
+        """
+        ax.text(105.2, -2.4, author, fontsize=10, va="center")
+
+        if extra_text:
+            for i, text in enumerate(extra_text):
+                ax.text(
+                    -0.25,
+                    -2.4 - 2 * i,
+                    text,
+                    fontsize=10,
+                    va="center",
+                    ha="left",
+                )
+
+    def addPitchLegend(self, ax, legendElements):
+        """
+        Adds legend at the top of the plot
+        """
+        ax.legend(
+            handles=legendElements,
+            loc="upper center",
+            ncol=len(legendElements),
+            bbox_to_anchor=(0.5, 1),
+            fontsize=10,
+            fancybox=True,
+            frameon=False,
+            handletextpad=0.5,
+            handleheight=1.2,
+        )
