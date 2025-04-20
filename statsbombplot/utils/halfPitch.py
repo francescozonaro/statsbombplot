@@ -97,14 +97,27 @@ class HalfPitch:
             patches.Wedge(
                 (60, 40),  # Middle of the pitch
                 10,  # Radius of the center circle
-                0,
-                360,
+                -90,
+                90,
                 fill=True,
                 edgecolor=lines_color,
                 facecolor=lines_color,
                 zorder=4,
                 width=0.02,
                 alpha=0.8,
+            )
+        )
+
+        # Center dot
+        ax.add_patch(
+            patches.Circle(
+                (60, 40),  # Middle of the pitch
+                0.5,  # Radius of the center circle
+                fill=True,
+                edgecolor=lines_color,
+                facecolor=lines_color,
+                zorder=4,
+                alpha=1,
             )
         )
 
@@ -175,9 +188,12 @@ class HalfPitch:
                 self._point_to_meters([1, 0]),
                 self._point_to_meters([1, 1]),
             ],  # Right line
-            [self._point_to_meters([0, 1]), self._point_to_meters([1, 1])],  # Top line
             [
-                self._point_to_meters([0, 0]),
+                self._point_to_meters([0.5, 1]),
+                self._point_to_meters([1, 1]),
+            ],  # Top line
+            [
+                self._point_to_meters([0.5, 0]),
                 self._point_to_meters([1, 0]),
             ],  # Bottom line
         ]

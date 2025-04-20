@@ -108,6 +108,18 @@ class FullPitch:
             )
         )
 
+        ax.add_patch(
+            patches.Circle(
+                (60, 40),  # Middle of the pitch
+                0.5,  # Radius of the center circle
+                fill=True,
+                edgecolor=lines_color,
+                facecolor=lines_color,
+                zorder=4,
+                alpha=1,
+            )
+        )
+
     def draw(self):
         """
         Plot an empty horizontal football pitch, returning Matplotlib's ax object so we can keep adding elements to it.

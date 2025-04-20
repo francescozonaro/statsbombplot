@@ -43,6 +43,7 @@ shotCountsMap = {}
 
 for idx, team in enumerate(tqdm(teams, leave=False)):
     games = getAllTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, team)
+    games = games[:1]
     ZONES_X = 24
     ZONES_Y = 16
     RECT_X = 120 / ZONES_X
@@ -110,7 +111,7 @@ for idx, team in enumerate(teams):
             axes[idx].add_patch(fill_rect)
             # axes[idx].add_patch(edge_rect)
 
-    axes[idx].text(55.5, 87, team, fontsize=10, va="center")
+    axes[idx].text(59.5, 87, team, fontsize=10, va="center")
 
 
 legendElements = [
@@ -142,7 +143,7 @@ fig.legend(
     handles=legendElements,
     loc="upper center",
     ncol=len(legendElements),
-    bbox_to_anchor=(0.5, 0.97),
+    bbox_to_anchor=(0.5, 0.93),
     fontsize=10,
     fancybox=True,
     frameon=False,
