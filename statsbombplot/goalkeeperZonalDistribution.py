@@ -35,6 +35,7 @@ COMPETITION_ID = 11
 SEASON_ID = 27
 
 games = getAllTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, TEAM_NAME)
+games = games[1:2]
 
 ZONES_X = 4
 ZONES_Y = 4
@@ -58,7 +59,7 @@ for gameId in tqdm(games, leave=False):
 
     for i, row in passes.iterrows():
         startX = row["location"][0]
-        startY = row["location"][1]
+        startY = 80 - row["location"][1]
         endX = row["extra"]["pass"]["end_location"][0]
         endY = 80 - row["extra"]["pass"]["end_location"][1]
         zoneX = int(endX // RECT_X)
@@ -70,7 +71,8 @@ for gameId in tqdm(games, leave=False):
             passCounts[zoneY, zoneX] += 1
 
 pitch = FullPitch()
-f, ax = pitch.draw()
+f, ax = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
+pitch.draw(ax)
 
 for i in range(ZONES_Y):
     for j in range(ZONES_X):
@@ -103,7 +105,7 @@ for i in range(ZONES_Y):
 for startPoint, endPoint in zip(startingPoints, endingPoints):
     ax.scatter(
         startPoint[0],
-        80 - startPoint[1],
+        startPoint[1],
         s=120,
         edgecolor="black",
         linewidth=0.6,
@@ -114,7 +116,7 @@ for startPoint, endPoint in zip(startingPoints, endingPoints):
     )
     ax.plot(
         [startPoint[0], endPoint[0]],
-        [80 - startPoint[1], 80 - endPoint[1]],
+        [startPoint[1], endPoint[1]],
         linestyle="-",
         alpha=0.2,
         lw=0.6,

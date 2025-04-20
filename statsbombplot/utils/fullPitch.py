@@ -146,27 +146,27 @@ class FullPitch:
             )
         )
 
-    def draw(self):
-        """
-        Plot an empty horizontal football pitch, returning Matplotlib's ax object so we can keep adding elements to it.
-        """
+    # def draw(self):
+    #     """
+    #     Plot an empty horizontal football pitch, returning Matplotlib's ax object so we can keep adding elements to it.
+    #     """
 
-        ratio = self.height / float(self.width)
-        f, ax = plt.subplots(
-            1, 1, figsize=(self.fig_size, self.fig_size * ratio), dpi=300
-        )
-        ax.set_ylim([-5, self.height + 5])
-        ax.set_xlim([-5, self.width + 5])
-        ax.add_patch(
-            patches.Rectangle(
-                (0, 0), self.width, self.height, color=self.background_color
-            )
-        )
+    #     ratio = self.height / float(self.width)
+    #     f, ax = plt.subplots(
+    #         1, 1, figsize=(self.fig_size, self.fig_size * ratio), dpi=300
+    #     )
+    #     ax.set_ylim([-5, self.height + 5])
+    #     ax.set_xlim([-5, self.width + 5])
+    #     ax.add_patch(
+    #         patches.Rectangle(
+    #             (0, 0), self.width, self.height, color=self.background_color
+    #         )
+    #     )
 
-        self._draw_pitch_elements(ax, self.lines_color)
+    #     self._draw_pitch_elements(ax, self.lines_color)
 
-        plt.axis("off")
-        return f, ax
+    #     plt.axis("off")
+    #     return f, ax
 
     def draw(self, ax):
         """

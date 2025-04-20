@@ -36,7 +36,9 @@ for i, shot in validShots.iterrows():
 
     isHome = shot.team_id == match.homeTeamId
     pitch = FullPitch()
-    fig, ax = pitch.draw()
+
+    fig, ax = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
+    pitch.draw(ax)
 
     x = shot.location[0]
     y = 80 - shot.location[1]

@@ -67,7 +67,8 @@ for identifier, teamName, teamColor in zip(
     maxPairPassCount = pairPassCount.num_passes.max()
 
     pitch = FullPitch()
-    fig, ax = pitch.draw()
+    fig, ax = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
+    pitch.draw(ax)
 
     for pair_key, row in pairPassCount.iterrows():
         player1, player2 = pair_key.split("_")

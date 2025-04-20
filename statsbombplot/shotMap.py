@@ -27,7 +27,8 @@ isValidPeriod = df["period_id"] < 5
 shots = df[isShot & isValidPeriod]
 
 pitch = FullPitch()
-fig, ax = pitch.draw()
+fig, ax = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
+pitch.draw(ax)
 
 for _, shot in shots.iterrows():
     shotxG = round(shot.extra["shot"]["statsbomb_xg"], 3)
