@@ -15,7 +15,6 @@ folder = os.path.join("imgs/", str(f"goalkeeperZonalDistribution"))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"
 
-
 # PLAYER_NAME = "Jordan Pickford"
 # TEAM_NAME = "England"
 # MARKER_COLOR = "#f0150f"
@@ -28,17 +27,22 @@ plt.rcParams["font.family"] = "Monospace"
 # COMPETITION_ID = 55
 # SEASON_ID = 43
 
-PLAYER_NAME = "Claudio Andrés Bravo Muñoz"
-TEAM_NAME = "Barcelona"
-TEAM_COLOR = "#1f759f"
-COMPETITION_ID = 11
+# PLAYER_NAME = "Claudio Andrés Bravo Muñoz"
+# TEAM_NAME = "Barcelona"
+# TEAM_COLOR = "#1f759f"
+# COMPETITION_ID = 11
+# SEASON_ID = 27
+
+PLAYER_NAME = "David de Gea Quintana"
+TEAM_NAME = "Manchester United"
+TEAM_COLOR = "#f0150f"
+COMPETITION_ID = 2
 SEASON_ID = 27
 
 games = getAllTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, TEAM_NAME)
-games = games[1:2]
 
-ZONES_X = 4
-ZONES_Y = 4
+ZONES_X = 8
+ZONES_Y = 8
 RECT_X = 120 / ZONES_X
 RECT_Y = 80 / ZONES_Y
 passCounts = np.zeros((ZONES_Y, ZONES_X))
@@ -50,7 +54,8 @@ for gameId in tqdm(games, leave=False):
     df = match.events
     isPass = df["type_name"] == "Pass"
     isTargetPlayer = df["player_name"] == PLAYER_NAME
-    # Considering how Statsbomb data works, a pass is successful if there is no "outcome" field in the extra dict
+    # Considering how Statsbomb data works, a pass is successful if there
+    # is no "outcome" field in the extra dict.
     # Any outcome specification is negative (eg. Incomplete, Out, Unknown)
     isSuccessful = df["extra"].apply(
         lambda x: not (isinstance(x, dict) and "pass" in x and "outcome" in x["pass"])
@@ -149,9 +154,8 @@ legendElements = [
     ),
 ]
 
-extra = [f"{PLAYER_NAME} zonal pass distribution"]
 pitch.addPitchLegend(ax, legendElements=legendElements)
-pitch.addPitchNotes(ax, extra_text=extra, author="@francescozonaro")
+pitch.addPitchNotes(ax, author="@francescozonaro")
 saveFigure(
     f,
     f"{folder}/{normalizeString(PLAYER_NAME).replace(' ', '')}ZonalDistribution.png",
