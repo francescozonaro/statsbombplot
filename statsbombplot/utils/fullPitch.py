@@ -7,7 +7,8 @@ class FullPitch:
     def __init__(self):
         self.height = float(80)  # Updated height
         self.width = float(120)  # Updated width
-        self.background_color = "white"
+        # self.background_color = "white"
+        self.background_color = "#f9f7f3"
         self.lines_color = "#919191"
         self.fig_size = 15
 

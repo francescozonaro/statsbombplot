@@ -43,7 +43,6 @@ shotCountsMap = {}
 
 for idx, team in enumerate(tqdm(teams, leave=False)):
     games = getAllTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, team)
-    games = games[:1]
     ZONES_X = 24
     ZONES_Y = 16
     RECT_X = 120 / ZONES_X

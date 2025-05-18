@@ -190,23 +190,6 @@ class HalfPitch:
         ax.axis("off")
         return ax
 
-    # def addPitchNotes(self, ax, author, extra_text=None):
-    #     """
-    #     Adds author tag and extra text to the bottom left of the plot.
-    #     """
-    #     ax.text(105.2, -2.4, author, fontsize=10, va="center")
-
-    #     if extra_text:
-    #         for i, text in enumerate(extra_text):
-    #             ax.text(
-    #                 -0.25,
-    #                 -2.4 - 2 * i,
-    #                 text,
-    #                 fontsize=10,
-    #                 va="center",
-    #                 ha="left",
-    #             )
-
     def addPitchLegend(self, ax, legendElements):
         """
         Adds legend at the top of the plot

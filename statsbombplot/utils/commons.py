@@ -1,6 +1,9 @@
 import warnings
 import random
 import unicodedata
+import os
+import pickle
+import hashlib
 
 from statsbombpy.api_client import NoAuthWarning
 from .loader import Loader
@@ -15,6 +18,14 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 def getStatsbombAPI():
     api = Loader(creds={"user": "", "passwd": ""})
     return api
+
+
+def _get_cache_path(gameId):
+    CACHE_DIR = "match_cache"
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    key = f"match_{gameId}"
+    filename = hashlib.md5(key.encode()).hexdigest() + ".pkl"
+    return os.path.join(CACHE_DIR, filename)
 
 
 def fetchMatch(gameId, load_360=True):
@@ -32,6 +43,12 @@ def fetchMatch(gameId, load_360=True):
     - folder_path: The path where match-related images or outputs can be stored.
     """
 
+    cache_path = _get_cache_path(gameId)
+
+    if os.path.exists(cache_path):
+        with open(cache_path, "rb") as f:
+            return pickle.load(f)
+
     api = getStatsbombAPI()
     # Fetch match events, players, and teams
     try:
@@ -44,6 +61,9 @@ def fetchMatch(gameId, load_360=True):
 
     # Create and return the Match object
     match = Match(gameId, matchEvents, teams, players)
+
+    with open(cache_path, "wb") as f:
+        pickle.dump(match, f)
 
     return match
 
