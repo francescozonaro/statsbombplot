@@ -2,7 +2,9 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import os
 import numpy as np
+import urllib.request
 
+from PIL import Image
 from math import ceil
 from matplotlib.patches import Rectangle
 from tqdm import tqdm
@@ -29,32 +31,33 @@ os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"
 
 NORMALIZE_DATA = False
-PLOT_SINGLE_TEAMS = False
 COMPETITION_ID = 2
 SEASON_ID = 27
-TEAM_COLORS_HEX = {
-    "AFC Bournemouth": "#db0007",
-    "Arsenal": "#db0007",
-    "Aston Villa": "#670e36",
-    "Chelsea": "#034694",
-    "Crystal Palace": "#db0007",
-    "Everton": "#034694",
-    "Leicester City": "#034694",
-    "Liverpool": "#db0007",
-    "Manchester City": "#6cabdd",
-    "Manchester United": "#db0007",
-    "Newcastle United": "#241f20",
-    "Norwich City": "#12a804",
-    "Southampton": "#db0007",
-    "Stoke City": "#db0007",
-    "Sunderland": "#db0007",
-    "Swansea City": "#241f20",
-    "Tottenham Hotspur": "#241f20",
-    "Watford": "#fdb100",
-    "West Bromwich Albion": "#034694",
-    "West Ham United": "#670e36",
+RECTANGLE_COLOR_HEX = "#7956a4"
+EDGE_COLOR_HEX = "#535353"
+FOTMOB_URL = "https://images.fotmob.com/image_resources/logo/teamlogo/"
+TEAM_LOGO_URL = {
+    "AFC Bournemouth": f"{FOTMOB_URL}8678.png",
+    "Arsenal": f"{FOTMOB_URL}9825.png",
+    "Aston Villa": f"{FOTMOB_URL}10252.png",
+    "Chelsea": f"{FOTMOB_URL}8455.png",
+    "Crystal Palace": f"{FOTMOB_URL}9826.png",
+    "Everton": f"{FOTMOB_URL}8668.png",
+    "Leicester City": f"{FOTMOB_URL}8197.png",
+    "Liverpool": f"{FOTMOB_URL}8650.png",
+    "Manchester City": f"{FOTMOB_URL}8456.png",
+    "Manchester United": f"{FOTMOB_URL}10260.png",
+    "Newcastle United": f"{FOTMOB_URL}10261.png",
+    "Norwich City": f"{FOTMOB_URL}9850.png",
+    "Southampton": f"{FOTMOB_URL}8466.png",
+    "Stoke City": f"{FOTMOB_URL}10194.png",
+    "Sunderland": f"{FOTMOB_URL}8472.png",
+    "Swansea City": f"{FOTMOB_URL}10003.png",
+    "Tottenham Hotspur": f"{FOTMOB_URL}8586.png",
+    "Watford": f"{FOTMOB_URL}9817.png",
+    "West Bromwich Albion": f"{FOTMOB_URL}8659.png",
+    "West Ham United": f"{FOTMOB_URL}8654.png",
 }
-FULL_VISUAL_COLOR_HEX = "#7956a4"
 
 PITCH_WIDTH = 120
 PITCH_HEIGHT = 80
@@ -74,8 +77,6 @@ axes = axes.flatten()
 
 maxPassCounts = 0
 passCountsMap = {}
-startingPointsMap = {}
-endingPointsMap = {}
 
 for idx, team in enumerate(tqdm(teams, leave=False)):
     games = getAllTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, team)
@@ -85,8 +86,6 @@ for idx, team in enumerate(tqdm(teams, leave=False)):
     RECT_X = 120 / ZONES_X
     RECT_Y = 80 / ZONES_Y
     passCounts = np.zeros((ZONES_Y, ZONES_X))
-    startingPoints = []
-    endingPoints = []
 
     for gameId in tqdm(games, leave=False):
         match = fetchMatch(gameId, load_360=True)
@@ -108,31 +107,20 @@ for idx, team in enumerate(tqdm(teams, leave=False)):
         passes = df[isTargetPlayer & isPass & isSuccessful]
 
         for i, row in passes.iterrows():
-            startX = row["location"][0]
-            startY = 80 - row["location"][1]
             endX = row["extra"]["pass"]["end_location"][0]
             endY = 80 - row["extra"]["pass"]["end_location"][1]
             zoneX = int(endX // RECT_X)
             zoneY = int(endY // RECT_Y)
-
-            startingPoints.append(row["location"])
-            endingPoints.append(row["extra"]["pass"]["end_location"])
             if zoneX < ZONES_X and zoneY < ZONES_Y:
                 passCounts[zoneY, zoneX] += 1
 
     maxTeamPasses = np.max(passCounts)
     maxPassCounts = max(maxPassCounts, maxTeamPasses)
     passCountsMap[team] = passCounts
-    startingPointsMap[team] = startingPoints
-    endingPointsMap[team] = endingPoints
 
 for idx, team in enumerate(teams):
-
     pitch = FullPitch()
-    fSingle, axSingle = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
-    pitch.draw(axSingle)
     pitch.draw(ax=axes[idx])
-
     passCounts = passCountsMap[team]
 
     if not NORMALIZE_DATA:
@@ -146,31 +134,23 @@ for idx, team in enumerate(teams):
                 (j * RECT_X, 80 - (i + 1) * RECT_Y),
                 RECT_X,
                 RECT_Y,
-                # facecolor=TEAM_COLORS_HEX[team],
-                facecolor=FULL_VISUAL_COLOR_HEX,
+                facecolor=RECTANGLE_COLOR_HEX,
                 alpha=alphaFactor,
-                edgecolor="#535353",
+                edgecolor=EDGE_COLOR_HEX,
                 linewidth=0.2,
                 zorder=9,
             )
             axes[idx].add_patch(fill_rect)
 
-            totalTeamPasses = passCounts.sum()
-            shareOfTeamPasses = (
-                (passCounts / totalTeamPasses)
-                if totalTeamPasses > 0
-                else np.zeros_like(passCounts, dtype=float)
-            )
+            shareOfTeamPasses = passCounts / passCounts.sum()
             nonZeroShares = shareOfTeamPasses[shareOfTeamPasses > 0]
-            thr = np.percentile(nonZeroShares, 95) if nonZeroShares.size else np.inf
-            cx = j * RECT_X + RECT_X / 2
-            cy = 80 - (i + 1) * RECT_Y + RECT_Y / 2
-            s = shareOfTeamPasses[i, j]
-            if s > 0 and s >= thr:
+            thr = np.percentile(nonZeroShares, 95)
+            shareOfZone = shareOfTeamPasses[i, j]
+            if shareOfZone >= thr:
                 axes[idx].text(
-                    cx,
-                    cy,
-                    f"{s*100:.1f}%",
+                    j * RECT_X + RECT_X / 2,
+                    80 - (i + 1) * RECT_Y + RECT_Y / 2,
+                    f"{shareOfZone*100:.1f}%",
                     ha="center",
                     va="center",
                     fontsize=7,
@@ -179,26 +159,14 @@ for idx, team in enumerate(teams):
                     path_effects=[pe.withStroke(linewidth=0.5, foreground="black")],
                 )
 
-            if PLOT_SINGLE_TEAMS:
-                fill_rect_single = Rectangle(
-                    (j * RECT_X, 80 - (i + 1) * RECT_Y),
-                    RECT_X,
-                    RECT_Y,
-                    facecolor=TEAM_COLORS_HEX[team],
-                    alpha=alphaFactor,
-                    edgecolor="none",
-                    linewidth=0,
-                    zorder=9,
-                )
-                axSingle.add_patch(fill_rect_single)
+    img = Image.open(urllib.request.urlopen(TEAM_LOGO_URL[team])).convert("LA")
+    image_ax = axes[idx].inset_axes(
+        [0.02, 0.98, 0.10, 0.10], transform=axes[idx].transAxes
+    )
+    image_ax.imshow(img)
+    image_ax.axis("off")
 
-    axes[idx].text(0, 87, team, fontsize=10, va="center")
-
-    if PLOT_SINGLE_TEAMS:
-        saveFigure(
-            fSingle,
-            f"{folder}/{team}.png",
-        )
+    axes[idx].text(13, 87, team, fontsize=10, va="center")
 
 for i in range(len(teams), len(axes)):
     axes[i].axis("off")
@@ -221,7 +189,7 @@ legendElements = [
         s=70,
         edgecolor="black",
         linewidth=0.6,
-        facecolor=FULL_VISUAL_COLOR_HEX,
+        facecolor=RECTANGLE_COLOR_HEX,
         zorder=5,
         marker="s",
         label="Many received passes",
@@ -254,5 +222,5 @@ fig.patch.set_facecolor("#f9f7f3")
 
 saveFigure(
     fig,
-    f"{folder}/zFull.png",
+    f"{folder}/goalkeeperZonalDistribution.png",
 )
