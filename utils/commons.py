@@ -68,7 +68,7 @@ def fetchMatch(gameId, load_360=True):
     return match
 
 
-def fetchRandomMatch(seed=None):
+def getRandomMatchId(seed=None):
     if seed is not None:
         random.seed(seed)
 
@@ -77,7 +77,17 @@ def fetchRandomMatch(seed=None):
     randomRow = competitions.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
     games = api.games(randomRow.competition_id, randomRow.season_id)
     randomGame = games.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
-    return fetchMatch(gameId=randomGame.game_id, load_360=True)
+    return randomGame.game_id
+
+
+def getRandomCompetitionAndSeasonIds(seed=None):
+    if seed is not None:
+        random.seed(seed)
+
+    api = getStatsbombAPI()
+    competitions = api.competitions()
+    randomRow = competitions.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
+    return randomRow.competition_id, randomRow.season_id
 
 
 def getAllMatchesFromSeason(competitionId, seasonId):

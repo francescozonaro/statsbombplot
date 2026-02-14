@@ -2,14 +2,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import os
 
-from utils import (
-    FullPitch,
-    saveFigure,
-    fetchRandomMatch,
-)
+from utils import FullPitch, saveFigure, getRandomMatchId, fetchMatch
 
 
-match = fetchRandomMatch(seed=602210)
+match = fetchMatch(gameId=getRandomMatchId(seed=602210))
 folder = os.path.join("imgs/", str(match.gameId))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"

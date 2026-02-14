@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as pe
 import os
 import numpy as np
 
@@ -9,9 +10,8 @@ from utils import (
     getAllTeamMatchesFromSeason,
     getCompetitionTeamNames,
     fetchMatch,
-    HalfPitch,
-    FullPitch,
     saveFigure,
+    FullPitch,
 )
 
 
@@ -20,18 +20,18 @@ def findPlayerNameByRole(df, team, role):
         (df["type_name"] == "Starting XI") & (df["team_name"] == team)
     ].iloc[0]
     lineup = startingXI["extra"]["tactics"]["lineup"]
-    keeper = next(player for player in lineup if player["position"]["name"] == role)
-    return keeper["player"]["name"]
+    candidate = next(player for player in lineup if player["position"]["name"] == role)
+    return candidate["player"]["name"]
 
 
 folder = os.path.join("imgs/", str(f"goalkeeperDistribution"))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"
 
+NORMALIZE_DATA = False
+PLOT_SINGLE_TEAMS = False
 COMPETITION_ID = 2
 SEASON_ID = 27
-NORMALIZE_PER_TEAM = False
-PLOT_SINGLE_TEAMS = False
 TEAM_COLORS_HEX = {
     "AFC Bournemouth": "#db0007",
     "Arsenal": "#db0007",
@@ -44,31 +44,31 @@ TEAM_COLORS_HEX = {
     "Manchester City": "#6cabdd",
     "Manchester United": "#db0007",
     "Newcastle United": "#241f20",
-    "Norwich City": "#8ac926",
+    "Norwich City": "#12a804",
     "Southampton": "#db0007",
     "Stoke City": "#db0007",
     "Sunderland": "#db0007",
     "Swansea City": "#241f20",
     "Tottenham Hotspur": "#241f20",
-    "Watford": "#fdc500",
+    "Watford": "#fdb100",
     "West Bromwich Albion": "#034694",
     "West Ham United": "#670e36",
 }
+FULL_VISUAL_COLOR_HEX = "#7956a4"
 
 PITCH_WIDTH = 120
 PITCH_HEIGHT = 80
 PITCH_RATIO = PITCH_HEIGHT / PITCH_WIDTH
 
-teams = getCompetitionTeamNames(competitionId=COMPETITION_ID, seasonId=SEASON_ID)
-teams = sorted(teams)
-teams = teams[:18]
+teams = sorted(
+    getCompetitionTeamNames(competitionId=COMPETITION_ID, seasonId=SEASON_ID)
+)[:20]
+
 n_cols = min(len(teams), 5)
 n_rows = int(ceil(len(teams) / n_cols))
-
 subplot_width = 4
 fig_width = subplot_width * n_cols
 fig_height = subplot_width * PITCH_RATIO * n_rows
-
 fig, axes = plt.subplots(n_rows, n_cols, figsize=(fig_width, fig_height))
 axes = axes.flatten()
 
@@ -80,8 +80,8 @@ endingPointsMap = {}
 for idx, team in enumerate(tqdm(teams, leave=False)):
     games = getAllTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, team)
 
-    ZONES_X = 32
-    ZONES_Y = 32
+    ZONES_X = 6
+    ZONES_Y = 3
     RECT_X = 120 / ZONES_X
     RECT_Y = 80 / ZONES_Y
     passCounts = np.zeros((ZONES_Y, ZONES_X))
@@ -135,7 +135,7 @@ for idx, team in enumerate(teams):
 
     passCounts = passCountsMap[team]
 
-    if NORMALIZE_PER_TEAM:
+    if not NORMALIZE_DATA:
         maxPassCounts = np.max(passCounts)
 
     for i in range(ZONES_Y):
@@ -146,25 +146,38 @@ for idx, team in enumerate(teams):
                 (j * RECT_X, 80 - (i + 1) * RECT_Y),
                 RECT_X,
                 RECT_Y,
-                facecolor=TEAM_COLORS_HEX[team],
+                # facecolor=TEAM_COLORS_HEX[team],
+                facecolor=FULL_VISUAL_COLOR_HEX,
                 alpha=alphaFactor,
-                edgecolor="none",
-                linewidth=0,
+                edgecolor="#535353",
+                linewidth=0.2,
                 zorder=9,
             )
-            # edge_rect = Rectangle(
-            #     (j * RECT_X, 80 - (i + 1) * RECT_Y),
-            #     RECT_X,
-            #     RECT_Y,
-            #     edgecolor="#555555",
-            #     facecolor="none",
-            #     linewidth=0.1,
-            #     linestyle=(0, (3, 3)),
-            #     zorder=9,
-            # )
-
             axes[idx].add_patch(fill_rect)
-            # axes[idx].add_patch(edge_rect)
+
+            totalTeamPasses = passCounts.sum()
+            shareOfTeamPasses = (
+                (passCounts / totalTeamPasses)
+                if totalTeamPasses > 0
+                else np.zeros_like(passCounts, dtype=float)
+            )
+            nonZeroShares = shareOfTeamPasses[shareOfTeamPasses > 0]
+            thr = np.percentile(nonZeroShares, 95) if nonZeroShares.size else np.inf
+            cx = j * RECT_X + RECT_X / 2
+            cy = 80 - (i + 1) * RECT_Y + RECT_Y / 2
+            s = shareOfTeamPasses[i, j]
+            if s > 0 and s >= thr:
+                axes[idx].text(
+                    cx,
+                    cy,
+                    f"{s*100:.1f}%",
+                    ha="center",
+                    va="center",
+                    fontsize=7,
+                    color="#ffffff",
+                    zorder=10,
+                    path_effects=[pe.withStroke(linewidth=0.5, foreground="black")],
+                )
 
             if PLOT_SINGLE_TEAMS:
                 fill_rect_single = Rectangle(
@@ -177,61 +190,7 @@ for idx, team in enumerate(teams):
                     linewidth=0,
                     zorder=9,
                 )
-                # edge_rect_single = Rectangle(
-                #     (j * RECT_X, 80 - (i + 1) * RECT_Y),
-                #     RECT_X,
-                #     RECT_Y,
-                #     edgecolor="#555555",
-                #     facecolor="none",
-                #     linewidth=0.1,
-                #     linestyle=(0, (3, 3)),
-                #     zorder=9,
-                # )
                 axSingle.add_patch(fill_rect_single)
-                # axSingle.add_patch(edge_rect)
-
-    for startPoint, endPoint in zip(startingPointsMap[team], endingPointsMap[team]):
-        #     axes[idx].scatter(
-        #         startPoint[0],
-        #         startPoint[1],
-        #         s=25,
-        #         edgecolor="black",
-        #         linewidth=0.6,
-        #         facecolor=TEAM_COLORS_HEX[team],
-        #         zorder=5,
-        #         marker="o",
-        #         alpha=0.4,
-        #     )
-        #     axes[idx].plot(
-        #         [startPoint[0], endPoint[0]],
-        #         [startPoint[1], endPoint[1]],
-        #         linestyle="-",
-        #         alpha=0.2,
-        #         lw=0.6,
-        #         zorder=5,
-        #         color="#0c0c0c",
-        #     )
-        if PLOT_SINGLE_TEAMS:
-            axSingle.scatter(
-                startPoint[0],
-                startPoint[1],
-                s=25,
-                edgecolor="black",
-                linewidth=0.6,
-                facecolor=TEAM_COLORS_HEX[team],
-                zorder=5,
-                marker="o",
-                alpha=0.4,
-            )
-            axSingle.plot(
-                [startPoint[0], endPoint[0]],
-                [startPoint[1], endPoint[1]],
-                linestyle="-",
-                alpha=0.2,
-                lw=0.6,
-                zorder=5,
-                color="#0c0c0c",
-            )
 
     axes[idx].text(0, 87, team, fontsize=10, va="center")
 
@@ -254,7 +213,7 @@ legendElements = [
         facecolor="#ffffff",
         zorder=5,
         marker="s",
-        label="Few shots",
+        label="Few received passes",
     ),
     plt.scatter(
         [],
@@ -262,10 +221,10 @@ legendElements = [
         s=70,
         edgecolor="black",
         linewidth=0.6,
-        facecolor=TEAM_COLORS_HEX[team],
+        facecolor=FULL_VISUAL_COLOR_HEX,
         zorder=5,
         marker="s",
-        label="Many shots",
+        label="Many received passes",
     ),
 ]
 
