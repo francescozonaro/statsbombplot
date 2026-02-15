@@ -260,7 +260,7 @@ ax.text(
 plt.savefig(
     f"{folder}/{COMPETITION_NAME.lower().replace(' ', '')}.png",
     dpi=300,
-    facecolor="#EFE9E6",
+    facecolor="#f9f7f3",
     bbox_inches="tight",
     edgecolor="none",
     transparent=False,

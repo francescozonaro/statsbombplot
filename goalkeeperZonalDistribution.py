@@ -62,6 +62,10 @@ TEAM_LOGO_URL = {
 PITCH_WIDTH = 120
 PITCH_HEIGHT = 80
 PITCH_RATIO = PITCH_HEIGHT / PITCH_WIDTH
+ZONES_X = 6
+ZONES_Y = 5
+RECT_X = 120 / ZONES_X
+RECT_Y = 80 / ZONES_Y
 
 teams = sorted(
     getCompetitionTeamNames(competitionId=COMPETITION_ID, seasonId=SEASON_ID)
@@ -80,11 +84,6 @@ passCountsMap = {}
 
 for idx, team in enumerate(tqdm(teams, leave=False)):
     games = getAllTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, team)
-
-    ZONES_X = 6
-    ZONES_Y = 3
-    RECT_X = 120 / ZONES_X
-    RECT_Y = 80 / ZONES_Y
     passCounts = np.zeros((ZONES_Y, ZONES_X))
 
     for gameId in tqdm(games, leave=False):
@@ -181,7 +180,7 @@ legendElements = [
         facecolor="#ffffff",
         zorder=5,
         marker="s",
-        label="Few received passes",
+        label="Few GK distributions",
     ),
     plt.scatter(
         [],
@@ -192,7 +191,7 @@ legendElements = [
         facecolor=RECTANGLE_COLOR_HEX,
         zorder=5,
         marker="s",
-        label="Many received passes",
+        label="Many GK distributions",
     ),
 ]
 
