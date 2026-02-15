@@ -58,12 +58,12 @@ class Banger:
         xBanger = 1 - self.xG
 
         if self.technique != "Normal":
-            xBanger += 0.05
+            xBanger += 0.1
 
         distance = ((40 - endLocation[1]) ** 2 + (0 - endLocation[2] * 2) ** 2) ** 0.5
 
         if distance > 5:
-            xBanger += 0.075
+            xBanger += 0.1
 
         self.xBanger = round(xBanger, 2)
 
@@ -104,39 +104,6 @@ ax = plt.subplot()
 ax.set_xlim(0, 1)
 ax.set_ylim(0, 1)
 ax.set_axis_off()
-
-# Title
-plt.text(
-    x=0.05,
-    y=1.1,
-    s=f"GOALS WORTH WATCHING - {COMPETITION_NAME} Edition",
-    va="center",
-    ha="left",
-    fontsize=17,
-    color="black",
-    weight="bold",
-)
-plt.text(
-    x=0.05,
-    y=1.15,
-    s="   ",
-    va="center",
-    ha="left",
-    fontsize=8,
-    color="black",
-    weight="bold",
-)
-
-# Subtitle
-plt.text(
-    x=0.05,
-    y=1.025,
-    s=f"Remarkable goals from {COMPETITION_NAME}, selected for their exceptional xG values,\nstriking technique and precise placement, making them well worth revisiting.",
-    va="center",
-    ha="left",
-    fontsize=9,
-    color="#4E616C",
-)
 
 # Cols
 ax.text(
@@ -192,7 +159,7 @@ for i, banger in enumerate(bangersList):
             x=[0.05, 0.95],
             y1=rowHeight - 0.05,
             y2=rowHeight + 0.05,
-            color="#d7c8c1",
+            color="#eceae5",
             zorder=-1,
         )
 
@@ -241,7 +208,7 @@ for i, banger in enumerate(bangersList):
 
 ax.text(
     x=0.05,
-    y=0.03,
+    y=0.04,
     s=f"Data from Opta as of {datetime.now().strftime('%d %B %Y')}",
     size=7,
     ha="left",
@@ -249,7 +216,7 @@ ax.text(
 )
 ax.text(
     x=0.95,
-    y=0.03,
+    y=0.04,
     s=f"@francescozonaro",
     size=7,
     ha="right",
