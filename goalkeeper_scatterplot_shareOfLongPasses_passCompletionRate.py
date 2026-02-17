@@ -1,12 +1,10 @@
 import matplotlib.pyplot as plt
-import matplotlib.patheffects as pe
 import os
 import numpy as np
 import urllib.request
 import pandas as pd
 
-from PIL import Image
-from math import ceil
+from PIL import Image, ImageEnhance
 from matplotlib.patches import Rectangle
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from tqdm import tqdm
@@ -15,7 +13,6 @@ from utils import (
     getCompetitionTeamNames,
     fetchMatch,
     saveFigure,
-    FullPitch,
 )
 
 
@@ -32,11 +29,8 @@ folder = os.path.join("imgs/", str(f"goalkeeperPasses"))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"
 
-NORMALIZE_DATA = False
 COMPETITION_ID = 2
 SEASON_ID = 27
-RECTANGLE_COLOR_HEX = "#5668a4"
-EDGE_COLOR_HEX = "#535353"
 FOTMOB_URL = "https://images.fotmob.com/image_resources/logo/teamlogo/"
 TEAM_LOGO_URL = {
     "AFC Bournemouth": f"{FOTMOB_URL}8678.png",
@@ -61,16 +55,10 @@ TEAM_LOGO_URL = {
     "West Ham United": f"{FOTMOB_URL}8654.png",
 }
 
+# Data preparation
 teams = sorted(
     getCompetitionTeamNames(competitionId=COMPETITION_ID, seasonId=SEASON_ID)
 )[:20]
-
-fig = plt.figure(figsize=(10, 7), dpi=300)
-ax = plt.subplot()
-ax.set_xlim(0, 1)
-ax.set_ylim(0, 1)
-ax.set_axis_off()
-
 teamPasses = {}
 
 for idx, team in enumerate(tqdm(teams, leave=False)):
@@ -113,11 +101,13 @@ df = (
 )
 
 df["shareOfLong"] = df["longAttempted"] / (df["longAttempted"] + df["shortAttempted"])
-df["longCompletionRate"] = df["longCompleted"] / df["longAttempted"]
+# df["passCompletionRate"] = (df["longCompleted"] + df["shortCompleted"]) / (
+#     df["longAttempted"] + df["shortAttempted"]
+# )
+df["passCompletionRate"] = (df["longCompleted"]) / (df["longAttempted"])
 
-
+# Main figure
 IMAGE_W, IMAGE_H = 0.025, 0.025
-
 fig = plt.figure(
     figsize=(8, 8),
     dpi=100,
@@ -127,26 +117,72 @@ ax.set_facecolor("#eeeeee")
 ax.grid(visible=True, ls="--", color="lightgrey")
 ax.spines["right"].set_visible(False)
 ax.spines["top"].set_visible(False)
-ax.set_ylabel("Long pass completion rate", labelpad=10)
-ax.set_xlabel("Share of long passes", labelpad=10)
-ax.set_xlim(np.min(df["shareOfLong"]) - IMAGE_W, np.max(df["shareOfLong"]) + IMAGE_W)
-ax.set_ylim(
-    np.min(df["longCompletionRate"]) - IMAGE_H,
-    np.max(df["longCompletionRate"]) + IMAGE_H,
-)
+# ax.set_ylabel("GK pass completion rate", labelpad=10)
+ax.set_ylabel("GK long passes completion rate", labelpad=10)
+ax.set_xlabel("GK share of long passes", labelpad=10)
+
+minX, maxX = np.min(df["shareOfLong"]), np.max(df["shareOfLong"])
+minY, maxY = np.min(df["passCompletionRate"]), np.max(df["passCompletionRate"])
+ax.set_xlim(minX - IMAGE_W, maxX + IMAGE_W)
+ax.set_ylim(minY - 2 * IMAGE_H, maxY + 2 * IMAGE_H)
 
 for _, row in df.iterrows():
     team = row["team"]
     x = row["shareOfLong"]
-    y = row["longCompletionRate"]
+    y = row["passCompletionRate"]
 
-    img = Image.open(urllib.request.urlopen(TEAM_LOGO_URL[team])).convert("LA")
+    img = Image.open(urllib.request.urlopen(TEAM_LOGO_URL[team])).convert("RGBA")
+    enhancer = ImageEnhance.Color(img)
+    img = enhancer.enhance(0.5)
     image_ax = ax.inset_axes(
         [x - IMAGE_W / 2, y - IMAGE_H / 2, IMAGE_W, IMAGE_H], transform=ax.transData
     )
     image_ax.imshow(img)
     image_ax.axis("off")
 
+# Median
+x0 = df["shareOfLong"].median()
+y0 = df["passCompletionRate"].median()
+ax.axvline(x0, ls="--", lw=1, color="grey")
+ax.axhline(y0, ls="--", lw=1, color="grey")
+
+# Curve
+# x = df["shareOfLong"].to_numpy()
+# y = df["passCompletionRate"].to_numpy()
+# coeffs = np.polyfit(x, y, 2)
+# p = np.poly1d(coeffs)
+# x_line = np.linspace(x.min(), x.max(), 200)
+# y_line = p(x_line)
+# ax.plot(x_line, y_line, lw=2, ls="--", color="#d47e68")
+
+# Annotations
+tl_xy = (minX - IMAGE_W, maxY + 2 * IMAGE_H)
+br_xy = (maxX + IMAGE_W, minY - 2 * IMAGE_H)
+ax.annotate(
+    # "Short and\nprecise",
+    "Rarely goes long,\nwith more precision",
+    xy=tl_xy,
+    xycoords="data",
+    xytext=(5, -5),
+    textcoords="offset points",
+    ha="left",
+    multialignment="center",
+    va="top",
+    fontsize=10,
+)
+
+ax.annotate(
+    # "Long and\nimprecise",
+    "Often goes long,\nwith less precision",
+    xy=br_xy,
+    xycoords="data",
+    xytext=(-5, 5),
+    textcoords="offset points",
+    ha="right",
+    multialignment="center",
+    va="bottom",
+    fontsize=10,
+)
 
 fig.patch.set_facecolor("#f9f7f3")
 
