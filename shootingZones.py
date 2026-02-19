@@ -6,7 +6,7 @@ from matplotlib.patches import Rectangle
 from tqdm import tqdm
 from utils import (
     getAllTeamMatchesFromSeason,
-    getCompetitionTeamNames,
+    getTeamsBySeason,
     fetchMatch,
     HalfPitch,
     saveFigure,
@@ -21,7 +21,7 @@ SEASON_ID = 27
 VIZ_COLOR = "#a41212"
 NORMALIZE_PER_TEAM = True
 
-teams = getCompetitionTeamNames(competitionId=COMPETITION_ID, seasonId=SEASON_ID)
+teams = getTeamsBySeason(competitionId=COMPETITION_ID, seasonId=SEASON_ID)
 teams = sorted(teams)
 
 pitch_width = 60

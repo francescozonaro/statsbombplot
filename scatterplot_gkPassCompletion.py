@@ -8,7 +8,7 @@ from PIL import Image, ImageEnhance
 from tqdm import tqdm
 from utils import (
     getAllTeamMatchesFromSeason,
-    getCompetitionTeamNames,
+    getTeamsBySeason,
     fetchMatch,
     saveFigure,
 )
@@ -56,9 +56,7 @@ def _findKeeper(df, team, role):
 
 
 # Data preparation
-teams = sorted(
-    getCompetitionTeamNames(competitionId=COMPETITION_ID, seasonId=SEASON_ID)
-)[:20]
+teams = sorted(getTeamsBySeason(competitionId=COMPETITION_ID, seasonId=SEASON_ID))[:20]
 teamPasses = {}
 
 for idx, team in enumerate(tqdm(teams, leave=False)):

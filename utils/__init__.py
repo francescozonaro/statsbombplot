@@ -6,9 +6,12 @@ from .commons import (
     getRandomCompetitionAndSeasonIds,
     getAllMatchesFromSeason,
     getAllTeamMatchesFromSeason,
-    getCompetitionTeamNames,
+    getTeamsBySeason,
     normalizeString,
+    count_in_pitch_zones,
+    make_matplotlib_grid,
 )
 from .fullPitch import FullPitch
 from .halfPitch import HalfPitch
 from .loader import Loader
+from .config import *
