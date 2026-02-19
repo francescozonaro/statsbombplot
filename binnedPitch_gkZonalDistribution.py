@@ -16,16 +16,6 @@ from utils import (
     FullPitch,
 )
 
-
-def findPlayerNameByRole(df, team, role):
-    startingXI = df[
-        (df["type_name"] == "Starting XI") & (df["team_name"] == team)
-    ].iloc[0]
-    lineup = startingXI["extra"]["tactics"]["lineup"]
-    candidate = next(player for player in lineup if player["position"]["name"] == role)
-    return candidate["player"]["name"]
-
-
 folder = os.path.join("imgs/", str(f"goalkeeperDistribution"))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"
@@ -67,6 +57,16 @@ ZONES_Y = 5
 RECT_X = 120 / ZONES_X
 RECT_Y = 80 / ZONES_Y
 
+
+def findPlayerNameByRole(df, team, role):
+    startingXI = df[
+        (df["type_name"] == "Starting XI") & (df["team_name"] == team)
+    ].iloc[0]
+    lineup = startingXI["extra"]["tactics"]["lineup"]
+    candidate = next(player for player in lineup if player["position"]["name"] == role)
+    return candidate["player"]["name"]
+
+
 teams = sorted(
     getCompetitionTeamNames(competitionId=COMPETITION_ID, seasonId=SEASON_ID)
 )[:20]
@@ -75,7 +75,7 @@ n_cols = min(len(teams), 5)
 n_rows = int(ceil(len(teams) / n_cols))
 subplot_width = 4
 fig_width = subplot_width * n_cols
-fig_height = subplot_width * PITCH_RATIO * n_rows
+fig_height = subplot_width * n_rows * PITCH_RATIO
 fig, axes = plt.subplots(n_rows, n_cols, figsize=(fig_width, fig_height))
 axes = axes.flatten()
 

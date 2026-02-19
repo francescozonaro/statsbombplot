@@ -5,8 +5,6 @@ import urllib.request
 import pandas as pd
 
 from PIL import Image, ImageEnhance
-from matplotlib.patches import Rectangle
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from tqdm import tqdm
 from utils import (
     getAllTeamMatchesFromSeason,
@@ -16,15 +14,7 @@ from utils import (
 )
 
 
-def findPlayerNameByRole(df, team, role):
-    startingXI = df[
-        (df["type_name"] == "Starting XI") & (df["team_name"] == team)
-    ].iloc[0]
-    lineup = startingXI["extra"]["tactics"]["lineup"]
-    candidate = next(player for player in lineup if player["position"]["name"] == role)
-    return candidate["player"]["name"]
-
-
+# Constants
 folder = os.path.join("imgs/", str(f"goalkeeperPasses"))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"
@@ -55,6 +45,16 @@ TEAM_LOGO_URL = {
     "West Ham United": f"{FOTMOB_URL}8654.png",
 }
 
+
+def _findKeeper(df, team, role):
+    startingXI = df[
+        (df["type_name"] == "Starting XI") & (df["team_name"] == team)
+    ].iloc[0]
+    lineup = startingXI["extra"]["tactics"]["lineup"]
+    candidate = next(player for player in lineup if player["position"]["name"] == role)
+    return candidate["player"]["name"]
+
+
 # Data preparation
 teams = sorted(
     getCompetitionTeamNames(competitionId=COMPETITION_ID, seasonId=SEASON_ID)
@@ -75,20 +75,22 @@ for idx, team in enumerate(tqdm(teams, leave=False)):
         match = fetchMatch(gameId, load_360=True)
         df = match.events
 
-        PLAYER_NAME = findPlayerNameByRole(df, team, "Goalkeeper")
+        KEEPER_NAME = _findKeeper(df, team, "Goalkeeper")
         isPass = df["type_name"] == "Pass"
-        isTargetPlayer = df["player_name"] == PLAYER_NAME
-        gkPasses = df[isTargetPlayer & isPass]
+        isKeeper = df["player_name"] == KEEPER_NAME
+        gkPasses = df[isKeeper & isPass]
 
         for index, row in gkPasses.iterrows():
             passHeight = row["extra"]["pass"]["height"]["name"]
             passLength = row["extra"]["pass"]["length"]
-            passExtra = row.get("extra", {}).get("pass", {})
-            passSuccessful = "outcome" not in passExtra
-            threshold = 25 if passHeight == "High Pass" else 45
-            isLong = passLength > threshold
+            passSuccessful = "outcome" not in row["extra"]["pass"]
+
+            longThreshold = 25 if passHeight == "High Pass" else 45
+            isLong = passLength > longThreshold
+
             keyAttempt = "longAttempted" if isLong else "shortAttempted"
             keyComplete = "longCompleted" if isLong else "shortCompleted"
+
             teamPasses[team][keyAttempt] += 1
             if passSuccessful:
                 teamPasses[team][keyComplete] += 1
@@ -107,7 +109,7 @@ df["shareOfLong"] = df["longAttempted"] / (df["longAttempted"] + df["shortAttemp
 df["passCompletionRate"] = (df["longCompleted"]) / (df["longAttempted"])
 
 # Main figure
-IMAGE_W, IMAGE_H = 0.025, 0.025
+LOGO_W, LOGO_H = 0.025, 0.025
 fig = plt.figure(
     figsize=(8, 8),
     dpi=100,
@@ -117,14 +119,14 @@ ax.set_facecolor("#eeeeee")
 ax.grid(visible=True, ls="--", color="lightgrey")
 ax.spines["right"].set_visible(False)
 ax.spines["top"].set_visible(False)
+ax.set_xlabel("GK share of long passes", labelpad=10)
 # ax.set_ylabel("GK pass completion rate", labelpad=10)
 ax.set_ylabel("GK long passes completion rate", labelpad=10)
-ax.set_xlabel("GK share of long passes", labelpad=10)
 
 minX, maxX = np.min(df["shareOfLong"]), np.max(df["shareOfLong"])
 minY, maxY = np.min(df["passCompletionRate"]), np.max(df["passCompletionRate"])
-ax.set_xlim(minX - IMAGE_W, maxX + IMAGE_W)
-ax.set_ylim(minY - 2 * IMAGE_H, maxY + 2 * IMAGE_H)
+ax.set_xlim(minX - LOGO_W, maxX + LOGO_W)
+ax.set_ylim(minY - 2 * LOGO_H, maxY + 2 * LOGO_H)
 
 for _, row in df.iterrows():
     team = row["team"]
@@ -133,9 +135,9 @@ for _, row in df.iterrows():
 
     img = Image.open(urllib.request.urlopen(TEAM_LOGO_URL[team])).convert("RGBA")
     enhancer = ImageEnhance.Color(img)
-    img = enhancer.enhance(0.5)
+    img = enhancer.enhance(0.5)  # Lowers saturation
     image_ax = ax.inset_axes(
-        [x - IMAGE_W / 2, y - IMAGE_H / 2, IMAGE_W, IMAGE_H], transform=ax.transData
+        [x - LOGO_W / 2, y - LOGO_H / 2, LOGO_W, LOGO_H], transform=ax.transData
     )
     image_ax.imshow(img)
     image_ax.axis("off")
@@ -156,10 +158,9 @@ ax.axhline(y0, ls="--", lw=1, color="grey")
 # ax.plot(x_line, y_line, lw=2, ls="--", color="#d47e68")
 
 # Annotations
-tl_xy = (minX - IMAGE_W, maxY + 2 * IMAGE_H)
-br_xy = (maxX + IMAGE_W, minY - 2 * IMAGE_H)
+tl_xy = (minX - LOGO_W, maxY + 2 * LOGO_H)
+br_xy = (maxX + LOGO_W, minY - 2 * LOGO_H)
 ax.annotate(
-    # "Short and\nprecise",
     "Rarely goes long,\nwith more precision",
     xy=tl_xy,
     xycoords="data",
@@ -172,7 +173,6 @@ ax.annotate(
 )
 
 ax.annotate(
-    # "Long and\nimprecise",
     "Often goes long,\nwith less precision",
     xy=br_xy,
     xycoords="data",
