@@ -19,7 +19,7 @@ from utils.commons import (
 from utils.config import *
 from utils.fullPitch import FullPitch
 
-folder = os.path.join("imgs/", str(f"goalkeeperDistribution"))
+folder = os.path.join("imgs/", str(f"goalkeepers/zonalPassDistribution"))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = FONT_FAMILY
 
@@ -29,7 +29,7 @@ ZONES_X = 6
 ZONES_Y = 5
 ZONE_WIDTH = PITCH_WIDTH / ZONES_X
 ZONE_HEIGHT = PITCH_HEIGHT / ZONES_Y
-VIZ_NAME = f"gkDistribution_{COMPETITION_ID}_{SEASON_ID}"
+VIZ_NAME = f"zonalPassDistribution_{COMPETITION_ID}_{SEASON_ID}"
 
 
 def findPlayerNameByRole(df, team, role):
@@ -52,16 +52,18 @@ for idx, team in enumerate(tqdm(teams, leave=False)):
     for gameId in tqdm(games, leave=False):
         match = fetchMatch(gameId, load_360=True)
         df = match.events
-        player_name = findPlayerNameByRole(df, team, "Goalkeeper")
 
-        # Considering Statsbomb data, a pass is successful if there is no "outcome" in the extra dict. Any outcome specification is negative (eg. Incomplete, Out, Unknown)
         is_pass = df["type_name"] == "Pass"
-        is_target_player = df["player_name"] == player_name
-        passes = df[is_target_player & is_pass]
-        passes = passes[passes["extra"].apply(lambda x: "outcome" not in x["pass"])]
+        is_team = df["team_name"] == team
+        is_gk = df["position_name"] == "Goalkeeper"
+        gkPasses = df[is_team & is_gk & is_pass]
+        # Considering Statsbomb data, a pass is successful if there is no "outcome" in the extra dict. Any outcome specification is negative (eg. Incomplete, Out, Unknown)
+        gkPasses = gkPasses[
+            gkPasses["extra"].apply(lambda x: "outcome" not in x["pass"])
+        ]
 
         # Vectorized extraction of end locations and zone assignment
-        end_locations = passes["extra"].apply(lambda x: x["pass"]["end_location"])
+        end_locations = gkPasses["extra"].apply(lambda x: x["pass"]["end_location"])
         end_x = np.array([loc[0] for loc in end_locations])
         end_y = 80 - np.array([loc[1] for loc in end_locations])
         pass_counts += count_in_pitch_zones(
@@ -157,16 +159,6 @@ fig.legend(
     frameon=False,
     handletextpad=0.5,
     handleheight=1,
-)
-
-fig.text(
-    0.82,
-    0.05,
-    PERSONAL_WATERMARK,
-    fontsize=12,
-    ha="left",
-    va="center",
-    alpha=0.8,
 )
 
 fig.patch.set_facecolor(FIG_BACKGROUND_COLOR)
