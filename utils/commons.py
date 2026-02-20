@@ -105,7 +105,7 @@ def getTeamsBySeason(competitionId, seasonId):
     return list(games["home_team_name"].unique())
 
 
-def getAllTeamMatchesFromSeason(competitionId, seasonId, teamName):
+def getTeamMatchesFromSeason(competitionId, seasonId, teamName):
     games = getStatsbombAPI().games(competition_id=competitionId, season_id=seasonId)
     games = games[
         games[["home_team_name", "away_team_name"]].isin([teamName]).any(axis=1)

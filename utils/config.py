@@ -7,7 +7,7 @@ PITCH_RATIO = PITCH_HEIGHT / PITCH_WIDTH
 FONT_FAMILY = "Monospace"
 
 # Branding
-WATERMARK = "@francescozonaro"
+PERSONAL_WATERMARK = "@francescozonaro"
 
 # Colors
 FIG_BACKGROUND_COLOR = "#f9f7f3"

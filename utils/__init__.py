@@ -5,7 +5,7 @@ from .commons import (
     getRandomMatchId,
     getRandomCompetitionAndSeasonIds,
     getAllMatchesFromSeason,
-    getAllTeamMatchesFromSeason,
+    getTeamMatchesFromSeason,
     getTeamsBySeason,
     normalizeString,
     count_in_pitch_zones,

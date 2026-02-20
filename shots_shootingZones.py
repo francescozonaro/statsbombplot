@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.patches import Rectangle
 from tqdm import tqdm
 from utils import (
-    getAllTeamMatchesFromSeason,
+    getTeamMatchesFromSeason,
     getTeamsBySeason,
     fetchMatch,
     HalfPitch,
@@ -42,7 +42,7 @@ maxShotCounts = 0
 shotCountsMap = {}
 
 for idx, team in enumerate(tqdm(teams, leave=False)):
-    games = getAllTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, team)
+    games = getTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, team)
     ZONES_X = 24
     ZONES_Y = 16
     RECT_X = 120 / ZONES_X

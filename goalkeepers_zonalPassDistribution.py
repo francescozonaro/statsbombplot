@@ -7,7 +7,17 @@ import urllib.request
 from PIL import Image
 from matplotlib.patches import Rectangle
 from tqdm import tqdm
-from utils import *
+
+from utils.commons import (
+    count_in_pitch_zones,
+    fetchMatch,
+    getTeamMatchesFromSeason,
+    getTeamsBySeason,
+    make_matplotlib_grid,
+    saveFigure,
+)
+from utils.config import *
+from utils.fullPitch import FullPitch
 
 folder = os.path.join("imgs/", str(f"goalkeeperDistribution"))
 os.makedirs(folder, exist_ok=True)
@@ -19,7 +29,6 @@ ZONES_X = 6
 ZONES_Y = 5
 ZONE_WIDTH = PITCH_WIDTH / ZONES_X
 ZONE_HEIGHT = PITCH_HEIGHT / ZONES_Y
-NORMALIZE_GLOBALLY = False
 VIZ_NAME = f"gkDistribution_{COMPETITION_ID}_{SEASON_ID}"
 
 
@@ -33,12 +42,11 @@ def findPlayerNameByRole(df, team, role):
 
 
 # Data processing
-teams = sorted(getTeamsBySeason(competitionId=COMPETITION_ID, seasonId=SEASON_ID))
-maxPassCounts = 0
+teams = sorted(getTeamsBySeason(COMPETITION_ID, SEASON_ID))
 passCountsMap = {}
 
 for idx, team in enumerate(tqdm(teams, leave=False)):
-    games = getAllTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, team)
+    games = getTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, team)
     pass_counts = np.zeros((ZONES_Y, ZONES_X))
 
     for gameId in tqdm(games, leave=False):
@@ -60,8 +68,6 @@ for idx, team in enumerate(tqdm(teams, leave=False)):
             end_x, end_y, ZONES_X, ZONES_Y, PITCH_WIDTH, PITCH_HEIGHT
         )
 
-    maxTeamPasses = np.max(pass_counts)
-    maxPassCounts = max(maxPassCounts, maxTeamPasses)
     passCountsMap[team] = pass_counts
 
 
@@ -73,35 +79,32 @@ for idx, team in enumerate(teams):
     pitch = FullPitch()
     pitch.draw(ax=axes[idx])
     pass_counts = passCountsMap[team]
-
-    if not NORMALIZE_GLOBALLY:
-        maxPassCounts = np.max(pass_counts)
-
-    shareOfTeamPasses = pass_counts / pass_counts.sum()
-    nonZeroShares = shareOfTeamPasses[shareOfTeamPasses > 0]
-    thr = np.percentile(nonZeroShares, 95)
+    team_max_pass_count = np.max(pass_counts)
+    share_of_team_passes = pass_counts / pass_counts.sum()
+    non_zero_shares = share_of_team_passes[share_of_team_passes > 0]
+    label_threshold = np.percentile(non_zero_shares, 95)
     for i in range(ZONES_Y):
         for j in range(ZONES_X):
             count = pass_counts[i, j]
-            alphaFactor = 1 * count / maxPassCounts
+            alphaFactor = 1 * count / team_max_pass_count
             fill_rect = Rectangle(
                 (j * ZONE_WIDTH, 80 - (i + 1) * ZONE_HEIGHT),
                 ZONE_WIDTH,
                 ZONE_HEIGHT,
                 facecolor=PURPLE_HEX,
-                alpha=alphaFactor,
                 edgecolor=GRAY_HEX,
+                alpha=alphaFactor,
                 linewidth=0.2,
                 zorder=9,
             )
             axes[idx].add_patch(fill_rect)
 
-            shareOfZone = shareOfTeamPasses[i, j]
-            if shareOfZone >= thr:
+            cur_zone_passes = share_of_team_passes[i, j]
+            if cur_zone_passes >= label_threshold:
                 axes[idx].text(
                     j * ZONE_WIDTH + ZONE_WIDTH / 2,
                     80 - (i + 1) * ZONE_HEIGHT + ZONE_HEIGHT / 2,
-                    f"{shareOfZone*100:.1f}%",
+                    f"{cur_zone_passes*100:.1f}%",
                     ha="center",
                     va="center",
                     fontsize=7,
@@ -153,13 +156,13 @@ fig.legend(
     fancybox=True,
     frameon=False,
     handletextpad=0.5,
-    handleheight=2,
+    handleheight=1,
 )
 
 fig.text(
     0.82,
     0.05,
-    WATERMARK,
+    PERSONAL_WATERMARK,
     fontsize=12,
     ha="left",
     va="center",

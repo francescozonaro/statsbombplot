@@ -7,7 +7,7 @@ import pandas as pd
 from PIL import Image, ImageEnhance
 from tqdm import tqdm
 from utils import (
-    getAllTeamMatchesFromSeason,
+    getTeamMatchesFromSeason,
     getTeamsBySeason,
     fetchMatch,
     saveFigure,
@@ -60,7 +60,7 @@ teams = sorted(getTeamsBySeason(competitionId=COMPETITION_ID, seasonId=SEASON_ID
 teamPasses = {}
 
 for idx, team in enumerate(tqdm(teams, leave=False)):
-    games = getAllTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, team)
+    games = getTeamMatchesFromSeason(COMPETITION_ID, SEASON_ID, team)
 
     teamPasses[team] = {
         "longAttempted": 0,
