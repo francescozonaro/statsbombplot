@@ -15,12 +15,11 @@ import pandas as pd
 import os
 
 from utils import FullPitch, saveFigure, fetchMatch
-from utils.config import FIG_BACKGROUND_COLOR
+from utils.config import *
 
 folder = os.path.join("imgs/", str(f"passingNetwork"))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"
-
 
 GAME_ID = 3795506  # EURO 2020 Final
 match = fetchMatch(GAME_ID, load_360=True)
@@ -29,46 +28,39 @@ teamColors = ["#3f8ae6", "#f04a5f"]
 for identifier, teamName, teamColor in zip(
     match.teamIdentifiers, match.teamNames, teamColors
 ):
-    teamEvents = match.events[match.events["team_id"] == identifier].copy()
-    idFirstSub = teamEvents[teamEvents.type_name == "Substitution"].index.min()
+    # Data
+    df = match.events[match.events["team_id"] == identifier]
+    idFirstSub = df[df.type_name == "Substitution"].index.min()
 
-    df = (
-        teamEvents[
-            (teamEvents.index < idFirstSub)
-            & (teamEvents.type_name == "Pass")
-            & (
-                ~teamEvents["extra"].apply(
-                    lambda x: "pass" in x and "outcome" in x["pass"]
-                )
-            )
-        ]
-        .copy()
-        .reset_index(drop=True)
-    )
-    df["receiver"] = df["extra"].apply(
-        lambda x: x.get("pass", {}).get("recipient", {}).get("name")
-    )
+    isBeforeFirstSub = df.index < idFirstSub
+    isPass = df.type_name == "Pass"
+    df = df[isBeforeFirstSub & isPass]
+
+    isSuccessful = df["extra"].apply(lambda x: "outcome" not in x["pass"])
+    df = df[isSuccessful].reset_index(drop=True)
+
+    df["pass_data"] = df["extra"].apply(lambda x: x.get("pass", {}))
+    df["receiver"] = df["pass_data"].apply(lambda x: x.get("recipient", {}).get("name"))
+    df["location_end"] = df["pass_data"].apply(lambda x: x.get("end_location"))
     df["pair_key"] = df.apply(
         lambda x: "_".join(sorted([x["player_name"], x["receiver"]])), axis=1
     )
-    df["location_end"] = df["extra"].apply(
-        lambda x: x.get("pass", {}).get("end_location")
-    )
-    df[["x", "y"]] = pd.DataFrame(df["location"].tolist())
-    df[["x_end", "y_end"]] = pd.DataFrame(df["location_end"].tolist())
+    df[["x", "y"]] = df["location"].tolist()
+    df[["x_end", "y_end"]] = df["location_end"].tolist()
     df["y"] = 80 - df["y"]
-
     df = df[["player_name", "x", "y", "receiver", "x_end", "y_end", "pair_key"]]
 
     playerPassCount = df.groupby("player_name").size().to_frame("num_passes")
     playerPosition = df.groupby("player_name").agg({"x": "mean", "y": "mean"})
-    pairPassCount = df.groupby("pair_key").size().to_frame("num_passes")
-    pairPassCount = pairPassCount[pairPassCount["num_passes"] > 3]
+    pairPassCount = (
+        df.groupby("pair_key").size().to_frame("num_passes").query("num_passes > 3")
+    )
     maxPlayerPassCount = playerPassCount.num_passes.max()
     maxPairPassCount = pairPassCount.num_passes.max()
 
+    # Figure
     pitch = FullPitch()
-    fig, ax = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
+    fig, ax = plt.subplots(1, 1, figsize=(15, 15 * PITCH_RATIO), dpi=300)
     ax.set_facecolor(FIG_BACKGROUND_COLOR)
     pitch.draw(ax)
 
