@@ -31,16 +31,6 @@ ZONE_WIDTH = PITCH_WIDTH / ZONES_X
 ZONE_HEIGHT = PITCH_HEIGHT / ZONES_Y
 VIZ_NAME = f"zonalPassDistribution_{COMPETITION_ID}_{SEASON_ID}"
 
-
-def findPlayerNameByRole(df, team, role):
-    startingXI = df[
-        (df["type_name"] == "Starting XI") & (df["team_name"] == team)
-    ].iloc[0]
-    lineup = startingXI["extra"]["tactics"]["lineup"]
-    candidate = next(player for player in lineup if player["position"]["name"] == role)
-    return candidate["player"]["name"]
-
-
 # Data processing
 teams = sorted(getTeamsBySeason(COMPETITION_ID, SEASON_ID))
 passCountsMap = {}
