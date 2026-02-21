@@ -152,7 +152,7 @@ for i, shot in validShots.iterrows():
     ]
 
     pitch.addPitchLegend(ax, legendElements)
-    pitch.addPitchNotes(ax, author="@francescozonaro", extra_text=extra)
+    pitch.addPitchNotes(ax, extra_text=extra)
     saveFigure(fig, f"{folder}/shotFreezed_{match.gameId}_{i}.png")
 
     plt.close()

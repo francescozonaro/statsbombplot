@@ -187,12 +187,10 @@ class FullPitch:
         ax.axis("off")
         return ax
 
-    def addPitchNotes(self, ax, author, extra_text=None):
+    def addPitchNotes(self, ax, extra_text=None):
         """
         Adds author tag and extra text to the bottom left of the plot.
         """
-        ax.text(105.2, -2.4, author, fontsize=10, va="center")
-
         if extra_text:
             for i, text in enumerate(extra_text):
                 ax.text(

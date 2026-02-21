@@ -116,5 +116,5 @@ legendElements = [
 
 extra = [f"{match.homeTeamName} vs {match.awayTeamName}"]
 pitch.addPitchLegend(ax, legendElements)
-pitch.addPitchNotes(ax, author="@francescozonaro", extra_text=extra)
+pitch.addPitchNotes(ax, extra_text=extra)
 saveFigure(fig, f"{folder}/shotmap_{match.gameId}.png")

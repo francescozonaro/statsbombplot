@@ -15,6 +15,7 @@ import pandas as pd
 import os
 
 from utils import FullPitch, saveFigure, fetchMatch
+from utils.config import FIG_BACKGROUND_COLOR
 
 folder = os.path.join("imgs/", str(f"passingNetwork"))
 os.makedirs(folder, exist_ok=True)
@@ -68,6 +69,7 @@ for identifier, teamName, teamColor in zip(
 
     pitch = FullPitch()
     fig, ax = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
+    ax.set_facecolor(FIG_BACKGROUND_COLOR)
     pitch.draw(ax)
 
     for pair_key, row in pairPassCount.iterrows():
@@ -109,7 +111,7 @@ for identifier, teamName, teamColor in zip(
             playerY,
             ".",
             markersize=markerSize - 15,
-            color="white",
+            color=FIG_BACKGROUND_COLOR,
             zorder=6,
         )
         ax.annotate(
@@ -172,7 +174,8 @@ for identifier, teamName, teamColor in zip(
     pitch.addPitchLegend(ax, legendElements)
     pitch.addPitchNotes(
         ax,
-        author="@francescozonaro",
         extra_text=extra_text,
     )
+    fig.patch.set_facecolor(FIG_BACKGROUND_COLOR)
+
     saveFigure(fig, f"{folder}/{match.gameId}_{teamName}.png")
