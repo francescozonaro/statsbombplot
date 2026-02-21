@@ -31,7 +31,7 @@ ZONE_WIDTH = PITCH_WIDTH / ZONES_X
 ZONE_HEIGHT = PITCH_HEIGHT / ZONES_Y
 VIZ_NAME = f"zonalPassDistribution_{COMPETITION_ID}_{SEASON_ID}"
 
-# Data processing
+# Data
 teams = sorted(getTeamsBySeason(COMPETITION_ID, SEASON_ID))
 passCountsMap = {}
 
@@ -63,7 +63,7 @@ for idx, team in enumerate(tqdm(teams, leave=False)):
     passCountsMap[team] = pass_counts
 
 
-# Drawing
+# Figure
 fig, axes = make_matplotlib_grid(
     len(teams), max_cols=5, subplot_width=4, ratio=PITCH_RATIO
 )
