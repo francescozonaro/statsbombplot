@@ -16,7 +16,7 @@ import os
 
 from utils.fullPitch import FullPitch
 from utils.commons import saveFigure, fetchMatch
-from utils.config import FIG_BACKGROUND_COLOR
+from utils.config import *
 
 folder = os.path.join("imgs/", str(f"passingNetwork"))
 os.makedirs(folder, exist_ok=True)
