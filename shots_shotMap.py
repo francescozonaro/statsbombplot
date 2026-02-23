@@ -3,20 +3,23 @@ import matplotlib.patheffects as pe
 import os
 import matplotlib.colors as mcolors
 
-from utils import FullPitch, saveFigure, getRandomMatchId, fetchMatch
+from utils.fullPitch import FullPitch
+from utils.commons import saveFigure, getRandomMatchId, fetchMatch
+from utils.config import *
 
+GAME_ID = 3795506  # EURO 2020 Final
 
-match = fetchMatch(gameId=getRandomMatchId(seed=602210))
-folder = os.path.join("imgs/", str(match.gameId))
+folder = os.path.join("imgs/", str(GAME_ID))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"
 
-
-homeTeamColor = "#3f8ae6"
-awayTeamColor = "#f04a5f"
+awayTeamColor = "#3f8ae6"
+homeTeamColor = "#f04a5f"
 markerSize = 120
 lineWidth = 0.7
 
+# match = fetchMatch(gameId=getRandomMatchId(seed=602210))
+match = fetchMatch(gameId=GAME_ID)
 df = match.events
 isShot = df["type_name"] == "Shot"
 isValidPeriod = df["period_id"] < 5
@@ -24,6 +27,8 @@ shots = df[isShot & isValidPeriod]
 
 pitch = FullPitch()
 fig, ax = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
+fig.patch.set_facecolor(FIG_BACKGROUND_COLOR)
+ax.set_facecolor(FIG_BACKGROUND_COLOR)
 pitch.draw(ax)
 
 for _, shot in shots.iterrows():
@@ -85,10 +90,10 @@ legendElements = [
         s=90,
         edgecolor="black",
         linewidth=0.6,
-        facecolor=(1, 1, 1, 0.8),
+        facecolor=awayTeamColor,
         zorder=5,
-        marker="*",
-        label="Goal",
+        marker="X",
+        label="Off Target",
     ),
     plt.scatter(
         [],
@@ -96,7 +101,7 @@ legendElements = [
         s=90,
         edgecolor="black",
         linewidth=0.6,
-        facecolor=(1, 1, 1, 0.8),
+        facecolor=awayTeamColor,
         zorder=5,
         marker="o",
         label="On Target",
@@ -107,10 +112,10 @@ legendElements = [
         s=90,
         edgecolor="black",
         linewidth=0.6,
-        facecolor=(1, 1, 1, 0.8),
+        facecolor=awayTeamColor,
         zorder=5,
-        marker="X",
-        label="Off Target",
+        marker="*",
+        label="Goal",
     ),
 ]
 
