@@ -14,21 +14,22 @@ import matplotlib.lines as mlines
 import pandas as pd
 import os
 
-from utils import FullPitch, saveFigure, fetchMatch
+from utils.fullPitch import FullPitch
+from utils.commons import saveFigure, fetchMatch
 from utils.config import FIG_BACKGROUND_COLOR
 
 folder = os.path.join("imgs/", str(f"passingNetwork"))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"
 
-
 GAME_ID = 3795506  # EURO 2020 Final
-match = fetchMatch(GAME_ID, load_360=True)
-teamColors = ["#3f8ae6", "#f04a5f"]
+TEAM_COLORS = ["#3f8ae6", "#f04a5f"]
 
+match = fetchMatch(GAME_ID, load_360=True)
 for identifier, teamName, teamColor in zip(
-    match.teamIdentifiers, match.teamNames, teamColors
+    match.teamIdentifiers, match.teamNames, TEAM_COLORS
 ):
+    # Data
     teamEvents = match.events[match.events["team_id"] == identifier].copy()
     idFirstSub = teamEvents[teamEvents.type_name == "Substitution"].index.min()
 
@@ -67,6 +68,7 @@ for identifier, teamName, teamColor in zip(
     maxPlayerPassCount = playerPassCount.num_passes.max()
     maxPairPassCount = pairPassCount.num_passes.max()
 
+    # Figure
     pitch = FullPitch()
     fig, ax = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
     ax.set_facecolor(FIG_BACKGROUND_COLOR)
