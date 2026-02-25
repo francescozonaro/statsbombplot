@@ -2,121 +2,86 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import os
 import matplotlib.colors as mcolors
+import numpy as np
 
 from utils.fullPitch import FullPitch
 from utils.commons import saveFigure, getRandomMatchId, fetchMatch
 from utils.config import *
 
 GAME_ID = 3795506  # EURO 2020 Final
+HOME_TEAM_COLOR = "#3f8ae6"
+AWAY_TEAM_COLOR = "#f04a5f"
+MARKER_SIZE = 120
+LINE_WIDTH = 0.7
+OUTCOME_STYLE = {
+    "Goal": ("*", MARKER_SIZE * 1.5, 7),
+    "Saved": ("o", MARKER_SIZE, 6),
+}
 
 folder = os.path.join("imgs/", str(GAME_ID))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"
 
-awayTeamColor = "#3f8ae6"
-homeTeamColor = "#f04a5f"
-markerSize = 120
-lineWidth = 0.7
-
-# match = fetchMatch(gameId=getRandomMatchId(seed=602210))
+### Data ###
 match = fetchMatch(gameId=GAME_ID)
 df = match.events
 isShot = df["type_name"] == "Shot"
 isValidPeriod = df["period_id"] < 5
-shots = df[isShot & isValidPeriod]
+sdf = df[isShot & isValidPeriod].copy()
+isHome = sdf["team_id"] == match.homeTeamId
+sdf.loc[~isHome, "plot_x"] = sdf.loc[~isHome, "location"].map(lambda loc: loc[0])
+sdf.loc[~isHome, "plot_y"] = sdf.loc[~isHome, "location"].map(lambda loc: 80 - loc[1])
+sdf.loc[isHome, "plot_x"] = sdf.loc[isHome, "location"].map(lambda loc: 120 - loc[0])
+sdf.loc[isHome, "plot_y"] = sdf.loc[isHome, "location"].map(lambda loc: loc[1])
+sdf["team_color"] = np.where(isHome, HOME_TEAM_COLOR, AWAY_TEAM_COLOR)
 
+### Figure ###
 pitch = FullPitch()
 fig, ax = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
 fig.patch.set_facecolor(FIG_BACKGROUND_COLOR)
 ax.set_facecolor(FIG_BACKGROUND_COLOR)
 pitch.draw(ax)
 
-for _, shot in shots.iterrows():
-    shotxG = round(shot.extra["shot"]["statsbomb_xg"], 3)
-    scaledxG = 0.1 + (1 - 0.1) * (shotxG / 0.25)
-    scaledxG = min(scaledxG, 1)
+for _, shot in sdf.iterrows():
+    shot_extra = shot.extra["shot"]
+    shot_xg = round(shot_extra["statsbomb_xg"], 3)
+    scaled_xg = np.clip(shot_xg / 0.25, 0.1, 1.0)
+    outcome = shot_extra["outcome"]["name"]
+    shotTechnique = shot_extra["technique"]["name"]
+    body_part = shot_extra["body_part"]["name"]
+    shotColor = mcolors.to_rgba(shot.team_color, scaled_xg)
 
-    shotTechnique = shot.extra["shot"]["technique"]["name"]
-    if shotTechnique == "Normal":
-        shotTechnique = shot.extra["shot"]["body_part"]["name"]
+    marker, size, zorder = OUTCOME_STYLE.get(outcome, ("X", MARKER_SIZE, 5))
+    ax.scatter(
+        shot.plot_x,
+        shot.plot_y,
+        s=size,
+        edgecolor="black",
+        linewidth=LINE_WIDTH,
+        facecolor=shotColor,
+        zorder=zorder,
+        marker=marker,
+    )
 
-    if shot.team_id != match.homeTeamId:
-        x = shot.location[0]
-        y = 80 - shot.location[1]
-        shotColor = mcolors.to_rgba(homeTeamColor, scaledxG)
-    else:
-        x = 120 - shot.location[0]
-        y = shot.location[1]
-        shotColor = mcolors.to_rgba(awayTeamColor, scaledxG)
 
-    if shot.extra["shot"]["outcome"]["name"] == "Goal":
-        ax.scatter(
-            x,
-            y,
-            s=markerSize * 1.5,
-            edgecolor="black",
-            linewidth=lineWidth,
-            facecolor=shotColor,
-            zorder=7,
-            marker="*",
-        )
-    elif shot.extra["shot"]["outcome"]["name"] == "Saved":
-        ax.scatter(
-            x,
-            y,
-            s=markerSize,
-            edgecolor="black",
-            linewidth=lineWidth,
-            facecolor=shotColor,
-            zorder=6,
-            marker="o",
-        )
-    else:
-        ax.scatter(
-            x,
-            y,
-            s=markerSize,
-            edgecolor="black",
-            linewidth=lineWidth,
-            facecolor=shotColor,
-            zorder=5,
-            marker="X",
-        )
-
+legend_markers = [
+    ("X", "Off Target"),
+    ("o", "On Target"),
+    ("*", "Goal"),
+]
 legendElements = [
     plt.scatter(
         [],
         [],
         s=90,
+        marker=marker,
+        label=label,
         edgecolor="black",
         linewidth=0.6,
-        facecolor=awayTeamColor,
+        facecolor=HOME_TEAM_COLOR,
         zorder=5,
-        marker="X",
-        label="Off Target",
-    ),
-    plt.scatter(
-        [],
-        [],
-        s=90,
-        edgecolor="black",
-        linewidth=0.6,
-        facecolor=awayTeamColor,
-        zorder=5,
-        marker="o",
-        label="On Target",
-    ),
-    plt.scatter(
-        [],
-        [],
-        s=90,
-        edgecolor="black",
-        linewidth=0.6,
-        facecolor=awayTeamColor,
-        zorder=5,
-        marker="*",
-        label="Goal",
-    ),
+    )
+    for marker, label in legend_markers
 ]
 
 extra = [f"{match.homeTeamName} vs {match.awayTeamName}"]
