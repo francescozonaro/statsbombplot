@@ -2,7 +2,9 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import os
 
-from utils import FullPitch, saveFigure, getRandomMatchId, fetchMatch
+from utils.fullPitch import FullPitch
+from utils.commons import saveFigure, getRandomMatchId, fetchMatch
+from utils.config import *
 
 
 match = fetchMatch(gameId=getRandomMatchId(seed=602210))
@@ -35,6 +37,8 @@ for i, shot in validShots.iterrows():
 
     fig, ax = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
     pitch.draw(ax)
+    fig.patch.set_facecolor(FIG_BACKGROUND_COLOR)
+    ax.set_facecolor(FIG_BACKGROUND_COLOR)
 
     x = shot.location[0]
     y = 80 - shot.location[1]
@@ -156,4 +160,4 @@ for i, shot in validShots.iterrows():
     saveFigure(fig, f"{folder}/shotFreezed_{match.gameId}_{i}.png")
 
     plt.close()
-    exit()
+    exit()  # Single shot
