@@ -1,40 +1,40 @@
-import matplotlib.pyplot as plt
-import matplotlib.patheffects as pe
 import os
 
+import matplotlib.patheffects as pe
+import matplotlib.pyplot as plt
+
+from utils.commons import fetchMatch, saveFigure
+from utils.config import FIG_BACKGROUND_COLOR
 from utils.fullPitch import FullPitch
-from utils.commons import saveFigure, getRandomMatchId, fetchMatch
-from utils.config import *
 
+GAME_ID = 3795506  # EURO 2020 Final
+HOME_TEAM_COLOR = "#3f8ae6"
+AWAY_TEAM_COLOR = "#f04a5f"
 
-match = fetchMatch(gameId=getRandomMatchId(seed=602210))
-folder = os.path.join("imgs/", str(match.gameId))
+folder = os.path.join("imgs/", str(GAME_ID))
 os.makedirs(folder, exist_ok=True)
 plt.rcParams["font.family"] = "Monospace"
 
-homeTeamColor = "#3f8ae6"
-awayTeamColor = "#f04a5f"
-playerNameToJerseyNumber = {
+### Data ###
+match = fetchMatch(gameId=GAME_ID)
+player_to_jersey_map = {
     player["player_name"]: player["jersey_number"]
     for _, player in match.players.iterrows()
 }
 
 df = match.events
-isShot = df["type_name"] == "Shot"
-isValidPeriod = df["period_id"] < 5
-hasFreezeFrame = df["extra"].apply(
+is_shot = df["type_name"] == "Shot"
+is_valid_period = df["period_id"] < 5
+has_freeze = df["extra"].apply(
     lambda x: isinstance(x, dict)
     and "shot" in x
     and "freeze_frame" in x.get("shot", {})
 )
+validShots = df[is_shot & is_valid_period & has_freeze].reset_index(drop=True)
 
-validShots = df[isShot & isValidPeriod & hasFreezeFrame].reset_index(drop=True)
-
+### Figures ###
 for i, shot in validShots.iterrows():
-
-    isHome = shot.team_id == match.homeTeamId
     pitch = FullPitch()
-
     fig, ax = plt.subplots(1, 1, figsize=(15, 15 * (80 / 120)), dpi=300)
     pitch.draw(ax)
     fig.patch.set_facecolor(FIG_BACKGROUND_COLOR)
@@ -42,16 +42,18 @@ for i, shot in validShots.iterrows():
 
     x = shot.location[0]
     y = 80 - shot.location[1]
-    end_x = shot["extra"]["shot"]["end_location"][0]
-    end_y = 80 - shot["extra"]["shot"]["end_location"][1]
-    frame = shot["extra"]["shot"]["freeze_frame"]
+    shot_extra = shot["extra"]["shot"]
+    shot_end_x = shot_extra["end_location"][0]
+    shot_end_y = 80 - shot_extra["end_location"][1]
+    shot_frame = shot_extra["freeze_frame"]
+    shot_outcome = shot_extra["outcome"]["name"].lower()
+    shot_technique = shot_extra["technique"]["name"].lower()
+    shot_body_part = shot_extra["body_part"]["name"].lower()
+    shot_xg = shot_extra["statsbomb_xg"]
 
-    if isHome:
-        mainColor = homeTeamColor
-        oppColor = awayTeamColor
-    else:
-        mainColor = awayTeamColor
-        oppColor = homeTeamColor
+    is_home = shot.team_id == match.homeTeamId
+    home_color = HOME_TEAM_COLOR if is_home else AWAY_TEAM_COLOR
+    away_color = AWAY_TEAM_COLOR if is_home else HOME_TEAM_COLOR
 
     ax.scatter(
         x,
@@ -59,29 +61,25 @@ for i, shot in validShots.iterrows():
         s=120,
         edgecolor="black",
         linewidth=0.6,
-        facecolor=mainColor,
+        facecolor=home_color,
         zorder=11,
         marker="*",
     )
 
     ax.plot(
-        [x, end_x],
-        [y, end_y],
+        [x, shot_end_x],
+        [y, shot_end_y],
         color=(0, 0, 0, 0.2),
         linewidth=0.9,
         zorder=5,
         linestyle="--",
     )
 
-    for player in frame:
+    for player in shot_frame:
 
         freezed_player_x = player["location"][0]
         freezed_player_y = 80 - player["location"][1]
-
-        if player["teammate"]:
-            freezed_player_color = mainColor
-        else:
-            freezed_player_color = oppColor
+        freezed_player_color = home_color if player["teammate"] else away_color
 
         ax.scatter(
             freezed_player_x,
@@ -97,7 +95,7 @@ for i, shot in validShots.iterrows():
         ax.text(
             freezed_player_x + 0.025,
             freezed_player_y - 0.05,
-            f"{playerNameToJerseyNumber[player['player']['name']]}",
+            str(player_to_jersey_map.get(player["player"]["name"], "?")),
             fontsize=6,
             zorder=9,
             ha="center",
@@ -106,14 +104,14 @@ for i, shot in validShots.iterrows():
             path_effects=[pe.withStroke(linewidth=1.5, foreground="black")],
         )
 
-    legendElements = [
+    legend_elements = [
         plt.scatter(
             [],
             [],
             s=90,
             edgecolor="black",
             linewidth=0.6,
-            facecolor=mainColor,
+            facecolor=home_color,
             zorder=5,
             marker="*",
             label="Shot location",
@@ -124,7 +122,7 @@ for i, shot in validShots.iterrows():
             s=60,
             edgecolor="black",
             linewidth=0.6,
-            facecolor=mainColor,
+            facecolor=home_color,
             zorder=5,
             marker="o",
             label="Teammate",
@@ -135,29 +133,21 @@ for i, shot in validShots.iterrows():
             s=60,
             edgecolor="black",
             linewidth=0.6,
-            facecolor=oppColor,
+            facecolor=away_color,
             zorder=5,
             marker="o",
             label="Opponent",
         ),
     ]
 
-    shotOutcome = shot.extra["shot"]["outcome"]["name"].lower()
-    shotTechnique = (
-        shot.extra["shot"]["body_part"]["name"].lower()
-        if shot.extra["shot"]["technique"]["name"].lower() == "normal"
-        else shot.extra["shot"]["technique"]["name"].lower()
-    )
-    shotValue = shot.extra["shot"]["statsbomb_xg"]
-
-    formattedTime = f"{shot.minute}:{shot.second:02d}"
+    formatted_time = f"{shot.minute}:{shot.second:02d}"
     extra = [
-        f"At {formattedTime}, {shot.player_name} took a shot with {shotTechnique}, had an xG of {round(shotValue, 3)}, and it resulted in {shotOutcome}."
+        f"At {formatted_time}, {shot.player_name} took a shot with an xG of {round(shot_xg, 3)}, which resulted in {shot_outcome}."
     ]
 
-    pitch.addPitchLegend(ax, legendElements)
+    pitch.addPitchLegend(ax, legend_elements)
     pitch.addPitchNotes(ax, extra_text=extra)
-    saveFigure(fig, f"{folder}/shotFreezed_{match.gameId}_{i}.png")
+    saveFigure(fig, f"{folder}/shotFreezed_{i}.png")
 
     plt.close()
-    exit()  # Single shot
+    # break  # remove to process all shots

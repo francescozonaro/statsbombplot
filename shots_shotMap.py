@@ -1,12 +1,12 @@
-import matplotlib.pyplot as plt
-import matplotlib.patheffects as pe
 import os
+
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
 import numpy as np
 
+from utils.commons import fetchMatch, saveFigure
+from utils.config import FIG_BACKGROUND_COLOR
 from utils.fullPitch import FullPitch
-from utils.commons import saveFigure, getRandomMatchId, fetchMatch
-from utils.config import *
 
 GAME_ID = 3795506  # EURO 2020 Final
 HOME_TEAM_COLOR = "#3f8ae6"
