@@ -1,5 +1,4 @@
 import hashlib
-import os
 import pickle
 import random
 import warnings
@@ -7,6 +6,7 @@ import warnings
 from requests.exceptions import HTTPError
 from statsbombpy.api_client import NoAuthWarning
 
+from ..config import CACHE_DIR
 from .loader import Loader
 from .match import Match
 
@@ -15,52 +15,48 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 # Fetching
-def getStatsbombAPI():
+def get_statsbomb_api():
     api = Loader(creds={"user": "", "passwd": ""})
     return api
 
 
-def _get_cache_path(gameId):
-    CACHE_DIR = "match_cache"
-    os.makedirs(CACHE_DIR, exist_ok=True)
-    key = f"match_{gameId}"
+def _get_cache_path(game_id):
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    key = f"match_{game_id}"
     filename = hashlib.md5(key.encode()).hexdigest() + ".pkl"
-    return os.path.join(CACHE_DIR, filename)
+    return CACHE_DIR / filename
 
 
-def fetchMatch(gameId, load_360=True):
+def fetch_match(game_id, load_360=True):
     """
-    Fetches events, players, and teams from the API and creates a Match object.
+    Fetch events, players and teams for a game and return a `Match`.
+
+    Results are pickled in `CACHE_DIR`, so each game is downloaded only once.
 
     Parameters:
-    - gameId: The ID of the game to fetch data for.
-    - api: The StatsBomb API instance.
-    - folder: The base folder to store images or outputs.
-    - load_360: Whether to load 360-degree data (default: True).
-
-    Returns:
-    - match: The Match object created using fetched data.
-    - folder_path: The path where match-related images or outputs can be stored.
+    - game_id: The ID of the game to fetch data for.
+    - load_360: Whether to load 360-degree data (default: True). Falls back to
+      events only if 360 data is not available for the game.
     """
 
-    cache_path = _get_cache_path(gameId)
+    cache_path = _get_cache_path(game_id)
 
-    if os.path.exists(cache_path):
+    if cache_path.exists():
         with open(cache_path, "rb") as f:
             return pickle.load(f)
 
-    api = getStatsbombAPI()
+    api = get_statsbomb_api()
     # Fetch match events, players, and teams
     try:
-        matchEvents = api.events(gameId, load_360=load_360)
+        match_events = api.events(game_id, load_360=load_360)
     except HTTPError:
-        matchEvents = api.events(gameId, load_360=False)
+        match_events = api.events(game_id, load_360=False)
 
-    players = api.players(gameId)
-    teams = api.teams(gameId)
+    players = api.players(game_id)
+    teams = api.teams(game_id)
 
     # Create and return the Match object
-    match = Match(gameId, matchEvents, teams, players)
+    match = Match(game_id, match_events, teams, players)
 
     with open(cache_path, "wb") as f:
         pickle.dump(match, f)
@@ -68,41 +64,39 @@ def fetchMatch(gameId, load_360=True):
     return match
 
 
-def getRandomMatchId(seed=None):
+def get_random_match_id(seed=None):
     if seed is not None:
         random.seed(seed)
 
-    api = getStatsbombAPI()
+    api = get_statsbomb_api()
     competitions = api.competitions()
-    randomRow = competitions.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
-    games = api.games(randomRow.competition_id, randomRow.season_id)
-    randomGame = games.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
-    return randomGame.game_id
+    random_row = competitions.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
+    games = api.games(random_row.competition_id, random_row.season_id)
+    random_game = games.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
+    return random_game.game_id
 
 
-def getRandomCompetitionAndSeasonIds(seed=None):
+def get_random_competition_and_season_ids(seed=None):
     if seed is not None:
         random.seed(seed)
 
-    api = getStatsbombAPI()
+    api = get_statsbomb_api()
     competitions = api.competitions()
-    randomRow = competitions.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
-    return randomRow.competition_id, randomRow.season_id
+    random_row = competitions.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
+    return random_row.competition_id, random_row.season_id
 
 
-def getAllMatchesFromSeason(competitionId, seasonId):
-    games = getStatsbombAPI().games(competition_id=competitionId, season_id=seasonId)
+def get_all_matches_from_season(competition_id, season_id):
+    games = get_statsbomb_api().games(competition_id=competition_id, season_id=season_id)
     return list(games["game_id"])
 
 
-def getTeamsBySeason(competitionId, seasonId):
-    games = getStatsbombAPI().games(competition_id=competitionId, season_id=seasonId)
+def get_teams_by_season(competition_id, season_id):
+    games = get_statsbomb_api().games(competition_id=competition_id, season_id=season_id)
     return list(games["home_team_name"].unique())
 
 
-def getTeamMatchesFromSeason(competitionId, seasonId, teamName):
-    games = getStatsbombAPI().games(competition_id=competitionId, season_id=seasonId)
-    games = games[
-        games[["home_team_name", "away_team_name"]].isin([teamName]).any(axis=1)
-    ]
+def get_team_matches_from_season(competition_id, season_id, team_name):
+    games = get_statsbomb_api().games(competition_id=competition_id, season_id=season_id)
+    games = games[games[["home_team_name", "away_team_name"]].isin([team_name]).any(axis=1)]
     return list(games["game_id"])

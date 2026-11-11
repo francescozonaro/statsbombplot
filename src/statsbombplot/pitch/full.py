@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
 
@@ -147,28 +146,6 @@ class FullPitch:
             )
         )
 
-    # def draw(self):
-    #     """
-    #     Plot an empty horizontal football pitch, returning Matplotlib's ax object so we can keep adding elements to it.
-    #     """
-
-    #     ratio = self.height / float(self.width)
-    #     f, ax = plt.subplots(
-    #         1, 1, figsize=(self.fig_size, self.fig_size * ratio), dpi=300
-    #     )
-    #     ax.set_ylim([-5, self.height + 5])
-    #     ax.set_xlim([-5, self.width + 5])
-    #     ax.add_patch(
-    #         patches.Rectangle(
-    #             (0, 0), self.width, self.height, color=self.background_color
-    #         )
-    #     )
-
-    #     self._draw_pitch_elements(ax, self.lines_color)
-
-    #     plt.axis("off")
-    #     return f, ax
-
     def draw(self, ax):
         """
         Plot an empty horizontal football pitch, returning Matplotlib's ax object so we can keep adding elements to it.
@@ -177,9 +154,7 @@ class FullPitch:
         ax.set_ylim([-5, self.height + 5])
         ax.set_xlim([-5, self.width + 5])
         ax.add_patch(
-            patches.Rectangle(
-                (0, 0), self.width, self.height, color=self.background_color
-            )
+            patches.Rectangle((0, 0), self.width, self.height, color=self.background_color)
         )
 
         self._draw_pitch_elements(ax, self.lines_color)
@@ -187,7 +162,7 @@ class FullPitch:
         ax.axis("off")
         return ax
 
-    def addPitchNotes(self, ax, extra_text=None):
+    def add_pitch_notes(self, ax, extra_text=None):
         """
         Adds author tag and extra text to the bottom left of the plot.
         """
@@ -202,14 +177,14 @@ class FullPitch:
                     ha="left",
                 )
 
-    def addPitchLegend(self, ax, legendElements):
+    def add_pitch_legend(self, ax, legend_elements):
         """
         Adds legend at the top of the plot
         """
         ax.legend(
-            handles=legendElements,
+            handles=legend_elements,
             loc="upper center",
-            ncol=len(legendElements),
+            ncol=len(legend_elements),
             bbox_to_anchor=(0.5, 1),
             fontsize=10,
             fancybox=True,

@@ -6,8 +6,8 @@ Based on Socceraction Statsbomb loader
 
 """
 
-from statsbombpy import sb
 import pandas as pd
+from statsbombpy import sb
 
 
 class Loader:
@@ -62,11 +62,7 @@ class Loader:
             "referee",
         ]
 
-        obj = list(
-            sb.matches(
-                competition_id, season_id, fmt="dict", creds=self._creds
-            ).values()
-        )
+        obj = list(sb.matches(competition_id, season_id, fmt="dict", creds=self._creds).values())
 
         if not isinstance(obj, list):
             raise ValueError("The retrieved data should contain a list of games")
@@ -131,9 +127,7 @@ class Loader:
 
         obj = self._lineups(game_id)
 
-        playersdf = pd.DataFrame(
-            self._flatten_id(p) for lineup in obj for p in lineup["lineup"]
-        )
+        playersdf = pd.DataFrame(self._flatten_id(p) for lineup in obj for p in lineup["lineup"])
         playergamesdf = self.extract_player_games(self.events(game_id))
 
         playersdf = pd.merge(
@@ -210,9 +204,7 @@ class Loader:
         eventsdf["related_events"] = eventsdf["related_events"].apply(
             lambda d: d if isinstance(d, list) else []
         )
-        eventsdf["under_pressure"] = (
-            eventsdf["under_pressure"].fillna(False).astype(bool)
-        )
+        eventsdf["under_pressure"] = eventsdf["under_pressure"].fillna(False).astype(bool)
         eventsdf["counterpress"] = eventsdf["counterpress"].fillna(False).astype(bool)
         eventsdf.rename(
             columns={"id": "event_id", "period": "period_id", "match_id": "game_id"},
@@ -299,18 +291,14 @@ class Loader:
                 player_red_card = red_cards[red_cards.player_id == player["player_id"]]
                 if len(player_red_card) > 0:
                     red_card_minute = player_red_card.iloc[0].minute
-                    player["minutes_played"] = self._expand_minute(
-                        red_card_minute, periods_minutes
-                    )
+                    player["minutes_played"] = self._expand_minute(red_card_minute, periods_minutes)
                 players[player["player_id"]] = player
         # stats for substitutions
         for substitution in events[events.type_name == "Substitution"].itertuples():
             exp_sub_minute = self._expand_minute(substitution.minute, periods_minutes)
             replacement = {
                 "player_id": substitution.extra["substitution"]["replacement"]["id"],
-                "player_name": substitution.extra["substitution"]["replacement"][
-                    "name"
-                ],
+                "player_name": substitution.extra["substitution"]["replacement"]["name"],
                 "minutes_played": game_minutes - exp_sub_minute,
                 "team_id": substitution.team_id,
                 "game_id": game_id,
@@ -320,8 +308,7 @@ class Loader:
             if len(player_red_card) > 0:
                 red_card_minute = player_red_card.iloc[0].minute
                 replacement["minutes_played"] = (
-                    self._expand_minute(red_card_minute, periods_minutes)
-                    - exp_sub_minute
+                    self._expand_minute(red_card_minute, periods_minutes) - exp_sub_minute
                 )
             players[replacement["player_id"]] = replacement
             players[substitution.player_id]["minutes_played"] = exp_sub_minute
@@ -355,9 +342,7 @@ class Loader:
                 if "id" in v and "name" in v:
                     newd[k + "_id"] = v["id"]
                     newd[k + "_name"] = v["name"]
-                    newd[k + "_extra"] = {
-                        l: w for (l, w) in v.items() if l in ("id", "name")
-                    }
+                    newd[k + "_extra"] = {key: w for (key, w) in v.items() if key in ("id", "name")}
                 else:
                     newd = {**newd, **self._flatten(v)}
             else:

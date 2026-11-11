@@ -1,14 +1,22 @@
 import math
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 
+from .config import FONT_FAMILY
 
-def saveFigure(fig, filename, dpi=300):
-    """
-    Saves the figure to a file with the given dpi.
-    """
-    fig.savefig(filename, bbox_inches="tight", format="png", dpi=dpi)
+
+def apply_style():
+    """Apply the default matplotlib style (font family) used by all plots."""
+    plt.rcParams["font.family"] = FONT_FAMILY
+
+
+def save_figure(fig, path, dpi=300):
+    """Save the figure as a PNG at `path`, creating parent folders if needed."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path, bbox_inches="tight", format="png", dpi=dpi)
 
 
 def make_matplotlib_grid(n_items, max_cols=5, subplot_width=4, ratio=80 / 120):

@@ -1,3 +1,9 @@
+from pathlib import Path
+
+# Paths (relative to the working directory)
+OUTPUT_DIR = Path("output")
+CACHE_DIR = Path("match_cache")
+
 # Pitch dimensions (StatsBomb)
 PITCH_WIDTH = 120
 PITCH_HEIGHT = 80

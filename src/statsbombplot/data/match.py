@@ -1,13 +1,13 @@
 class Match:
-    def __init__(self, gameId, matchEvents, matchTeams, matchPlayers):
-        self.gameId = gameId
-        self.events = matchEvents
-        self.players = matchPlayers
+    def __init__(self, game_id, match_events, match_teams, match_players):
+        self.game_id = game_id
+        self.events = match_events
+        self.players = match_players
 
-        self.homeTeamName = matchTeams.iloc[0]["team_name"]
-        self.homeTeamId = matchTeams.iloc[0]["team_id"]
-        self.awayTeamName = matchTeams.iloc[1]["team_name"]
-        self.awayTeamId = matchTeams.iloc[1]["team_id"]
+        self.home_team_name = match_teams.iloc[0]["team_name"]
+        self.home_team_id = match_teams.iloc[0]["team_id"]
+        self.away_team_name = match_teams.iloc[1]["team_name"]
+        self.away_team_id = match_teams.iloc[1]["team_id"]
 
-        self.teamNames = list([self.homeTeamName, self.awayTeamName])
-        self.teamIdentifiers = list([self.homeTeamId, self.awayTeamId])
+        self.team_names = [self.home_team_name, self.away_team_name]
+        self.team_ids = [self.home_team_id, self.away_team_id]
