@@ -3,6 +3,8 @@ import numpy as np
 
 
 class FullPitch:
+    """A full horizontal pitch in StatsBomb coordinates (120 x 80)."""
+
     def __init__(self):
         self.height = float(80)  # Updated height
         self.width = float(120)  # Updated width

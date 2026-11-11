@@ -1,7 +1,16 @@
+from __future__ import annotations
+
 import numpy as np
 
 
-def count_in_pitch_zones(x, y, zones_x, zones_y, pitch_w=120, pitch_h=80):
+def count_in_pitch_zones(
+    x: np.ndarray,
+    y: np.ndarray,
+    zones_x: int,
+    zones_y: int,
+    pitch_w: float = 120,
+    pitch_h: float = 80,
+) -> np.ndarray:
     """
     Bin (x, y) coordinates into a grid and count occurrences per zone. Defaults to StatsBomb pitch dimensions (120x80) and orientation (y flipped).
 

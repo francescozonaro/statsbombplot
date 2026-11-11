@@ -1,5 +1,16 @@
+import pandas as pd
+
+
 class Match:
-    def __init__(self, game_id, match_events, match_teams, match_players):
+    """A single game: its events, players and the two teams (home first)."""
+
+    def __init__(
+        self,
+        game_id: int,
+        match_events: pd.DataFrame,
+        match_teams: pd.DataFrame,
+        match_players: pd.DataFrame,
+    ) -> None:
         self.game_id = game_id
         self.events = match_events
         self.players = match_players

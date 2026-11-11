@@ -1,25 +1,30 @@
+from __future__ import annotations
+
 import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.figure import Figure
 
 from .config import FONT_FAMILY
 
 
-def apply_style():
+def apply_style() -> None:
     """Apply the default matplotlib style (font family) used by all plots."""
     plt.rcParams["font.family"] = FONT_FAMILY
 
 
-def save_figure(fig, path, dpi=300):
+def save_figure(fig: Figure, path: str | Path, dpi: int = 300) -> None:
     """Save the figure as a PNG at `path`, creating parent folders if needed."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, bbox_inches="tight", format="png", dpi=dpi)
 
 
-def make_matplotlib_grid(n_items, max_cols=5, subplot_width=4, ratio=80 / 120):
+def make_matplotlib_grid(
+    n_items: int, max_cols: int = 5, subplot_width: float = 4, ratio: float = 80 / 120
+) -> tuple[Figure, np.ndarray]:
     """
     Create a grid of matplotlib subplots, hiding any unused axes.
 

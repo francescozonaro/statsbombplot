@@ -24,9 +24,15 @@ ignore = ["E501"]  # long docstrings/strings; the formatter handles code
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff"]
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
