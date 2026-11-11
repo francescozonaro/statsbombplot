@@ -3,20 +3,21 @@ import numpy as np
 from matplotlib.patches import Rectangle
 from tqdm import tqdm
 
+from statsbombplot.cli import resolve_season, season_args
 from statsbombplot.config import OUTPUT_DIR
 from statsbombplot.data import fetch_match, get_team_matches_from_season, get_teams_by_season
 from statsbombplot.pitch import HalfPitch
 from statsbombplot.plotting import apply_style, save_figure
 
-COMPETITION_ID = 2
-SEASON_ID = 27
 VIZ_COLOR = "#a41212"
 NORMALIZE_PER_TEAM = True
 
 
 def main():
     apply_style()
-    teams = get_teams_by_season(competition_id=COMPETITION_ID, season_id=SEASON_ID)
+    args = season_args("Shot density per team over a season.")
+    competition_id, season_id = resolve_season(args.competition_id, args.season_id)
+    teams = get_teams_by_season(competition_id=competition_id, season_id=season_id)
     teams = sorted(teams)
 
     pitch_width = 60
@@ -37,7 +38,7 @@ def main():
     shot_counts_map = {}
 
     for idx, team in enumerate(tqdm(teams, leave=False)):
-        games = get_team_matches_from_season(COMPETITION_ID, SEASON_ID, team)
+        games = get_team_matches_from_season(competition_id, season_id, team)
         ZONES_X = 24
         ZONES_Y = 16
         RECT_X = 120 / ZONES_X
@@ -145,7 +146,7 @@ def main():
 
     save_figure(
         fig,
-        OUTPUT_DIR / "shooting_zones" / "shooting_zones.png",
+        OUTPUT_DIR / "shooting_zones" / f"{competition_id}_{season_id}.png",
     )
 
 

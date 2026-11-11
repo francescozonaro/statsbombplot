@@ -7,6 +7,7 @@ from matplotlib.patches import Rectangle
 from PIL import Image
 from tqdm import tqdm
 
+from statsbombplot.cli import resolve_season, season_args
 from statsbombplot.config import (
     FIG_BACKGROUND_COLOR,
     GRAY_HEX,
@@ -23,24 +24,23 @@ from statsbombplot.data import fetch_match, get_team_matches_from_season, get_te
 from statsbombplot.pitch import FullPitch, count_in_pitch_zones
 from statsbombplot.plotting import apply_style, make_matplotlib_grid, save_figure
 
-COMPETITION_ID = 2
-SEASON_ID = 27
 ZONES_X = 6
 ZONES_Y = 5
 ZONE_WIDTH = PITCH_WIDTH / ZONES_X
 ZONE_HEIGHT = PITCH_HEIGHT / ZONES_Y
-VIZ_NAME = f"zonal_pass_distribution_{COMPETITION_ID}_{SEASON_ID}"
 
 # Data
 
 
 def main():
     apply_style()
-    teams = sorted(get_teams_by_season(COMPETITION_ID, SEASON_ID))
+    args = season_args("Where each team's goalkeeper distributes the ball over a season.")
+    competition_id, season_id = resolve_season(args.competition_id, args.season_id)
+    teams = sorted(get_teams_by_season(competition_id, season_id))
     pass_counts_map = {}
 
     for idx, team in enumerate(tqdm(teams, leave=False)):
-        games = get_team_matches_from_season(COMPETITION_ID, SEASON_ID, team)
+        games = get_team_matches_from_season(competition_id, season_id, team)
         pass_counts = np.zeros((ZONES_Y, ZONES_X))
 
         for game_id in tqdm(games, leave=False):
@@ -152,7 +152,7 @@ def main():
 
     save_figure(
         fig,
-        OUTPUT_DIR / "goalkeeper_zonal_pass_distribution" / f"{VIZ_NAME}.png",
+        OUTPUT_DIR / "goalkeeper_zonal_pass_distribution" / f"{competition_id}_{season_id}.png",
     )
 
 

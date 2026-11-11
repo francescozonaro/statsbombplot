@@ -6,23 +6,24 @@ import pandas as pd
 from PIL import Image, ImageEnhance
 from tqdm import tqdm
 
+from statsbombplot.cli import resolve_season, season_args
 from statsbombplot.config import FIG_BACKGROUND_COLOR, GRAY_HEX, OUTPUT_DIR, TEAM_LOGO_URL
 from statsbombplot.data import fetch_match, get_team_matches_from_season, get_teams_by_season
 from statsbombplot.plotting import apply_style, save_figure
 
-COMPETITION_ID = 2
-SEASON_ID = 27
 LOGO_W = 0.025
 LOGO_H = 0.025
 
 
 def main():
     apply_style()
+    args = season_args("Goalkeeper long-pass share vs. completion rate for every team in a season.")
+    competition_id, season_id = resolve_season(args.competition_id, args.season_id)
     # Data
-    teams = sorted(get_teams_by_season(COMPETITION_ID, SEASON_ID))
+    teams = sorted(get_teams_by_season(competition_id, season_id))
     records = []
     for team in tqdm(teams, leave=False):
-        games = get_team_matches_from_season(COMPETITION_ID, SEASON_ID, team)
+        games = get_team_matches_from_season(competition_id, season_id, team)
         long_attempted = short_attempted = long_completed = short_completed = 0
 
         for game_id in tqdm(games, leave=False):
@@ -107,7 +108,7 @@ def main():
 
     save_figure(
         fig,
-        OUTPUT_DIR / "goalkeeper_pass_completion" / "share_of_long_vs_completion.png",
+        OUTPUT_DIR / "goalkeeper_pass_completion" / f"{competition_id}_{season_id}.png",
     )
 
 

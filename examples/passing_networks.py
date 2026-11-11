@@ -12,12 +12,12 @@ import matplotlib.lines as mlines
 import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 
+from statsbombplot.cli import game_args, resolve_game
 from statsbombplot.config import FIG_BACKGROUND_COLOR, OUTPUT_DIR, PITCH_RATIO
 from statsbombplot.data import fetch_match
 from statsbombplot.pitch import FullPitch
 from statsbombplot.plotting import apply_style, save_figure
 
-GAME_ID = 3795506  # EURO 2020 Final
 TEAM_COLORS = ["#3f8ae6", "#f04a5f"]
 PLAYER_MAPPINGS = {
     "Emerson Palmieri dos Santos": "Emerson Palmieri",
@@ -28,7 +28,9 @@ PLAYER_MAPPINGS = {
 
 def main():
     apply_style()
-    match = fetch_match(GAME_ID, load_360=True)
+    args = game_args("Passing network of each team in a match.")
+    game_id = resolve_game(args.game_id)
+    match = fetch_match(game_id, load_360=True)
     for identifier, team_name, team_color in zip(match.team_ids, match.team_names, TEAM_COLORS):
         # Data
         df = match.events[match.events["team_id"] == identifier]

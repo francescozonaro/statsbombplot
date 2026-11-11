@@ -2,12 +2,12 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 
+from statsbombplot.cli import game_args, resolve_game
 from statsbombplot.config import FIG_BACKGROUND_COLOR, OUTPUT_DIR
 from statsbombplot.data import fetch_match
 from statsbombplot.pitch import FullPitch
 from statsbombplot.plotting import apply_style, save_figure
 
-GAME_ID = 3795506  # EURO 2020 Final
 HOME_TEAM_COLOR = "#3f8ae6"
 AWAY_TEAM_COLOR = "#f04a5f"
 MARKER_SIZE = 120
@@ -21,7 +21,9 @@ OUTCOME_STYLE = {
 def main():
     apply_style()
     ### Data ###
-    match = fetch_match(game_id=GAME_ID)
+    args = game_args("Shot map of a match, sized and shaded by xG.")
+    game_id = resolve_game(args.game_id)
+    match = fetch_match(game_id=game_id)
     df = match.events
     is_shot = df["type_name"] == "Shot"
     is_valid_period = df["period_id"] < 5

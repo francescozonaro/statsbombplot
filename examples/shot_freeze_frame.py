@@ -1,15 +1,18 @@
 import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 
+from statsbombplot.cli import game_args, resolve_game
 from statsbombplot.config import FIG_BACKGROUND_COLOR, OUTPUT_DIR
-from statsbombplot.data import fetch_match, get_random_match_id
+from statsbombplot.data import fetch_match
 from statsbombplot.pitch import FullPitch
 from statsbombplot.plotting import apply_style, save_figure
 
 
 def main():
     apply_style()
-    match = fetch_match(game_id=get_random_match_id(seed=602210))
+    args = game_args("Freeze frame of the players at the moment of a shot.")
+    game_id = resolve_game(args.game_id)
+    match = fetch_match(game_id=game_id)
 
     home_team_color = "#3f8ae6"
     away_team_color = "#f04a5f"
@@ -151,10 +154,9 @@ def main():
 
         pitch.add_pitch_legend(ax, legend_elements)
         pitch.add_pitch_notes(ax, extra_text=extra)
-        save_figure(fig, OUTPUT_DIR / "shot_freeze_frame" / f"{match.game_id}_{i}.png")
+        save_figure(fig, OUTPUT_DIR / "shot_freeze_frame" / str(match.game_id) / f"{i}.png")
 
         plt.close(fig)
-        break  # Single shot
 
 
 if __name__ == "__main__":

@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import pickle
-import random
 import warnings
+from functools import lru_cache
 from pathlib import Path
 
+import pandas as pd
 from requests.exceptions import HTTPError
 from statsbombpy.api_client import NoAuthWarning
 
@@ -67,44 +68,30 @@ def fetch_match(game_id: int, load_360: bool = True) -> Match:
     return match
 
 
-def get_random_match_id(seed: int | None = None) -> int:
-    """Pick a random game from a random competition/season (reproducible with `seed`)."""
-    if seed is not None:
-        random.seed(seed)
-
-    api = get_statsbomb_api()
-    competitions = api.competitions()
-    random_row = competitions.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
-    games = api.games(random_row.competition_id, random_row.season_id)
-    random_game = games.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
-    return random_game.game_id
+@lru_cache(maxsize=None)
+def get_competitions() -> pd.DataFrame:
+    """Return every competition/season available in the StatsBomb open data."""
+    return get_statsbomb_api().competitions()
 
 
-def get_random_competition_and_season_ids(seed: int | None = None) -> tuple[int, int]:
-    """Pick a random (competition_id, season_id) pair (reproducible with `seed`)."""
-    if seed is not None:
-        random.seed(seed)
-
-    api = get_statsbomb_api()
-    competitions = api.competitions()
-    random_row = competitions.sample(n=1, random_state=random.randint(0, 10000)).iloc[0]
-    return random_row.competition_id, random_row.season_id
+@lru_cache(maxsize=None)
+def get_games(competition_id: int, season_id: int) -> pd.DataFrame:
+    """Return the games (date, gameweek, teams, score...) of a competition season."""
+    return get_statsbomb_api().games(competition_id=competition_id, season_id=season_id)
 
 
 def get_all_matches_from_season(competition_id: int, season_id: int) -> list[int]:
     """Return the ids of all games in a competition season."""
-    games = get_statsbomb_api().games(competition_id=competition_id, season_id=season_id)
-    return list(games["game_id"])
+    return list(get_games(competition_id, season_id)["game_id"])
 
 
 def get_teams_by_season(competition_id: int, season_id: int) -> list[str]:
     """Return the names of the teams that played in a competition season."""
-    games = get_statsbomb_api().games(competition_id=competition_id, season_id=season_id)
-    return list(games["home_team_name"].unique())
+    return list(get_games(competition_id, season_id)["home_team_name"].unique())
 
 
 def get_team_matches_from_season(competition_id: int, season_id: int, team_name: str) -> list[int]:
     """Return the ids of all games a team played in a competition season."""
-    games = get_statsbomb_api().games(competition_id=competition_id, season_id=season_id)
+    games = get_games(competition_id, season_id)
     games = games[games[["home_team_name", "away_team_name"]].isin([team_name]).any(axis=1)]
     return list(games["game_id"])

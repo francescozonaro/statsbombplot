@@ -20,8 +20,15 @@ pip install -e ".[dev]"
 Every plot is a standalone script in [`examples/`](examples). Run one from the repository root:
 
 ```bash
-python examples/shot_map.py
+python examples/shot_map.py                       # asks which match to plot
+python examples/shot_map.py --game-id 3795506     # no questions
+python examples/shooting_zones.py --competition-id 2 --season-id 27
 ```
+
+Whatever a script needs and you did not pass, it asks for, listing only what exists in the open data:
+competition, then its seasons, then (for match scripts) its games with date, gameweek or stage, and score.
+At any prompt, type a number to pick, or type text (a team, a year) to filter the list.
+Run a script with `--help` to see its flags. Without a terminal (e.g. in CI) all flags are required.
 
 Images are written to `output/<script_name>/`. Match data is downloaded once from the StatsBomb open data
 and cached in `match_cache/`.
@@ -41,6 +48,7 @@ and cached in `match_cache/`.
 ```
 src/statsbombplot/
   config.py        paths, colors, pitch dimensions
+  cli.py           command-line flags and interactive prompts
   plotting.py      shared matplotlib helpers (style, save, grids)
   data/            StatsBomb loader, match model and cached fetching
   pitch/           full/half pitch drawing and zone counting

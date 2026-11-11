@@ -3,13 +3,10 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+from statsbombplot.cli import resolve_season, season_args
 from statsbombplot.config import OUTPUT_DIR
 from statsbombplot.data import fetch_match, get_all_matches_from_season
 from statsbombplot.plotting import apply_style
-
-COMPETITION_NAME = "EURO 2020"
-COMPETITION_ID = 55
-SEASON_ID = 43
 
 
 class Banger:
@@ -65,7 +62,9 @@ class Banger:
 
 def main():
     apply_style()
-    games = get_all_matches_from_season(competition_id=COMPETITION_ID, season_id=SEASON_ID)
+    args = season_args("The goals with the lowest xG of a competition season, ranked.")
+    competition_id, season_id = resolve_season(args.competition_id, args.season_id)
+    games = get_all_matches_from_season(competition_id=competition_id, season_id=season_id)
     bangers = []
 
     for game_id in tqdm(games, leave=False):
@@ -220,7 +219,7 @@ def main():
         va="center",
     )
 
-    out = OUTPUT_DIR / "goals_worth_watching" / f"{COMPETITION_NAME.lower().replace(' ', '')}.png"
+    out = OUTPUT_DIR / "goals_worth_watching" / f"{competition_id}_{season_id}.png"
     out.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(
         out,
