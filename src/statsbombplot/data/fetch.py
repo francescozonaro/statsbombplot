@@ -87,7 +87,9 @@ def get_all_matches_from_season(competition_id: int, season_id: int) -> list[int
 
 def get_teams_by_season(competition_id: int, season_id: int) -> list[str]:
     """Return the names of the teams that played in a competition season."""
-    return list(get_games(competition_id, season_id)["home_team_name"].unique())
+    games = get_games(competition_id, season_id)
+    # home and away: in partial data (e.g. only one club's games) some teams never play at home
+    return sorted(set(games["home_team_name"]) | set(games["away_team_name"]))
 
 
 def get_team_matches_from_season(competition_id: int, season_id: int, team_name: str) -> list[int]:
