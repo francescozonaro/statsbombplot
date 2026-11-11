@@ -52,6 +52,11 @@ def test_choose_filters_by_text_and_treats_out_of_range_numbers_as_text(terminal
     assert cli.choose("Pick:", [("a", "Argentina"), ("b", "Brazil"), ("c", "Chile")]) == "b"
 
 
+def test_choose_does_not_crash_on_unicode_digits(terminal):
+    terminal("\u00b2", "1")  # a superscript two is not a number
+    assert cli.choose("Pick:", [("a", "A"), ("b", "B")]) == "a"
+
+
 def test_choose_filters_by_year(terminal):
     terminal("2015", "1")
     assert cli.choose("Pick:", [("a", "2014/2015"), ("b", "2016/2017")]) == "a"

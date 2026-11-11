@@ -16,7 +16,13 @@ from statsbombplot.config import (
     PLAIN_WHITE_HEX,
     PURPLE_HEX,
 )
-from statsbombplot.data import fetch_match, get_team_matches_from_season, get_teams_by_season
+from statsbombplot.data import (
+    fetch_match,
+    get_all_matches_from_season,
+    get_team_matches_from_season,
+    get_teams_by_season,
+    prefetch_matches,
+)
 from statsbombplot.pitch import FullPitch, count_in_pitch_zones
 from statsbombplot.plotting import apply_style, load_team_logo, make_matplotlib_grid, save_figure
 
@@ -33,6 +39,7 @@ def main():
     args = season_args("Where each team's goalkeeper distributes the ball over a season.")
     competition_id, season_id = resolve_season(args.competition_id, args.season_id)
     teams = sorted(get_teams_by_season(competition_id, season_id))
+    prefetch_matches(get_all_matches_from_season(competition_id, season_id))
     pass_counts_map = {}
 
     for idx, team in enumerate(tqdm(teams, leave=False)):
@@ -40,7 +47,7 @@ def main():
         pass_counts = np.zeros((ZONES_Y, ZONES_X))
 
         for game_id in tqdm(games, leave=False):
-            match = fetch_match(game_id, load_360=True)
+            match = fetch_match(game_id)
             df = match.events
 
             is_pass = df["type_name"] == "Pass"

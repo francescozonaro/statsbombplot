@@ -1,9 +1,7 @@
-"""
+"""Adapted from the StatsBomb loader of socceraction (MIT License,
+Copyright (c) 2019 KU Leuven Machine Learning Research Group).
 
-Based on Socceraction Statsbomb loader
-
-(https://github.com/ML-KULeuven/socceraction)
-
+https://github.com/ML-KULeuven/socceraction - full notice in THIRD_PARTY_NOTICES.md
 """
 
 import pandas as pd
@@ -15,10 +13,6 @@ class Loader:
         self,
         creds=None,
     ):
-        if sb is None:
-            raise ImportError(
-                """The 'statsbombpy' package is required. Install with 'pip install statsbombpy'."""
-            )
         self._creds = creds or sb.DEFAULT_CREDS
 
     def competitions(self):

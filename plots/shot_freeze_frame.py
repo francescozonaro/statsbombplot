@@ -2,7 +2,12 @@ import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 
 from statsbombplot.cli import game_args, resolve_game
-from statsbombplot.config import FIG_BACKGROUND_COLOR, OUTPUT_DIR
+from statsbombplot.config import (
+    AWAY_TEAM_COLOR,
+    FIG_BACKGROUND_COLOR,
+    HOME_TEAM_COLOR,
+    OUTPUT_DIR,
+)
 from statsbombplot.data import fetch_match
 from statsbombplot.pitch import FullPitch
 from statsbombplot.plotting import apply_style, save_figure
@@ -26,8 +31,6 @@ def main():
     game_id = resolve_game(args.game_id)
     match = fetch_match(game_id=game_id)
 
-    home_team_color = "#3f8ae6"
-    away_team_color = "#f04a5f"
     player_name_to_jersey_number = {
         player["player_name"]: player["jersey_number"] for _, player in match.players.iterrows()
     }
@@ -57,11 +60,11 @@ def main():
         frame = shot["extra"]["shot"]["freeze_frame"]
 
         if is_home:
-            main_color = home_team_color
-            opp_color = away_team_color
+            main_color = HOME_TEAM_COLOR
+            opp_color = AWAY_TEAM_COLOR
         else:
-            main_color = away_team_color
-            opp_color = home_team_color
+            main_color = AWAY_TEAM_COLOR
+            opp_color = HOME_TEAM_COLOR
 
         ax.scatter(
             x,

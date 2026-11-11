@@ -5,7 +5,13 @@ from tqdm import tqdm
 
 from statsbombplot.cli import resolve_season, season_args
 from statsbombplot.config import OUTPUT_DIR
-from statsbombplot.data import fetch_match, get_team_matches_from_season, get_teams_by_season
+from statsbombplot.data import (
+    fetch_match,
+    get_all_matches_from_season,
+    get_team_matches_from_season,
+    get_teams_by_season,
+    prefetch_matches,
+)
 from statsbombplot.pitch import HalfPitch
 from statsbombplot.plotting import apply_style, make_matplotlib_grid, save_figure
 
@@ -19,6 +25,7 @@ def main():
     competition_id, season_id = resolve_season(args.competition_id, args.season_id)
     teams = get_teams_by_season(competition_id=competition_id, season_id=season_id)
     teams = sorted(teams)
+    prefetch_matches(get_all_matches_from_season(competition_id, season_id))
 
     pitch_width = 60
     pitch_height = 80
@@ -41,7 +48,7 @@ def main():
         ending_points = []
 
         for game_id in tqdm(games, leave=False):
-            match = fetch_match(game_id, load_360=True)
+            match = fetch_match(game_id)
             df = match.events
             shots = df[df["type_name"] == "Shot"]
 

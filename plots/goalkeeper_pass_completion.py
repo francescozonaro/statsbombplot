@@ -6,7 +6,13 @@ from tqdm import tqdm
 
 from statsbombplot.cli import resolve_season, season_args
 from statsbombplot.config import FIG_BACKGROUND_COLOR, GRAY_HEX, OUTPUT_DIR
-from statsbombplot.data import fetch_match, get_team_matches_from_season, get_teams_by_season
+from statsbombplot.data import (
+    fetch_match,
+    get_all_matches_from_season,
+    get_team_matches_from_season,
+    get_teams_by_season,
+    prefetch_matches,
+)
 from statsbombplot.plotting import apply_style, load_team_logo, save_figure
 
 LOGO_W = 0.025
@@ -19,13 +25,14 @@ def main():
     competition_id, season_id = resolve_season(args.competition_id, args.season_id)
     # Data
     teams = sorted(get_teams_by_season(competition_id, season_id))
+    prefetch_matches(get_all_matches_from_season(competition_id, season_id))
     records = []
     for team in tqdm(teams, leave=False):
         games = get_team_matches_from_season(competition_id, season_id, team)
         long_attempted = short_attempted = long_completed = short_completed = 0
 
         for game_id in tqdm(games, leave=False):
-            match = fetch_match(game_id, load_360=True)
+            match = fetch_match(game_id)
             df = match.events
 
             gk_passes = df[

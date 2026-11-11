@@ -20,9 +20,10 @@ PERSONAL_WATERMARK = "@francescozonaro"
 FIG_BACKGROUND_COLOR = "#f9f7f3"
 PURPLE_HEX = "#7956a4"
 GRAY_HEX = "#535353"
-LIGHT_GRAY_HEX = "#707070"
 PLAIN_WHITE_HEX = "#ffffff"
 PLAIN_BLACK_HEX = "#000000"
+HOME_TEAM_COLOR = "#3f8ae6"
+AWAY_TEAM_COLOR = "#f04a5f"
 
 # Team logos: StatsBomb team name -> Fotmob team id (see team_logos.json)
 FOTMOB_URL = "https://images.fotmob.com/image_resources/logo/teamlogo/"

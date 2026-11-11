@@ -18,5 +18,5 @@ env/
 .DS_Store
 
 # Generated data and outputs
-/output
-/match_cache
+output/
+match_cache/

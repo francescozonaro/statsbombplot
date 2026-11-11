@@ -17,12 +17,19 @@ def apply_style() -> None:
     plt.rcParams["font.family"] = FONT_FAMILY
 
 
+LOGO_TIMEOUT_SECONDS = 10
+
+
 def load_team_logo(team: str, mode: str = "RGBA") -> Image.Image | None:
-    """Download a team's logo, or return None if we have no logo URL for that team."""
+    """Download a team's logo, or return None if we have none or the download fails."""
     url = TEAM_LOGO_URL.get(team)
     if url is None:
         return None
-    return Image.open(urllib.request.urlopen(url)).convert(mode)
+    try:
+        with urllib.request.urlopen(url, timeout=LOGO_TIMEOUT_SECONDS) as response:
+            return Image.open(response).convert(mode)
+    except OSError:  # timeout, HTTP/network error or an unreadable image
+        return None
 
 
 def save_figure(fig: Figure, path: str | Path, dpi: int = 300) -> None:

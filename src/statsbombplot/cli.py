@@ -50,7 +50,7 @@ def choose(title: str, options: Sequence[tuple[T, str]]) -> T:
         except (EOFError, KeyboardInterrupt):
             raise SystemExit("\naborted") from None
 
-        if answer.isdigit() and 1 <= int(answer) <= len(shown):
+        if answer.isdecimal() and 1 <= int(answer) <= len(shown):
             return shown[int(answer) - 1][0]
         elif not answer:
             shown = list(options)

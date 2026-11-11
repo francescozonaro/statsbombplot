@@ -1,7 +1,7 @@
 # statsbombplot
 
 Football analytics visualizations built on [StatsBomb open data](https://github.com/statsbomb/open-data).
-Shot maps, passing networks, goalkeeper distribution, shot freeze frames and more, drawn with matplotlib on
+Passing networks, goalkeeper distribution, shot freeze frames and more, drawn with matplotlib on
 a StatsBomb-coordinate pitch.
 
 ## Installation
@@ -20,8 +20,8 @@ pip install -e ".[dev]"
 Every plot is a standalone script in [`plots/`](plots). Run one from the repository root:
 
 ```bash
-python plots/shot_map.py                       # asks which match to plot
-python plots/shot_map.py --game-id 3795506     # no questions
+python plots/passing_networks.py                       # asks which match to plot
+python plots/passing_networks.py --game-id 3795506     # no questions
 python plots/shooting_zones.py --competition-id 2 --season-id 27
 ```
 
@@ -35,7 +35,6 @@ and cached in `match_cache/`.
 
 | Script | What it draws |
 | --- | --- |
-| `shot_map.py` | Both teams' shots in a match, sized and shaded by xG |
 | `shot_freeze_frame.py` | Player positions at the moment of a shot (360 data) |
 | `shooting_zones.py` | Shot density per team over a season |
 | `passing_networks.py` | Average positions and pass counts between players |
@@ -56,9 +55,10 @@ All images use EURO 2020 data (the final, Italy vs England, for the match plots)
 
 | | |
 | --- | --- |
-| ![Shot map](docs/images/shot_map.png) | ![Shot freeze frame](docs/images/shot_freeze_frame.png) |
-| ![Passing network](docs/images/passing_network.png) | ![Goalkeeper pass completion](docs/images/goalkeeper_pass_completion.png) |
-| ![Shooting zones](docs/images/shooting_zones.png) | ![Goalkeeper zonal pass distribution](docs/images/goalkeeper_zonal_pass_distribution.png) |
+| ![Shot freeze frame](docs/images/shot_freeze_frame.png) | ![Passing network](docs/images/passing_network.png) |
+| ![Goalkeeper pass completion](docs/images/goalkeeper_pass_completion.png) | ![Shooting zones](docs/images/shooting_zones.png) |
+
+![Goalkeeper zonal pass distribution](docs/images/goalkeeper_zonal_pass_distribution.png)
 
 ![Goals worth watching](docs/images/goals_worth_watching.png)
 
@@ -92,4 +92,4 @@ please credit StatsBomb in anything you publish.
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE). Third-party code is credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

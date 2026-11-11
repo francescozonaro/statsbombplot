@@ -13,12 +13,19 @@ import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 
 from statsbombplot.cli import game_args, resolve_game
-from statsbombplot.config import FIG_BACKGROUND_COLOR, OUTPUT_DIR, PITCH_RATIO
+from statsbombplot.config import (
+    AWAY_TEAM_COLOR,
+    FIG_BACKGROUND_COLOR,
+    HOME_TEAM_COLOR,
+    OUTPUT_DIR,
+    PITCH_RATIO,
+)
 from statsbombplot.data import fetch_match
 from statsbombplot.pitch import FullPitch
 from statsbombplot.plotting import apply_style, save_figure
 
-TEAM_COLORS = ["#3f8ae6", "#f04a5f"]
+# Display names for the labels: the plot shows each player's last word, so multi-part surnames
+# and long legal names are rewritten. Add entries here for other matches.
 PLAYER_MAPPINGS = {
     "Emerson Palmieri dos Santos": "Emerson Palmieri",
     "Giovanni Di Lorenzo": "Giovanni DiLorenzo",
@@ -30,8 +37,10 @@ def main():
     apply_style()
     args = game_args("Passing network of each team in a match.")
     game_id = resolve_game(args.game_id)
-    match = fetch_match(game_id, load_360=True)
-    for identifier, team_name, team_color in zip(match.team_ids, match.team_names, TEAM_COLORS):
+    match = fetch_match(game_id)
+    for identifier, team_name, team_color in zip(
+        match.team_ids, match.team_names, (HOME_TEAM_COLOR, AWAY_TEAM_COLOR)
+    ):
         # Data
         df = match.events[match.events["team_id"] == identifier]
         id_first_sub = df[df.type_name == "Substitution"].index.min()

@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from statsbombplot.cli import resolve_season, season_args
-from statsbombplot.config import OUTPUT_DIR
-from statsbombplot.data import fetch_match, get_all_matches_from_season
+from statsbombplot.config import OUTPUT_DIR, PERSONAL_WATERMARK
+from statsbombplot.data import fetch_match, get_all_matches_from_season, prefetch_matches
 from statsbombplot.plotting import apply_style
 
 
@@ -58,10 +58,11 @@ def main():
     args = season_args("The most spectacular goals of a season, ranked by an xBanger score.")
     competition_id, season_id = resolve_season(args.competition_id, args.season_id)
     games = get_all_matches_from_season(competition_id=competition_id, season_id=season_id)
+    prefetch_matches(games)
     bangers = []
 
     for game_id in tqdm(games, leave=False):
-        match = fetch_match(game_id, load_360=True)
+        match = fetch_match(game_id)
         events = match.events
         shots = events[events["type_name"] == "Shot"]
         for i, row in shots.iterrows():
@@ -217,7 +218,7 @@ def main():
     ax.text(
         x=0.95,
         y=0.04,
-        s="@francescozonaro",
+        s=PERSONAL_WATERMARK,
         size=7,
         ha="right",
         va="center",
