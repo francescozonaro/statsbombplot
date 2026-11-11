@@ -109,7 +109,7 @@ def main():
             ax.text(
                 freezed_player_x + 0.025,
                 freezed_player_y - 0.05,
-                f"{player_name_to_jersey_number[player['player']['name']]}",
+                str(player_name_to_jersey_number.get(player["player"]["name"], "?")),
                 fontsize=6,
                 zorder=9,
                 ha="center",
