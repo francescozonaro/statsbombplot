@@ -22,7 +22,7 @@ Every plot is a standalone script in [`plots/`](plots). Run one from the reposit
 ```bash
 python plots/passing_networks.py                       # asks which match to plot
 python plots/passing_networks.py --game-id 3795506     # no questions
-python plots/shooting_zones.py --competition-id 2 --season-id 27
+python plots/goalkeeper_pass_completion.py --competition-id 2 --season-id 27
 ```
 
 Whatever a script needs and you did not pass, it asks for, listing only what exists in the open data:
@@ -36,7 +36,6 @@ and cached in `match_cache/`.
 | Script | What it draws |
 | --- | --- |
 | `shot_freeze_frame.py` | Player positions at the moment of a shot (360 data) |
-| `shooting_zones.py` | Shot density per team over a season |
 | `passing_networks.py` | Average positions and pass counts between players |
 | `goalkeeper_pass_completion.py` | Long-pass share vs. completion rate for every team's goalkeeper |
 | `goalkeeper_zonal_pass_distribution.py` | Where each team's goalkeeper distributes the ball |
@@ -56,9 +55,7 @@ All images use EURO 2020 data (the final, Italy vs England, for the match plots)
 | | |
 | --- | --- |
 | ![Shot freeze frame](docs/images/shot_freeze_frame.png) | ![Passing network](docs/images/passing_network.png) |
-| ![Goalkeeper pass completion](docs/images/goalkeeper_pass_completion.png) | ![Shooting zones](docs/images/shooting_zones.png) |
-
-![Goalkeeper zonal pass distribution](docs/images/goalkeeper_zonal_pass_distribution.png)
+| ![Goalkeeper pass completion](docs/images/goalkeeper_pass_completion.png) | ![Goalkeeper zonal pass distribution](docs/images/goalkeeper_zonal_pass_distribution.png) |
 
 ![Goals worth watching](docs/images/goals_worth_watching.png)
 
@@ -70,7 +67,7 @@ src/statsbombplot/
   cli.py           command-line flags and interactive prompts
   plotting.py      shared matplotlib helpers (style, save, grids)
   data/            StatsBomb loader, match model and cached fetching
-  pitch/           full/half pitch drawing and zone counting
+  pitch/           pitch drawing and zone counting
 plots/             one runnable script per plot
 docs/images/       gallery images used in this README
 tests/             unit tests (no network needed)

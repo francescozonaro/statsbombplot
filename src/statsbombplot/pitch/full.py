@@ -11,10 +11,6 @@ class FullPitch:
         self.background_color = "#f9f7f3"
         self.lines_color = "#919191"
         self.fig_size = 15
-        # Subclasses show only part of the pitch: where it starts (0-1 of the width)
-        # and which angles of the centre circle to draw.
-        self.x_start = 0.0
-        self.circle_angles = (0, 360)
 
     def _point_to_meters(self, p):
         """Convert a point's coordinates from a 0-1 range to meters."""
@@ -34,11 +30,11 @@ class FullPitch:
                 self._point_to_meters([1, 1]),
             ],  # Right line
             [
-                self._point_to_meters([self.x_start, 1]),
+                self._point_to_meters([0, 1]),
                 self._point_to_meters([1, 1]),
             ],  # Top line
             [
-                self._point_to_meters([self.x_start, 0]),
+                self._point_to_meters([0, 0]),
                 self._point_to_meters([1, 0]),
             ],  # Bottom line
         ]
@@ -131,7 +127,8 @@ class FullPitch:
             patches.Wedge(
                 (60, 40),  # Middle of the pitch
                 10,  # Radius of the center circle
-                *self.circle_angles,
+                0,
+                360,
                 fill=True,
                 edgecolor=lines_color,
                 facecolor=lines_color,
@@ -159,7 +156,7 @@ class FullPitch:
         """
 
         ax.set_ylim([-5, self.height + 5])
-        ax.set_xlim([self.width * self.x_start - 5, self.width + 5])
+        ax.set_xlim([-5, self.width + 5])
         ax.add_patch(
             patches.Rectangle((0, 0), self.width, self.height, color=self.background_color)
         )
