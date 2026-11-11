@@ -7,6 +7,18 @@ from statsbombplot.data import fetch_match
 from statsbombplot.pitch import FullPitch
 from statsbombplot.plotting import apply_style, save_figure
 
+# StatsBomb outcome name -> phrase completing "...and it ___."
+OUTCOME_PHRASE = {
+    "Goal": "was a goal",
+    "Saved": "was saved",
+    "Saved Off Target": "was saved, but was off target anyway",
+    "Saved to Post": "was saved onto the post",
+    "Post": "hit the post",
+    "Blocked": "was blocked",
+    "Off T": "went off target",
+    "Wayward": "went wayward",
+}
+
 
 def main():
     apply_style()
@@ -139,7 +151,8 @@ def main():
             ),
         ]
 
-        shot_outcome = shot.extra["shot"]["outcome"]["name"].lower()
+        outcome = shot.extra["shot"]["outcome"]["name"]
+        shot_outcome = OUTCOME_PHRASE.get(outcome, f"ended as {outcome.lower()}")
         shot_technique = (
             shot.extra["shot"]["body_part"]["name"].lower()
             if shot.extra["shot"]["technique"]["name"].lower() == "normal"
@@ -149,7 +162,7 @@ def main():
 
         formatted_time = f"{shot.minute}:{shot.second:02d}"
         extra = [
-            f"At {formatted_time}, {shot.player_name} took a shot with {shot_technique}, had an xG of {round(shot_value, 3)}, and it resulted in {shot_outcome}."
+            f"At {formatted_time}, {shot.player_name} took a shot with {shot_technique}, had an xG of {round(shot_value, 3)}, and it {shot_outcome}."
         ]
 
         pitch.add_pitch_legend(ax, legend_elements)

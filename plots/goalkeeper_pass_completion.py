@@ -1,15 +1,14 @@
-import urllib.request
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from PIL import Image, ImageEnhance
+from adjustText import adjust_text
+from PIL import ImageEnhance
 from tqdm import tqdm
 
 from statsbombplot.cli import resolve_season, season_args
-from statsbombplot.config import FIG_BACKGROUND_COLOR, GRAY_HEX, OUTPUT_DIR, TEAM_LOGO_URL
+from statsbombplot.config import FIG_BACKGROUND_COLOR, GRAY_HEX, LIGHT_GRAY_HEX, OUTPUT_DIR
 from statsbombplot.data import fetch_match, get_team_matches_from_season, get_teams_by_season
-from statsbombplot.plotting import apply_style, save_figure
+from statsbombplot.plotting import apply_style, load_team_logo, save_figure
 
 LOGO_W = 0.025
 LOGO_H = 0.025
@@ -84,19 +83,46 @@ def main():
     ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f"{x:.0%}"))
     ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f"{y:.0%}"))
 
+    labels, label_x, label_y = [], [], []
     for _, row in pdf.iterrows():
         team = row["team"]
         x = row["share_of_long"]
         y = row["pass_completion_rate"]
 
-        img = Image.open(urllib.request.urlopen(TEAM_LOGO_URL[team])).convert("RGBA")
-        enhancer = ImageEnhance.Color(img)
-        img = enhancer.enhance(0.5)  # Lowers saturation
+        img = load_team_logo(team)
+        if img is None:  # no logo for this team: label the point with its name
+            ax.scatter(x, y, s=12, color=GRAY_HEX, zorder=5)
+            labels.append(
+                ax.text(
+                    x,
+                    y,
+                    team,
+                    ha="center",
+                    va="center",
+                    fontsize=7,
+                    color=GRAY_HEX,
+                    bbox={"facecolor": FIG_BACKGROUND_COLOR, "edgecolor": "none", "pad": 0.5},
+                    zorder=4,
+                )
+            )
+            label_x.append(x)
+            label_y.append(y)
+            continue
+        img = ImageEnhance.Color(img).enhance(0.5)  # Lowers saturation
         img_x = x - LOGO_W / 2
         img_y = y - LOGO_H / 2
         image_ax = ax.inset_axes([img_x, img_y, LOGO_W, LOGO_H], transform=ax.transData)
         image_ax.imshow(img)
         image_ax.axis("off")
+
+    if labels:  # spread the text labels so they do not overlap
+        adjust_text(
+            labels,
+            x=label_x,
+            y=label_y,
+            ax=ax,
+            arrowprops={"arrowstyle": "-", "color": LIGHT_GRAY_HEX, "lw": 0.5},
+        )
 
     # Median
     x0 = pdf["share_of_long"].median()

@@ -7,7 +7,7 @@ from statsbombplot.cli import resolve_season, season_args
 from statsbombplot.config import OUTPUT_DIR
 from statsbombplot.data import fetch_match, get_team_matches_from_season, get_teams_by_season
 from statsbombplot.pitch import HalfPitch
-from statsbombplot.plotting import apply_style, save_figure
+from statsbombplot.plotting import apply_style, make_matplotlib_grid, save_figure
 
 VIZ_COLOR = "#a41212"
 NORMALIZE_PER_TEAM = True
@@ -24,15 +24,7 @@ def main():
     pitch_height = 80
     pitch_ratio = pitch_height / pitch_width
 
-    n_cols = 5
-    n_rows = 4
-
-    subplot_width = 4
-    fig_width = subplot_width * n_cols
-    fig_height = subplot_width * pitch_ratio * n_rows
-
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(fig_width, fig_height))
-    axes = axes.flatten()
+    fig, axes = make_matplotlib_grid(len(teams), max_cols=5, subplot_width=4, ratio=pitch_ratio)
 
     max_shot_counts = 0
     shot_counts_map = {}

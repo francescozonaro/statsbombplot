@@ -17,12 +17,12 @@ pip install -e ".[dev]"
 
 ## Usage
 
-Every plot is a standalone script in [`examples/`](examples). Run one from the repository root:
+Every plot is a standalone script in [`plots/`](plots). Run one from the repository root:
 
 ```bash
-python examples/shot_map.py                       # asks which match to plot
-python examples/shot_map.py --game-id 3795506     # no questions
-python examples/shooting_zones.py --competition-id 2 --season-id 27
+python plots/shot_map.py                       # asks which match to plot
+python plots/shot_map.py --game-id 3795506     # no questions
+python plots/shooting_zones.py --competition-id 2 --season-id 27
 ```
 
 Whatever a script needs and you did not pass, it asks for, listing only what exists in the open data:
@@ -41,7 +41,26 @@ and cached in `match_cache/`.
 | `passing_networks.py` | Average positions and pass counts between players |
 | `goalkeeper_pass_completion.py` | Long-pass share vs. completion rate for every team's goalkeeper |
 | `goalkeeper_zonal_pass_distribution.py` | Where each team's goalkeeper distributes the ball |
-| `goals_worth_watching.py` | The goals with the lowest xG of a competition, ranked |
+| `goals_worth_watching.py` | The most spectacular goals of a season, ranked by an "xBanger" score (low xG, unusual technique, placement) |
+
+## Team logos
+
+Plots that show crests or flags use `src/statsbombplot/team_logos.json`, which maps each StatsBomb team name to a
+[Fotmob](https://www.fotmob.com) team id (340 clubs and national teams, men's and women's). Teams missing from the
+file are drawn as text, so nothing breaks. To add one, put `"Team name": <fotmob id>` in the file; the id is the number
+in the team's Fotmob URL.
+
+## Gallery
+
+All images use EURO 2020 data (the final, Italy vs England, for the match plots).
+
+| | |
+| --- | --- |
+| ![Shot map](docs/images/shot_map.png) | ![Shot freeze frame](docs/images/shot_freeze_frame.png) |
+| ![Passing network](docs/images/passing_network.png) | ![Goalkeeper pass completion](docs/images/goalkeeper_pass_completion.png) |
+| ![Shooting zones](docs/images/shooting_zones.png) | ![Goalkeeper zonal pass distribution](docs/images/goalkeeper_zonal_pass_distribution.png) |
+
+![Goals worth watching](docs/images/goals_worth_watching.png)
 
 ## Project layout
 
@@ -52,7 +71,8 @@ src/statsbombplot/
   plotting.py      shared matplotlib helpers (style, save, grids)
   data/            StatsBomb loader, match model and cached fetching
   pitch/           full/half pitch drawing and zone counting
-examples/          runnable plot scripts
+plots/             one runnable script per plot
+docs/images/       gallery images used in this README
 tests/             unit tests (no network needed)
 ```
 

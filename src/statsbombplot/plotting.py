@@ -1,18 +1,28 @@
 from __future__ import annotations
 
 import math
+import urllib.request
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.figure import Figure
+from PIL import Image
 
-from .config import FONT_FAMILY
+from .config import FONT_FAMILY, TEAM_LOGO_URL
 
 
 def apply_style() -> None:
     """Apply the default matplotlib style (font family) used by all plots."""
     plt.rcParams["font.family"] = FONT_FAMILY
+
+
+def load_team_logo(team: str, mode: str = "RGBA") -> Image.Image | None:
+    """Download a team's logo, or return None if we have no logo URL for that team."""
+    url = TEAM_LOGO_URL.get(team)
+    if url is None:
+        return None
+    return Image.open(urllib.request.urlopen(url)).convert(mode)
 
 
 def save_figure(fig: Figure, path: str | Path, dpi: int = 300) -> None:

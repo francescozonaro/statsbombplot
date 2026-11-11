@@ -1,10 +1,7 @@
-import urllib.request
-
 import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Rectangle
-from PIL import Image
 from tqdm import tqdm
 
 from statsbombplot.cli import resolve_season, season_args
@@ -18,11 +15,10 @@ from statsbombplot.config import (
     PLAIN_BLACK_HEX,
     PLAIN_WHITE_HEX,
     PURPLE_HEX,
-    TEAM_LOGO_URL,
 )
 from statsbombplot.data import fetch_match, get_team_matches_from_season, get_teams_by_season
 from statsbombplot.pitch import FullPitch, count_in_pitch_zones
-from statsbombplot.plotting import apply_style, make_matplotlib_grid, save_figure
+from statsbombplot.plotting import apply_style, load_team_logo, make_matplotlib_grid, save_figure
 
 ZONES_X = 6
 ZONES_Y = 5
@@ -104,10 +100,11 @@ def main():
                         path_effects=[pe.withStroke(linewidth=0.5, foreground="black")],
                     )
 
-        img = Image.open(urllib.request.urlopen(TEAM_LOGO_URL[team])).convert("LA")
-        image_ax = axes[idx].inset_axes([0.02, 0.98, 0.10, 0.10], transform=axes[idx].transAxes)
-        image_ax.imshow(img)
-        image_ax.axis("off")
+        img = load_team_logo(team, mode="LA")
+        if img is not None:
+            image_ax = axes[idx].inset_axes([0.02, 0.98, 0.10, 0.10], transform=axes[idx].transAxes)
+            image_ax.imshow(img)
+            image_ax.axis("off")
 
         axes[idx].text(13, 87, team, fontsize=10, va="center")
 

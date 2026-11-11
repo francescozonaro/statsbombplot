@@ -30,14 +30,7 @@ class Banger:
             self.player_name = f"{player_parts[0]} {player_parts[-1]}"
 
         self.team_name = team_name
-        team_parts = team_name.split()
-        if len(team_parts) > 1:
-            self.team_name = f"{team_parts[0]}"
-
         self.opponent_name = opponent_name
-        opponent_parts = opponent_name.split()
-        if len(opponent_parts) > 1:
-            self.opponent_name = f"{opponent_parts[0]}"
 
         self.xg = xg
         self.location = location
@@ -62,7 +55,7 @@ class Banger:
 
 def main():
     apply_style()
-    args = season_args("The goals with the lowest xG of a competition season, ranked.")
+    args = season_args("The most spectacular goals of a season, ranked by an xBanger score.")
     competition_id, season_id = resolve_season(args.competition_id, args.season_id)
     games = get_all_matches_from_season(competition_id=competition_id, season_id=season_id)
     bangers = []
@@ -147,6 +140,7 @@ def main():
         zorder=3,
     )
 
+    match_labels = []
     for i, banger in enumerate(bangers_list):
         row_height = 1 - 0.15 - i * 0.1
 
@@ -168,7 +162,7 @@ def main():
             ha="left",
             va="center",
         )
-        ax.text(
+        match_label = ax.text(
             x=0.3,
             y=row_height,
             s=f"{banger.team_name} vs {banger.opponent_name} ({banger.minute})",
@@ -177,6 +171,7 @@ def main():
             ha="left",
             va="center",
         )
+        match_labels.append(match_label)
         ax.text(
             x=0.66,
             y=row_height,
@@ -202,10 +197,19 @@ def main():
             va="center",
         )
 
+    # Long team names: shrink only the rows whose match text would run into the xBanger column
+    plt.gcf().canvas.draw()
+    to_axes = ax.transAxes.inverted()
+    available = 0.6 - 0.3
+    for label in match_labels:
+        width = to_axes.transform(label.get_window_extent())[1][0] - 0.3
+        if width > available:
+            label.set_fontsize(label.get_fontsize() * available / width)
+
     ax.text(
         x=0.05,
         y=0.04,
-        s=f"Data from Opta as of {datetime.now().strftime('%d %B %Y')}",
+        s=f"Data from StatsBomb as of {datetime.now().strftime('%d %B %Y')}",
         size=7,
         ha="left",
         va="center",
