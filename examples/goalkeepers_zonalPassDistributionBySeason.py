@@ -8,16 +8,10 @@ from PIL import Image
 from matplotlib.patches import Rectangle
 from tqdm import tqdm
 
-from utils.commons import (
-    count_in_pitch_zones,
-    fetchMatch,
-    getTeamMatchesFromSeason,
-    getTeamsBySeason,
-    make_matplotlib_grid,
-    saveFigure,
-)
-from utils.config import *
-from utils.fullPitch import FullPitch
+from statsbombplot.config import *
+from statsbombplot.data import fetchMatch, getTeamMatchesFromSeason, getTeamsBySeason
+from statsbombplot.pitch import FullPitch, count_in_pitch_zones
+from statsbombplot.plotting import make_matplotlib_grid, saveFigure
 
 folder = os.path.join("imgs/", str(f"goalkeepers/zonalPassDistribution"))
 os.makedirs(folder, exist_ok=True)

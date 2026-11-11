@@ -6,13 +6,9 @@ import pandas as pd
 
 from PIL import Image, ImageEnhance
 from tqdm import tqdm
-from utils.commons import (
-    getTeamMatchesFromSeason,
-    getTeamsBySeason,
-    fetchMatch,
-    saveFigure,
-)
-from utils.config import *
+from statsbombplot.config import *
+from statsbombplot.data import fetchMatch, getTeamMatchesFromSeason, getTeamsBySeason
+from statsbombplot.plotting import saveFigure
 
 folder = os.path.join("imgs/", str(f"goalkeepers/passCompletion"))
 os.makedirs(folder, exist_ok=True)

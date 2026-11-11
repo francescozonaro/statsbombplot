@@ -13,9 +13,10 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import os
 
-from utils.fullPitch import FullPitch
-from utils.commons import saveFigure, fetchMatch
-from utils.config import *
+from statsbombplot.config import *
+from statsbombplot.data import fetchMatch
+from statsbombplot.pitch import FullPitch
+from statsbombplot.plotting import saveFigure
 
 folder = os.path.join("imgs/", str(f"passingNetwork"))
 os.makedirs(folder, exist_ok=True)

@@ -2,7 +2,7 @@ import os
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
-from utils import getAllMatchesFromSeason, fetchMatch
+from statsbombplot.data import fetchMatch, getAllMatchesFromSeason
 from datetime import datetime
 
 COMPETITION_NAME = "EURO 2020"

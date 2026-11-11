@@ -4,9 +4,10 @@ import os
 import matplotlib.colors as mcolors
 import numpy as np
 
-from utils.fullPitch import FullPitch
-from utils.commons import saveFigure, getRandomMatchId, fetchMatch
-from utils.config import *
+from statsbombplot.config import *
+from statsbombplot.data import fetchMatch, getRandomMatchId
+from statsbombplot.pitch import FullPitch
+from statsbombplot.plotting import saveFigure
 
 GAME_ID = 3795506  # EURO 2020 Final
 HOME_TEAM_COLOR = "#3f8ae6"

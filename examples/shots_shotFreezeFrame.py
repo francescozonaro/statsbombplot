@@ -2,9 +2,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import os
 
-from utils.fullPitch import FullPitch
-from utils.commons import saveFigure, getRandomMatchId, fetchMatch
-from utils.config import *
+from statsbombplot.config import *
+from statsbombplot.data import fetchMatch, getRandomMatchId
+from statsbombplot.pitch import FullPitch
+from statsbombplot.plotting import saveFigure
 
 
 match = fetchMatch(gameId=getRandomMatchId(seed=602210))

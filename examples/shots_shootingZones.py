@@ -4,13 +4,9 @@ import numpy as np
 
 from matplotlib.patches import Rectangle
 from tqdm import tqdm
-from utils import (
-    getTeamMatchesFromSeason,
-    getTeamsBySeason,
-    fetchMatch,
-    HalfPitch,
-    saveFigure,
-)
+from statsbombplot.data import fetchMatch, getTeamMatchesFromSeason, getTeamsBySeason
+from statsbombplot.pitch import HalfPitch
+from statsbombplot.plotting import saveFigure
 
 folder = os.path.join("imgs/", str(f"shootingDistribution"))
 os.makedirs(folder, exist_ok=True)
